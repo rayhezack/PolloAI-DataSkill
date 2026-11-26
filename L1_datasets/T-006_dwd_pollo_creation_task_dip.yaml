@@ -1,0 +1,40 @@
+id: T-006
+table: mc_prd.dwd_pollo_creation_task_dip
+domain: CRE
+purpose: 创作任务宽表。创作全链路指标唯一来源（R0 C4），覆盖任务、请求、成功、采纳、作品、积分、生成成本。一期不使用前端埋点（R0 C1）。
+grain: 一行 = 一个创作任务 record_id（任务粒度，不是作品粒度，R0 C2）
+primary_key: [record_id]
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: p_date = TO_CHAR(created_time,'yyyymmdd')（10/31 实测 100% 对齐）；同时限定 p_date 和 CAST(created_time AS DATE)
+default_filters:
+  - is_valid_task = 1        # 只排除风控和内部账号（R1 Q6）；擦边任务仍算有效（P-30）。大盘含 API 任务（R1 第 2 版）
+time_axis: created_time（任务创建时间，UTC+8）
+key_fields:
+  record_id: 任务唯一键（2026-10 全月 8,081,462 行，无重复）
+  user_id: 创作用户
+  platform_type: WEB / IOS / ANDROID
+  task_platform_group: WEB / APP
+  submit_time: 提交给厂商的时间（取自作品表）。为空有三种情况：①没发到厂商的失败任务（风控、审核拦截或扣费、素材上传失败，占绝大部分，其中 95% 是风控和审核）；②语音转写，已发给厂商但不产出作品，所以恒为空；③导演模式导出，走内部渲染，不经厂商（R1 创作域第 2 版 DS）。数仓将新增「是否已提交给厂商」标志列（DW-04）
+  is_success_by_output: 按产物判定任务是否成功（DS 口径）。和 is_success 几乎一致。语音转写成功但无作品会被判成失败（每天约 250 个，DW-05）
+  output_cnt: 产出作品数（含失败）
+  success_output_cnt: 成功作品数
+  adopted_output_cnt_3d: 3 日内被采纳的作品数，采纳 = 下载、分享、复用任一（按作品去重）（P-27）
+  downloaded_output_cnt_3d / shared_output_cnt_3d / reused_output_cnt_3d: 3 日内下载 / 分享 / 复用的作品数，三者有重叠，不能相加
+  credit_consume: 等于 credit_decimal − return_credit（10/31 实测 99.98%）。return_credit 基本为 0，真实返还记在积分流水里，数仓将修正该字段（DW-01、P-28）
+  credit_type: 积分类型：usage（订阅积分）/ reward（赠送）/ addon（积分包）/ api（P-31）
+  cost_usd: 生成成本（USD）。约 12% 的任务为空，几乎都是失败任务；成功任务覆盖率 99.8%（P-29）
+  cost_source: 成本来源，目前只有 TEMPORAL 或空
+  is_borderline: 擦边任务标记（P-30）
+  is_internal_account / is_internal_user / is_internal_ip: 内部标记，已体现在 is_valid_task 中
+  generate_mode / tool_code / video_model / model_final: 生成方式、工具、模型（维度候选）
+  agent_*: Agent 关联字段（二期）
+traps: [P-17, P-27, P-28, P-29, P-30, P-31, P-32]
+producer: 未核对（CNB 无权限）
+status: pending_review
+owner: 数据组
+evidence:
+  - "2026-11-25 核查（20261031）：有效任务 248,185 个，其中 WEB 230,257、IOS 8,721、ANDROID 9,207；有效 = 非内部账号/内部用户"
+  - "2026-11-25 核查（2026-10 全月有效任务）：任务 7,896,614；请求 7,351,742；成功 6,946,038；采纳任务 2,745,317；成功作品 9,201,758；3 日采纳作品 3,078,159；积分消耗 151,954,808；成本 $1,823,329.67（948,525 个任务成本为空）"
+  - "2026-11-25 核查：adopted_output_cnt_3d ≤ 下载+分享+复用（100%），且在 99.6% 的任务上等于三者最大值；从不超过成功作品数"

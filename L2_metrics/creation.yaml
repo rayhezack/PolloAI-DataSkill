@@ -1,0 +1,309 @@
+# 创作域指标。层级参照 R0 B-11 DS SQL：任务 → 请求 → 成功 → 采纳；作品数和积分另算。
+# 所有指标默认 filters 含 is_valid_task=1 与 p_date/created_time 双约束；分端加 platform_type。
+metrics:
+  - id: M-CRE-001
+    name: 创作任务数
+    synonyms: [任务数, 生成任务数, 有效任务数, 生成次数]
+    table: T-006
+    type: atomic
+    expr: COUNT(DISTINCT record_id)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    dedup_key: record_id
+    unit: 个
+    aggregation: total
+    dimensions: [D-007, D-008, D-009, D-004, D-005]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-11 DS SQL：task_cnt", "2026-10：7,896,614"]
+
+  - id: M-CRE-002
+    name: 请求任务数
+    synonyms: [提交任务数, 请求数]
+    definition: 已提交给生成厂商的任务。目标口径：数仓在创作任务表新增「是否已提交给厂商」标志列（有提交时间或有厂商任务 ID 即算，含语音转写，不含导演模式导出等内部渲染），直接数该列（DW-04）。该列上线前用 submit_time 非空临时代替。
+    disclaimer: 临时口径。语音转写已发给厂商但 submit_time 恒为空，会被漏算（11-05 起每天几百个）；导演模式导出不经厂商，不计入是对的。
+    table: T-006
+    type: atomic
+    expr: COUNT(DISTINCT CASE WHEN submit_time IS NOT NULL THEN record_id END)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    dedup_key: record_id
+    unit: 个
+    aggregation: total
+    dimensions: [D-007, D-008, D-009]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-11 DS SQL：submit_task_cnt", "2026-10：7,351,742（占任务 93.1%）"]
+
+  - id: M-CRE-003
+    name: 成功任务数
+    synonyms: [成功创作任务数, 生成成功数]
+    table: T-006
+    type: atomic
+    expr: COUNT(DISTINCT CASE WHEN is_success_by_output = 1 THEN record_id END)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    dedup_key: record_id
+    disclaimer: 语音转写成功但没有作品，目前被成功判定算成失败（每天约 250 个），数仓修正中（DW-05）。
+    unit: 个
+    aggregation: total
+    dimensions: [D-007, D-008, D-009]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-11 DS SQL：success_task_cnt", "2026-10：6,946,038（占任务 88.0%）"]
+
+  - id: M-CRE-004
+    name: 采纳任务数
+    synonyms: [被采纳任务数]
+    definition: 3 日内至少有一个作品被下载、分享或复用的任务。
+    table: T-006
+    type: atomic
+    expr: COUNT(DISTINCT CASE WHEN adopted_output_cnt_3d > 0 THEN record_id END)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    dedup_key: record_id
+    unit: 个
+    aggregation: total
+    dimensions: [D-007, D-008, D-009]
+    traps: [P-27]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-11 DS SQL：adopted_task_cnt", "2026-10：2,745,317"]
+
+  - id: M-CRE-005
+    name: 成功作品数
+    synonyms: [成功输出作品数, 产物数, 作品数]
+    table: T-006
+    type: atomic
+    expr: SUM(success_output_cnt)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    unit: 件
+    aggregation: total
+    dimensions: [D-007, D-008, D-009]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-11 DS SQL：success_output_cnt", "2026-10：9,201,758"]
+
+  - id: M-CRE-006
+    name: 3日采纳作品数
+    synonyms: [采纳作品数, 采纳产物数]
+    table: T-006
+    type: atomic
+    expr: SUM(adopted_output_cnt_3d)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    unit: 件
+    aggregation: total
+    dimensions: [D-007, D-008, D-009]
+    traps: [P-27]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-11（注释笔误已在 R0 I-2 更正）", "2026-10：3,078,159"]
+
+  - id: M-CRE-007
+    name: 积分消耗
+    synonyms: [创作消耗积分, 消耗积分, credits 消耗]
+    table: T-006
+    type: atomic
+    definition: 积分净消耗 = 消耗 − 返还。目标口径：数仓把任务表的 return_credit 修正为积分流水里的真实返还后，取全部有效任务 SUM(credit_consume)，与收入归因表、积分余额表一致（DW-01）。修正前临时只算成功任务。
+    expr: SUM(CASE WHEN is_success_by_output = 1 THEN credit_consume END)   -- 临时口径
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    unit: 积分
+    aggregation: total
+    dimensions: [D-007, D-009]
+    traps: [P-28, P-31]
+    disclaimer: 临时口径（只算成功任务），交付时必须注明。失败任务的积分实际已返还，但返还记在积分流水里，任务表的 return_credit 基本为 0。
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-11 DS SQL：credit_consume", "R1 创作域第 2 版 DS：修正前只算成功任务", "2026-10 临时口径：118,480,427（全部有效任务直接求和为 151,954,808，没扣掉已返还的积分）"]
+
+  - id: M-CRE-008
+    name: 创作用户数
+    synonyms: [创作者数, 创作UV, 创作人数, 创作者]
+    definition: 当期有 ≥1 个有效创作任务的去重用户；全站按同人去重（R0 C3）。
+    table: T-006
+    type: atomic
+    expr: COUNT(DISTINCT user_id)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    dedup_key: user_id
+    unit: 人
+    aggregation: total
+    dimensions: [D-007, D-008, D-004, D-005]
+    traps: [P-17, P-32]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 C3", "20261031：28,827（用户×端 29,065）"]
+
+  - id: M-CRE-009
+    name: 创作渗透率
+    synonyms: [创作率, 活跃创作率]
+    definition: 当日创作用户数 ÷ 当日登录 DAU。分子不要求与分母匹配（R0 C5）。
+    table: T-006
+    type: ratio
+    expr: M-CRE-008 / M-PAY-012   -- 按日计算；期间口径用日均分子 ÷ 日均分母
+    numerator: M-CRE-008
+    denominator: M-PAY-012
+    filters: ["分子分母同一天、同一端范围"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-007, D-004]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 C5", "20261031：28,827 / 96,695 = 29.8%"]
+
+  - id: M-CRE-010
+    name: 人均创作任务数
+    synonyms: [人均任务, 人均生成次数]
+    table: T-006
+    type: ratio
+    expr: M-CRE-001 / M-CRE-008
+    numerator: M-CRE-001
+    denominator: M-CRE-008
+    filters: ["同 M-CRE-001"]
+    unit: 个/人
+    aggregation: rate
+    dimensions: [D-007, D-008]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10 月度：7,896,614 / 422,584 = 18.7"]
+
+  - id: M-CRE-011
+    name: 任务成功率
+    synonyms: [生成成功率, 成功率]
+    table: T-006
+    type: ratio
+    expr: M-CRE-003 / M-CRE-001
+    numerator: M-CRE-003
+    denominator: M-CRE-001
+    filters: ["同 M-CRE-001"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-007, D-009]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：6,946,038 / 7,896,614 = 88.0%", "R1 创作域 Q2 DS：成功任务 ÷ 创作任务"]
+
+  - id: M-CRE-012
+    name: 任务采纳率
+    synonyms: [采纳率]
+    table: T-006
+    type: ratio
+    expr: M-CRE-004 / M-CRE-003
+    numerator: M-CRE-004
+    denominator: M-CRE-003
+    filters: ["同 M-CRE-004"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-007, D-008]
+    traps: [P-27]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：2,745,317 / 6,946,038 = 39.5%", "R1 创作域 Q2 DS：采纳任务 ÷ 成功任务"]
+
+  - id: M-CRE-013
+    name: 作品采纳率
+    synonyms: [产物采纳率]
+    table: T-006
+    type: ratio
+    expr: M-CRE-006 / M-CRE-005
+    numerator: M-CRE-006
+    denominator: M-CRE-005
+    filters: ["同 M-CRE-006"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-007, D-008]
+    traps: [P-27]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：3,078,159 / 9,201,758 = 33.5%", "R1 创作域 Q2 DS：采纳作品 ÷ 成功作品"]
+
+  - id: M-CRE-014
+    name: Dn再创作率（点位）
+    synonyms: [创作留存, 再创作率, D1再创作, D7再创作, 次日再创作]
+    definition: 基期创作用户中，恰好在第 n 个自然日再次创作的比例（R0 C6 默认点位）。窗口口径需显式说明。全站口径不要求同端；分端看时基期和第 n 日必须同端（G-14）。
+    table: T-006
+    type: ratio
+    expr: COUNT(DISTINCT 第n日也创作的基期用户) / COUNT(DISTINCT 基期创作用户)   -- 基期日 d 与 d+n 两日自关联 user_id
+    filters: ["is_valid_task = 1", "基期日 + n ≤ 昨日"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-007]
+    traps: [P-32]
+    # 分端：基期与第 n 日都限定同一 platform_type
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 C6", "基期 20261030：7,631 / 28,852 = 26.4%（T-005 预计算为 7,639 / 28,924）"]
+
+  - id: M-CRE-015
+    name: 生成成本
+    synonyms: [成本, 生成费用, 算力成本]
+    definition: 任务的生成成本（USD）。成本为空的任务绝大多数是失败任务，本来就没有执行。覆盖率按成功任务算。
+    table: T-006
+    type: atomic
+    expr: SUM(cost_usd)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    unit: USD
+    aggregation: total
+    dimensions: [D-007, D-009]
+    traps: [P-29]
+    disclaimer: 成功任务的成本覆盖率 99.8%；缺口主要是 seedream-5-0-flash 图片任务，交付时注明覆盖率。
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：$1,823,329.67", "成本为空 948,525 个：未提交厂商 543,224、提交后失败 392,878、成功但无成本 12,423（占成功任务 0.18%）", "R1 创作域第 2 版 DS 说明"]
+
+  - id: M-CRE-016
+    name: 人均积分消耗
+    synonyms: [人均消耗]
+    table: T-006
+    type: ratio
+    expr: M-CRE-007 / M-CRE-008
+    numerator: M-CRE-007
+    denominator: M-CRE-008
+    filters: ["同 M-CRE-007"]
+    unit: 积分/人
+    aggregation: rate
+    dimensions: [D-007, D-009]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10 月度（临时口径）：118,480,427 / 422,584 = 280.4"]
+
+  - id: M-CRE-017
+    name: 产出作品数
+    synonyms: [作品总数, 产出数, 输出作品数]
+    definition: 任务产出的全部作品，含失败作品。
+    table: T-006
+    type: atomic
+    expr: SUM(output_cnt)
+    filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
+    unit: 件
+    aggregation: total
+    dimensions: [D-007, D-008, D-009]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R1 创作域 Q2 DS 新增（作品成功率的分母）", "2026-10：10,641,670"]
+
+  - id: M-CRE-018
+    name: 作品成功率
+    synonyms: [产物成功率, 输出成功率]
+    table: T-006
+    type: ratio
+    expr: M-CRE-005 / M-CRE-017
+    numerator: M-CRE-005
+    denominator: M-CRE-017
+    filters: ["同 M-CRE-005"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-007, D-008]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R1 创作域 Q2 DS：成功产出作品数 ÷ 产出作品数", "2026-10：9,201,758 / 10,641,670 = 86.5%"]
+
+  - id: M-CRE-019
+    name: 当天采纳任务数
+    synonyms: [当日采纳任务数, 当天采纳, 当日采纳]
+    definition: 当天发生过采纳（下载、分享、复用任一）的任务数，不限定任务创建日期（R1 创作域 C4 DS）。
+    table: TBD
+    type: atomic
+    expr: 待定。DS 说明现有表可算：采纳事件表按发生日关联作品表，98% 能关到任务；10/31 约 9.9 万。等 DS 提供两张表名后补 SQL。不得用 adopted_output_cnt_3d 代替
+    filters: []
+    unit: 个
+    aggregation: total
+    open_question: OQ-10
+    status: draft
+    owner: 数据组
+    evidence: ["R1 创作域 C1/C4 DS：需要当天采纳口径", "R1 创作域第 2 版 DS：现有表可算，10/31 当天采纳任务约 9.9 万"]

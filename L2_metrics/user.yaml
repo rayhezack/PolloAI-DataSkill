@@ -1,0 +1,110 @@
+# 用户域指标。登录 DAU 定义在支付域 M-PAY-012（唯一来源 T-002），这里不重复定义。
+metrics:
+  - id: M-USR-001
+    name: 注册用户数
+    synonyms: [注册数, 新注册, 当日注册, 注册量]
+    definition: 注册日落在统计期内的已注册用户，排除内部用户。直接取用户画像表（R1 用户域第 2 版 DS，取代 R0 U2 的注册表）。
+    table: T-009
+    type: atomic
+    expr: COUNT(DISTINCT user_id)
+    filters: ["p_date = 昨日分区", "is_registered = 1", "COALESCE(is_internal_user_da, 0) <> 1", "TO_DATE(SUBSTR(CAST(register_date AS STRING),1,10),'yyyy-mm-dd') BETWEEN <期间起> AND <期间止>"]
+    dedup_key: user_id
+    unit: 人
+    aggregation: total
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 按本写法实跑：20261031 为 36,769；2026-10 全月 1,052,429（排除内部用户 18 个）", "20261031 与注册表、T-005 new_register_user_cnt 完全一致", "画像表 register_time 与 account_create_time 在 2026-10 注册用户上 100% 相同"]
+
+  - id: M-USR-002
+    name: 访客UV
+    synonyms: [访问UV, 访客数, 匿名访客, 全量DAU, 访问用户]
+    definition: 当日访客数，含未登录用户。默认取数仓已加工好的 T-005 dau 字段（R1 用户域 Q1）。只有分析以访客为目标人群、需要自定义事件过滤时，才用埋点表 T-007 对 anon_id 去重。
+    table: T-005
+    type: atomic
+    expr: SUM(dau)
+    filters: ["全站：client_type = '汇总' AND country = '汇总' AND borderline_tag = '汇总'", "p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    unit: 人
+    aggregation: total
+    traps: [P-26]
+    status: pending_review
+    owner: 数据组
+    evidence: ["20261031：143,308；埋点 anon_id 自算为 144,168（差 0.6%）", "R1 用户域 Q1 DS"]
+
+  - id: M-USR-003
+    name: 访问注册率
+    synonyms: [注册转化率, 访客注册率]
+    definition: 当日注册用户数（M-USR-001，用户画像表）÷ 当日访客 UV。分母默认用 T-005 dau；用埋点表对 anon_id 去重也可以，DS 认为两者都行（R1 用户域 Q4），交付时注明用的哪个。
+    table: T-009
+    type: ratio
+    expr: M-USR-001 / M-USR-002
+    numerator: M-USR-001
+    denominator: M-USR-002
+    filters: ["分子分母同一天、同一端范围"]
+    unit: "%"
+    aggregation: rate
+    status: pending_review
+    owner: 数据组
+    evidence: ["Q3 口径说明；R1 用户域 Q4 DS", "20261031：36,769 / 143,308 = 25.7%（埋点分母 144,168 时为 25.5%）"]
+
+  - id: M-USR-004
+    name: 期间新客登录DAU
+    synonyms: [新客DAU, 新用户DAU, 当日新客DAU]
+    definition: 登录 DAU 按 D-004 当日新老或 D-005 期间新老拆分，必须写明是哪一种（R0 B-06）。
+    table: T-002
+    type: derived
+    expr: COUNT(DISTINCT user_id) WHERE 新老标签 = '当日新' / '期间新'
+    filters: ["is_active = 1", "JOIN L2_dimensions.shared_cte.signup"]
+    unit: 人
+    aggregation: total
+    dimensions: [D-004, D-005]
+    traps: [P-24]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-06/U4"]
+
+  - id: M-USR-005
+    name: MAU
+    synonyms: [月活, 30日活跃]
+    definition: 近 30 天 [t-29, t] 活跃访客 anon_id 去重，滚动窗口，不是自然月（生产 SQL）。是否纳入一期待 DS 定（OQ-12）。
+    table: T-005
+    type: atomic
+    expr: SUM(mau)   -- 三个维度钉住为 '汇总'
+    filters: ["client_type = '汇总' AND country = '汇总' AND borderline_tag = '汇总'", "p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    unit: 人
+    aggregation: snapshot
+    traps: [P-26]
+    open_question: OQ-12
+    status: draft
+    owner: 数据组
+    evidence: ["CNB bigdata_etl main@d8753d1 生产 SQL 头注释：MAU = [t-29,t] 30 天窗口 COUNT(DISTINCT anon_id)", "20261031 全汇总：2,991,757；10/01 为 2,963,322，与滚动窗口一致"]
+
+  - id: M-USR-006
+    name: 活跃在订用户数
+    synonyms: [活跃订阅用户, 当日活跃的在订用户]
+    definition: 当日活跃的在订用户，直接取数仓 T-005 的 subscribed_active_user_cnt（R1 用户域 C3）。
+    table: T-005
+    type: atomic
+    expr: SUM(subscribed_active_user_cnt)
+    filters: ["全站：client_type = '汇总' AND country = '汇总' AND borderline_tag = '汇总'", "p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    unit: 人
+    aggregation: total
+    traps: [P-26]
+    status: pending_review
+    owner: 数据组
+    evidence: ["20261031：11,244", "R1 用户域 C3 DS"]
+
+  - id: M-USR-007
+    name: 访客Dn留存率
+    synonyms: [次日留存, 留存率, D1留存, D3留存, D7留存, 访客留存]
+    definition: stat_date 当天的访客（dau 群，anon_id）中，第 N 天回访的比例（点位）。窗口口径用 retain_Nd_window（N 日内至少回访一次）。是否纳入一期待 DS 定（OQ-12）。注意数仓核心指标登记表里的「访问留存」用的是留存表 user_group='visit'（page_view 人群），与本列不是同一人群。
+    table: T-005
+    type: ratio
+    expr: SUM(retain_{N}d) / SUM(dau)   -- 同一行；三个维度钉住
+    filters: ["client_type = '汇总' AND country = '汇总' AND borderline_tag = '汇总'", "stat_date + N ≤ 昨日（未成熟为 NULL）"]
+    unit: "%"
+    aggregation: rate
+    traps: [P-26]
+    open_question: OQ-12
+    status: draft
+    owner: 数据组
+    evidence: ["CNB bigdata_etl main@d8753d1 生产 SQL：retain_Nd = 日活(dau群)第 N 日留存数", "20261030：26,777 / 145,030 = 18.5%"]

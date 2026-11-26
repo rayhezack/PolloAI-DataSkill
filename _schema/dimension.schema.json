@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "L2 dimension",
+  "type": "object",
+  "required": ["id", "name", "expr", "status", "owner"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^D-[0-9]{3}$"},
+    "name": {"type": "string"},
+    "synonyms": {"type": "array", "items": {"type": "string"}},
+    "expr": {"type": "string"},
+    "values": {"type": "object", "additionalProperties": {"type": "string"}},
+    "applies_to": {"type": "array", "items": {"type": "string", "pattern": "^T-[0-9]{3}$"}},
+    "notes": {"type": "string"},
+    "traps": {"type": "array", "items": {"type": "string", "pattern": "^P-[0-9]{2}$"}},
+    "open_question": {"type": "string", "pattern": "^OQ-[0-9]{2}$"},
+    "status": {"$ref": "common#/status"},
+    "owner": {"type": "string"},
+    "reviewed_by": {"type": "string"},
+    "reviewed_at": {"type": "string"},
+    "evidence": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

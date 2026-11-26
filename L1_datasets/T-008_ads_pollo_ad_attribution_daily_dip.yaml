@@ -1,0 +1,30 @@
+id: T-008
+table: mc_prd.ads_pollo_ad_attribution_daily_dip
+domain: AD
+purpose: ⚠️ 不作为广告域默认表：DS 于 2026-11-25 指定改用 T-010（投放日主表）。本表是「注册日 cohort 表」（数据本身无误），按注册日看 cohort LTV、按 campaign/adgroup 下钻时才用，窗口有 D3/D7；是否纳入一期待 DS 定（OQ-15）。以下为原记录：广告投放归因日表：按投放端 × 广告平台 × 计划 × 广告组 × 国家 × 匹配层级，记录消耗、展示、点击、安装、归因用户和 Dn 累计 GMV。广告归因口径的唯一来源。
+grain: 一行 = stat_date × source_end × ad_platform × campaign_id × adgroup_id × country × match_level × is_first_purchase × product_type
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')
+default_filters:
+  - is_first_purchase = '汇总' AND product_type = 'ALL'   # 主行：带消耗、安装、归因用户、GMV；其它行是首购 GMV 拆分行（P-33）
+time_axis: stat_date（投放/归因日，待 R1 确认 GMV 的 cohort 起点）
+key_fields:
+  source_end: 投放端 WEB / APP
+  ad_platform: google / meta / bing / tiktok / asa / naver / yandex / kwai 等
+  match_level: 匹配层级 1/3/4/5，含义待 R1 确认（P-34）
+  cost_usd: 消耗（USD），只在 match_level 1、4 有值
+  impressions / clicks: 展示、点击
+  install_cnt: 安装数，只有 APP 有值，WEB 为空
+  cohort_user_cnt: 归因用户数（cohort）
+  gmv_usd_d0 ~ gmv_usd_d180: 归因用户 Dn 内累计 GMV，dN 只有在 stat_date + N ≤ 昨日时才完整（P-35）
+  is_first_purchase: 汇总 / 1 / 0
+  product_type: ALL / SUBSCRIPTION_NEW / API
+traps: [P-33, P-34, P-35]
+producer: CNB bigdata_etl main@d8753d1 pollo/02_数仓/广告域-广告投放归因/Sq_ads_pollo_ad_attribution_daily_dip.sql；口径见 ai_workspace/knowledge/legacy-caliber/ad-delivery.md。match_level：1 有钱有人 / 3 有人无钱 / 4 有钱无人 / 5 只有安装，看总量不要过滤
+status: deprecated
+owner: 数据组
+evidence:
+  - "2026-11-25 核查（2026-10 主行）：level 1 消耗 $638,861.24、归因用户 588,477、D0/D7/D30 GMV $354,155 / $505,895 / $621,241；level 4 只有消耗 $114,546.78；level 3 只有 GMV（D7 $46,159）；level 5 只有安装"
+  - "2026-11-25 核查：行类型（汇总, ALL）401,958 行；（1, SUBSCRIPTION_NEW）7,923 行；（0, SUBSCRIPTION_NEW）190 行；API 6 行"

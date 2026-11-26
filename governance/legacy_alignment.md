@@ -1,0 +1,29 @@
+# 存量知识对照（初版）
+
+来源：CNB `awesomeaicode/pollo/bigdata_etl` main@`d8753d1`（2026-11-25 通过 CNB API 下载归档读取）。仓库 `ai_workspace/knowledge/` 下已有数仓维护的口径资产，本库不应另起一套。本页只记录 2026-11-25 首次读到时发现的**差异**，尚未做完整对照（计划 Step 0）。
+
+## 仓库里的口径资产
+
+| 文件 | 状态 | 自我定位 |
+|---|---|---|
+| `ai_workspace/knowledge/data-warehouse/core-metric-registry.md` | verified 2026-11-20 | 核心指标「唯一的口径登记处」，离线 ADS、实时表、告警、看板都引用 |
+| `ai_workspace/knowledge/data-warehouse/ssot-rule-registry.md` | — | 汇率、端、风控、内部账号等规则的唯一实现（R01~R36） |
+| `ai_workspace/knowledge/data-warehouse/table-selection-guide.md` | — | 取数选表指引 |
+| `ai_workspace/knowledge/legacy-caliber/ad-delivery.md` | verified 2026-11-21 | 广告投放花费、归因、CAC/ROAS 口径，冲突以代码为准 |
+
+## 已发现的差异
+
+| # | 指标 | 本库（来源） | 仓库登记表 | 处理 |
+|---|---|---|---|---|
+| 1 | 访问注册率 | 当日注册 ÷ 当日访客 UV（R1 用户域 DS），10/31 为 25.7% | 有登录的访客数 ÷ DAU（`login_visitor_cnt / dau`），10/31 为 60.5% | OQ-14 |
+| 2 | 作品采纳率 | 采纳作品 ÷ **成功**作品（R1 创作域 Q2 DS） | 3 日内被采纳的作品 ÷ **生成**作品（R16，创作日报） | 待 DS 看，数值差未核对 |
+| 3 | 任务成功率 | `is_success_by_output`，创作任务表（R0 B-11 DS SQL） | 最新状态 succeed（R15），创作日报 `backend_task_success_cnt / backend_task_create_cnt` | 待 DS 看，数值差未核对 |
+| 4 | 创作任务数 / 创作 UV | 创作任务表 `is_valid_task = 1`（R0 C2） | 创作日报 `backend_task_create_cnt`（任意状态）/ `backend_task_create_uv` | 待 DS 看，数值差未核对 |
+| 5 | GMV | 有效订单，不要求金额 > 0（R1 Q4），含 API（R1 创作域 Q1） | 实收 > 0、非风控单（R02、R07），经营日报 `gross_pay_amount` | 差异约 4 笔 0 元单；API 是否含待对照 |
+| 6 | 留存 | 访客留存用活跃日报 `retain_Nd`（dau 群） | 「访问留存」用留存日报 `user_group = 'visit'`（page_view 人群） | 两种人群，见 M-USR-007 |
+| 7 | 广告 GMV 起算日 | DS：自首次注册日起，D0/D3/D7/D30 | 投放日主表从投放日起算，无 D3/D7；注册日 cohort 表才从注册日起算 | OQ-15 |
+| 8 | 渗透率分母 | 登录 DAU（付费墙表 `is_active`） | 登录活跃 UV `login_active_user_cnt` | 一致：10/31 两者都是 96,695 |
+
+## 需要定的总原则
+
+本库和仓库登记表是什么关系：本库引用登记表、只补登记表没有的部分；还是本库为准、反向推动登记表修改。见 OQ-16。

@@ -1,0 +1,198 @@
+# 广告域指标。2026-11-25 按 DS 指定换表重构：唯一来源 T-010 ads_pollo_ad_attribution_delivery_daily_hip。
+# 旧表 T-008 及其 match_level 口径作废。T-010 无汇总行，直接求和（P-37）；只取 stat_date ≤ 昨日（P-39）。
+# 通用 filters：p_date = TO_CHAR(stat_date,'yyyymmdd') 且 stat_date BETWEEN <期间起> AND <期间止>（期间止 ≤ 昨日）。
+metrics:
+  - id: M-AD-001
+    name: 广告消耗
+    synonyms: [投放消耗, 花费, spend, cost, 广告花费]
+    table: T-010
+    type: atomic
+    expr: SUM(cost_usd)
+    filters: ["p_date 与 stat_date 双约束", "stat_date ≤ 昨日"]
+    unit: USD
+    aggregation: total
+    dimensions: [D-011, D-012, D-013, D-014]
+    traps: [P-39]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：$753,408.02（APP $277,681.43、WEB $475,726.59），与旧表各层级消耗合计一致"]
+
+  - id: M-AD-002
+    name: 展示数
+    synonyms: [曝光, impressions, 展示量]
+    table: T-010
+    type: atomic
+    expr: SUM(impressions)
+    filters: ["p_date 与 stat_date 双约束", "stat_date ≤ 昨日"]
+    unit: 次
+    aggregation: total
+    dimensions: [D-011, D-012, D-013, D-014]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：61,197,737"]
+
+  - id: M-AD-003
+    name: 点击数
+    synonyms: [clicks, 点击量]
+    table: T-010
+    type: atomic
+    expr: SUM(clicks)
+    filters: ["p_date 与 stat_date 双约束", "stat_date ≤ 昨日"]
+    unit: 次
+    aggregation: total
+    dimensions: [D-011, D-012, D-013, D-014]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：2,555,010"]
+
+  - id: M-AD-004
+    name: 广告注册用户数
+    synonyms: [归因注册用户, 广告带来的注册, 投放注册数, 归因用户]
+    definition: 投放注册用户数：注册日 − 投放日 ≤ N 天的人数，N = 0/14/30/60/90/180/360/all（生产 SQL）。只含投放用户，不含自然量，不等于全部新注册。
+    table: T-010
+    type: atomic
+    expr: SUM(reg_user_cnt_d{N})
+    filters: ["p_date 与 stat_date 双约束", "stat_date + N ≤ 昨日"]
+    unit: 人
+    aggregation: total
+    dimensions: [D-011, D-012, D-013]
+    traps: [P-35]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：d0 611,189 / d14 630,736 / d30 635,005 / all 636,316"]
+
+  - id: M-AD-005
+    name: 广告归因GMV（Dn）
+    synonyms: [归因GMV, 广告GMV, D0 GMV, D14 GMV, D30 GMV, 回收金额]
+    definition: 由广告渠道带到端内的用户的累计 GMV（R1 广告域 Q4 DS）。本表窗口从投放日起算：付款日 − 投放日 ∈ [0, N]（生产 SQL）；DS 描述的「自首次注册日起、D3/D7」是注册日 cohort 表 T-008 的口径（OQ-15）。毛额，不扣退款。
+    table: T-010
+    type: atomic
+    expr: SUM(gmv_usd_d{N})
+    filters: ["p_date 与 stat_date 双约束", "stat_date + N ≤ 昨日"]
+    unit: USD
+    aggregation: total
+    dimensions: [D-011, D-012, D-013]
+    traps: [P-35, P-41]
+    open_question: OQ-15
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：d0 $353,883.09 / d14 $574,840.05 / d30 $656,987.32（10 月下旬未满 30 天）/ all $731,318.42"]
+
+  - id: M-AD-006
+    name: 广告LTV（Dn）
+    synonyms: [LTV, 用户价值, 人均回收]
+    definition: 归因GMV ÷ 注册用户数（R1 广告域 Q2 DS）。分母与 GMV 同窗口：SUM(gmv_usd_dN) / SUM(reg_user_cnt_dN)，与仓库广告口径文档一致（该文档自记「看板是否用 _all 待确认」，OQ-13）。
+    table: T-010
+    type: ratio
+    expr: M-AD-005 / M-AD-004   -- 同一个 N
+    numerator: M-AD-005
+    denominator: M-AD-004
+    filters: ["同 M-AD-005", "至少汇总到 投放端 × 广告平台（P-38）"]
+    unit: USD/人
+    aggregation: rate
+    dimensions: [D-011, D-012]
+    traps: [P-35, P-38]
+    open_question: OQ-13
+    status: draft
+    owner: 数据组
+    evidence: ["2026-10 草案：D0 $353,883 / 611,189 = $0.58；D14 $574,840 / 630,736 = $0.91"]
+
+  - id: M-AD-007
+    name: 获客成本 CAC
+    synonyms: [CAC, 获客成本, 注册成本, CPA]
+    definition: 广告消耗 ÷ 投放注册用户数，分母窗口随所选周期（reg_user_cnt_dN），看至今累计用 _all（仓库广告口径文档）。DS 只给了 ROI = LTV ÷ CAC，CAC 定义待 DS 确认（OQ-13）。
+    table: T-010
+    type: ratio
+    expr: M-AD-001 / M-AD-004   -- 与 LTV 同一个 N
+    numerator: M-AD-001
+    denominator: M-AD-004
+    filters: ["同 M-AD-001", "至少汇总到 投放端 × 广告平台（P-38）"]
+    unit: USD/人
+    aggregation: rate
+    dimensions: [D-011, D-012]
+    traps: [P-38, P-41]
+    open_question: OQ-13
+    status: draft
+    owner: 数据组
+    evidence: ["2026-10：D0 $753,408 / 611,189 = $1.23；_all $753,408 / 636,316 = $1.18", "仓库 ai_workspace/knowledge/legacy-caliber/ad-delivery.md 第四节"]
+
+  - id: M-AD-008
+    name: 广告ROI（Dn）
+    synonyms: [ROI, ROAS, 回收率, 回本率, D0 ROI, D14 ROI, D30 ROI]
+    definition: LTV ÷ CAC（R1 广告域 Q2 DS）。LTV 和 CAC 用同一个注册分母，所以等于 归因GMV ÷ 广告消耗，即仓库口径文档的 ROAS_N（累计回收率，≥ 1 为毛额回本）。
+    table: T-010
+    type: ratio
+    expr: M-AD-006 / M-AD-007   -- 同分母时 = SUM(gmv_usd_d{N}) / SUM(cost_usd)
+    numerator: M-AD-006
+    denominator: M-AD-007
+    filters: ["同 M-AD-005", "至少汇总到 投放端 × 广告平台（P-38）"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-011, D-012]
+    traps: [P-35, P-38, P-41]
+    open_question: OQ-13
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10（按 归因GMV ÷ 消耗）：D0 47.0%、D14 76.3%、D30 87.2%（10 月下旬未满 30 天）"]
+
+  - id: M-AD-009
+    name: 广告安装数
+    synonyms: [安装, installs, 激活]
+    definition: 只有 APP 投放有安装数，WEB 为空。
+    table: T-010
+    type: atomic
+    expr: SUM(install_cnt)
+    filters: ["p_date 与 stat_date 双约束", "source_end = 'APP'"]
+    unit: 次
+    aggregation: total
+    dimensions: [D-012]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10 APP：212,809"]
+
+  - id: M-AD-010
+    name: CPI
+    synonyms: [单次安装成本, 安装成本]
+    table: T-010
+    type: ratio
+    expr: M-AD-001 / M-AD-009   -- 仅 APP
+    numerator: M-AD-001
+    denominator: M-AD-009
+    filters: ["source_end = 'APP'"]
+    unit: USD/次
+    aggregation: rate
+    dimensions: [D-012]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10 APP：$277,681.43 / 212,809 = $1.30"]
+
+  - id: M-AD-011
+    name: 广告首购用户数
+    synonyms: [首购用户, 广告首购人数]
+    definition: 广告归因用户中，N 日内完成首购的用户数。另有 first_sub_*（首订）、first_api_*（API 首购）拆分。
+    table: T-010
+    type: atomic
+    expr: SUM(first_purchase_user_cnt_d{N})
+    filters: ["p_date 与 stat_date 双约束", "stat_date + N ≤ 昨日"]
+    unit: 人
+    aggregation: total
+    dimensions: [D-011, D-012]
+    traps: [P-35]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：d0 10,692 / all 13,903"]
+
+  - id: M-AD-012
+    name: 广告首购GMV
+    synonyms: [首购GMV, 首购回收]
+    table: T-010
+    type: atomic
+    expr: SUM(first_purchase_gmv_usd_d{N})
+    filters: ["p_date 与 stat_date 双约束", "stat_date + N ≤ 昨日"]
+    unit: USD
+    aggregation: total
+    dimensions: [D-011, D-012]
+    traps: [P-35]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10：d0 $290,973.70 / all $377,055.03"]

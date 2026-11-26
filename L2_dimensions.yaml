@@ -1,0 +1,190 @@
+# L2 维度。expr 是可以直接放进 SELECT 或 JOIN 的片段。
+shared_cte:
+  signup: |
+    -- 注册日（R1 用户域第 2 版：改用用户画像表 T-009）：每个已注册用户一行；未注册账号不在此 CTE 中
+    -- 2026-11-25 实跑：20261031 注册 36,769，与原注册表写法一致
+    signup AS (
+      SELECT user_id,
+             TO_DATE(SUBSTR(CAST(register_date AS STRING),1,10),'yyyy-mm-dd') AS min_signup_date
+      FROM mc_prd.ads_pollo_user_profile_dfp
+      WHERE p_date = TO_CHAR(DATEADD(GETDATE(), -1, 'dd'), 'yyyymmdd')
+        AND is_registered = 1
+    )
+
+dimensions:
+  - id: D-001
+    name: 支付端
+    synonyms: [端, 平台, Web, App, iOS, 安卓]
+    expr: "CASE WHEN UPPER(pay_platform)='WEB' THEN 'Web' WHEN UPPER(pay_platform) IN ('IOS','ANDROID') THEN 'App' ELSE 'UNKNOWN' END"
+    values: {Web: "pay_platform='WEB'", App: "pay_platform IN ('IOS','ANDROID')", UNKNOWN: 单列展示，不并入 App}
+    applies_to: [T-001]
+    notes: B-01 已裁决，App 不再沿用「非 Web」的写法。细分到 iOS/Android 时直接用 UPPER(pay_platform)。跨端人群用 reg_platform（P-12）。
+    open_question: OQ-05
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R0 B-01 DS 采纳"]
+
+  - id: D-002
+    name: 交易类型
+    synonyms: [订单类型, pay_type, 首订, 续订, 积分包, 升级]
+    expr: "UPPER(pay_type)"
+    values:
+      NEW_SUB: 首订（只有这一类算首订；RESUBSCRIBE 不算，见 R0 P3）
+      RENEW: 自动续订
+      RESUBSCRIBE: 重新订阅
+      CYCLE_RESET: 周期重置
+      ADDON: 积分包
+      UPGRADE: 升级
+      DOWNGRADE: 降级
+      API: API 收入。大盘默认包含，支付转化漏斗分析时剔除（README R3）
+    applies_to: [T-001]
+    traps: [P-08]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-11-24 核查：2026-10 有效订单的 pay_type 共 8 个取值，与上表一致"]
+
+  - id: D-003
+    name: 漏斗端
+    synonyms: [付费墙端]
+    expr: "platform_type  -- WEB/IOS/ANDROID；分组用 platform_group（WEB/APP）"
+    values: {WEB: Web, IOS: iOS, ANDROID: Android, APP: "platform_group='APP'"}
+    applies_to: [T-002]
+    notes: 全站登录 DAU 要跨端去重，按同人同日只算 1 人（P-24）。
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-11-24 核查：20261031 只出现 WEB/IOS/ANDROID 三个取值"]
+
+  - id: D-004
+    name: 当日新老
+    synonyms: [当日新客, 当天注册, 新用户（当日）]
+    expr: "CASE WHEN s.min_signup_date IS NULL OR s.min_signup_date > <行为日> THEN '注册日未知' WHEN s.min_signup_date = <行为日> THEN '当日新' ELSE '老' END"
+    values: {当日新: 注册日 = 行为日, 老: 注册日 < 行为日, 注册日未知: 单列展示，不并入新老}
+    applies_to: [T-001, T-002, T-004]
+    notes: JOIN shared_cte.signup ON user_id。用户直接说「新用户」这类裸词时，要回问指的是当日新还是期间新（B-06）。
+    traps: [P-25]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-06 / U4 DS 采纳"]
+
+  - id: D-005
+    name: 期间新老
+    synonyms: [当月新客, 当季新客, 当周新客, 期间新客]
+    expr: "CASE WHEN s.min_signup_date IS NULL THEN '注册日未知' WHEN s.min_signup_date BETWEEN <期间起> AND <期间止> THEN '期间新' WHEN s.min_signup_date < <期间起> THEN '期间老' ELSE '注册日未知' END"
+    values: {期间新: 注册日落在当周/月/季内, 期间老: 注册日早于期间起始日, 注册日未知: 单列展示}
+    applies_to: [T-001, T-002, T-004]
+    notes: 例如 Q3 的期间是 2026-07-01 至 2026-09-30。周度按业务周，从周日开始到周六结束（R1 C5）。
+    traps: [P-25]
+    status: pending_review
+    owner: 数据组
+    evidence: ["R0 B-06 / U4 DS 采纳"]
+
+  - id: D-006
+    name: 续费表维度
+    synonyms: [首续, 复续, 擦边, 月付, 年付, 周付]
+    expr: "platform_type, plan_cycle, plan_tier, renew_stage, borderline_tag  -- 每个维度都要么取 'ALL'，要么取具体值"
+    values: {renew_stage: "FIRST 首续 / REPEAT 复续", borderline_tag: "BORDERLINE_RAW 擦边 / NON_BORDERLINE_RAW 非擦边", plan_cycle: "WEEKLY/MONTHLY/ANNUAL", plan_tier: "LITE/PRO/ULTRA"}
+    applies_to: [T-003]
+    traps: [P-20]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-11-24 核查：20261015 分区的各维度枚举"]
+
+  - id: D-007
+    name: 创作端
+    synonyms: [创作平台, 任务端]
+    expr: "platform_type  -- WEB/IOS/ANDROID；分组用 task_platform_group（WEB/APP）"
+    values: {WEB: Web, IOS: iOS, ANDROID: Android, APP: "task_platform_group='APP'"}
+    applies_to: [T-006]
+    notes: 全站创作用户按同人去重；各端创作用户占比不可相加（P-17）。
+    traps: [P-17]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 核查：20261031 仅 WEB/IOS/ANDROID 三值"]
+
+  - id: D-008
+    name: 擦边标记
+    synonyms: [擦边, borderline, 擦边用户, 擦边任务]
+    expr: "T-006: is_borderline（1=擦边任务）；T-003/T-005: borderline_tag"
+    values: {"1 / BORDERLINE_RAW": 擦边, "0 / NON_BORDERLINE_RAW": 非擦边}
+    applies_to: [T-006, T-003, T-005]
+    notes: 擦边 ≠ 风控，擦边任务仍属有效任务（P-30）。任务级标记与用户级标记口径不同。
+    traps: [P-30]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 核查：20261031 有效任务 248,185 中擦边 144,788（58%）"]
+
+  - id: D-009
+    name: 积分类型
+    synonyms: [credit_type, 订阅积分, 赠送积分, 积分包积分]
+    expr: "credit_type"
+    values: {usage: 订阅积分, reward: 赠送积分, addon: 积分包积分, api: API 积分}
+    applies_to: [T-006]
+    traps: [P-31]
+    notes: 创作大盘包含 API 任务，专项分析时再剔除（R1 创作域第 2 版，与支付一致）。
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 核查：20261031 取值 usage/reward/addon/api 及少量空值"]
+
+  - id: D-010
+    name: 广告匹配层级
+    synonyms: [match_level, 匹配层级, 归因层级]
+    notes: 只存在于错误表 T-008，广告域改用 T-010 后作废，不得使用。
+    expr: "match_level"
+    values: {"1": "消耗与归因用户都匹配到（AI 推测）", "3": "有归因用户/GMV，无消耗（AI 推测）", "4": "有消耗，无归因用户（AI 推测）", "5": "只有安装（AI 推测）"}
+    applies_to: [T-008]
+    traps: [P-34]
+    status: deprecated
+    owner: 数据组
+    evidence: ["2026-11-25 核查：2026-10 各层级的消耗/用户/GMV 分布"]
+
+  - id: D-011
+    name: 投放端
+    synonyms: [source_end, 投放平台端]
+    expr: "source_end"
+    values: {WEB: Web 投放, APP: App 投放}
+    applies_to: [T-010]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 核查 T-010：仅 WEB/APP"]
+
+  - id: D-012
+    name: 广告平台
+    synonyms: [渠道, 媒体, ad_platform, 投放渠道]
+    expr: "LOWER(ad_platform)"
+    values: {google: Google, meta: Meta, bing: Bing, tiktok: TikTok, asa: Apple Search Ads, naver: Naver, yahoo: Yahoo, kwai: Kwai}
+    applies_to: [T-010]
+    notes: 与 v1 G-12 渠道归并（付费投放/自然/未知/其他）是两套维度，不要混用。
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 核查 T-010：20261031 出现的取值"]
+
+  - id: D-013
+    name: 广告渠道类型
+    synonyms: [channel, SEM, 信息流, 搜索广告]
+    expr: "channel"
+    values: {SEM: 搜索广告（WEB）, 信息流: 信息流广告（WEB）, 汇总: APP 投放不拆渠道时的固定取值，不是汇总行}
+    applies_to: [T-010]
+    traps: [P-37]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 核查 T-010：20261031 WEB 为 SEM/信息流，APP 全部为 '汇总'"]
+
+  - id: D-014
+    name: 投放设备类型
+    synonyms: [device_type, 设备, 电脑端, 手机端]
+    expr: "device_type"
+    values: {电脑: 电脑, 手机: 手机, 平板: 平板, 未知: 未知, 不适用: APP 投放的固定取值}
+    applies_to: [T-010]
+    notes: 消耗和注册可能落在不同设备行（P-38），按设备拆 ROI、CAC 会失真。
+    traps: [P-38]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-11-25 核查 T-010：20261031 取值"]

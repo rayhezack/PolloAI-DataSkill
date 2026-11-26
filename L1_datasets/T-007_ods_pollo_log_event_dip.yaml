@@ -1,0 +1,26 @@
+id: T-007
+table: mc_prd.ods_pollo_log_event_dip
+domain: USR
+purpose: 前端埋点事件表。一期只用于访客 UV（anon_id，R0 U1）和入口渗透类分析；创作指标不用它（R0 C1）。
+grain: 一行 = 一条埋点事件
+primary_key: [record_id]
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: p_date 与 TO_CHAR(event_time,'yyyymmdd') 对齐（G-02）；单日去重 UV 即可，跨天不能直接相加
+default_filters:
+  - event_id IS NOT NULL     # 有效埋点（R0 U1）
+time_axis: event_time（UTC+8，R0 B-09）
+key_fields:
+  anon_id: 匿名设备/浏览器 ID → 访客 UV（R0 U1）
+  uid: 登录用户 ID（未登录为空）
+  platform_type / client_type: 端
+  properties: 事件属性 JSON，用 GET_JSON_OBJECT 读取（v1 G-13）
+  is_first_day: 是否首日访问
+  entry_source / ad_id: 来源、广告 ID
+traps: [P-14, P-15]
+producer: 未核对（CNB 无权限）
+status: pending_review
+owner: 数据组
+evidence:
+  - "2026-11-25 核查（20261031，event_id 非空）：anon_id UV 144,168；uid UV 96,779；未登录 anon UV 113,914"

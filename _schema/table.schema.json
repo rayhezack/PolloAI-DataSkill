@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "L1 table card",
+  "type": "object",
+  "required": ["id", "table", "purpose", "grain", "partition", "default_filters", "time_axis", "key_fields", "status", "owner", "evidence"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^T-[0-9]{3}$"},
+    "table": {"type": "string", "pattern": "^mc_prd\\.[a-z0-9_]+$"},
+    "purpose": {"type": "string"},
+    "domain": {"enum": ["PAY", "CRE", "USR", "AD"]},
+    "grain": {"type": "string"},
+    "primary_key": {"type": "array", "items": {"type": "string"}},
+    "partition": {
+      "type": "object", "required": ["field", "read_rule"],
+      "properties": {"field": {"type": "string"}, "suffix": {"type": "string"}, "read_rule": {"type": "string"}}
+    },
+    "default_filters": {"type": "array", "items": {"type": "string"}},
+    "time_axis": {"type": "string"},
+    "key_fields": {"type": "object", "additionalProperties": {"type": "string"}},
+    "rollup_dims": {"type": "array", "items": {"type": "string"}},
+    "not_for": {"type": "array", "items": {"type": "string"}},
+    "traps": {"type": "array", "items": {"type": "string", "pattern": "^P-[0-9]{2}$"}},
+    "producer": {"type": "string"},
+    "status": {"$ref": "common#/status"},
+    "owner": {"type": "string"},
+    "reviewed_by": {"type": "string"},
+    "reviewed_at": {"type": "string"},
+    "evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

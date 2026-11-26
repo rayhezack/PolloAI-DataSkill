@@ -1,0 +1,36 @@
+id: T-002
+table: mc_prd.ads_pollo_transaction_paywall_user_daily_dip
+domain: PAY
+purpose: 用户×日×端的付费漏斗表，记录活跃、付费墙曝光、提交、主动支付。它是登录 DAU 的唯一来源（B-10），也是付费墙漏斗的主表。
+grain: 一行 = user_id × stat_date × platform_type
+primary_key: [stat_date, user_id, platform_type]
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')，两者同时限定
+default_filters: []
+time_axis: stat_date（UTC+8）
+key_fields:
+  platform_type: WEB / IOS / ANDROID
+  platform_group: WEB / APP（APP = IOS + ANDROID）
+  is_active: 当天在该端有有效行为；统计登录 DAU 时必须加 is_active=1（P-24）
+  is_paywall_expose: 当天看到过付费墙、定价页或账单页
+  is_paywall_submit: 当天在付费墙点过提交
+  is_pay: 当天在该端有主动支付，不含 RENEW 自动续费（P-19）
+  gmv_usd: 主动支付金额，不含自动续费，不能当支付GMV用（P-19）
+  register_date: 注册日，已不再作为新老判定依据，新老改用 D-004/D-005
+  paywall_expose_type: 曝光类型
+  submit_channel: 提交渠道
+  creation_cnt_30d: 近 30 天创作数
+not_for:
+  - 支付GMV、支付用户数：用 T-001（P-19）
+  - 注册日、新老判定：用 T-004 user_dfp（R0 U2）
+traps: [P-16, P-19, P-24]
+producer: 未核对（CNB 无权限）
+status: pilot
+owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-25
+evidence:
+  - "2026-11-24 核查（20261031）：全站 is_active=1 的 COUNT(DISTINCT user_id) 为 96,695；按用户×端计为 101,358 行"
+  - "2026-11-24 核查（20261031）：订单表 RENEW 支付用户 851 人，其中在本表 is_pay=1 的只有 8 人；NEW_SUB 为 689 人对 676 人，ADDON 为 522 人对 519 人"

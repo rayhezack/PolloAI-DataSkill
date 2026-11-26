@@ -1,0 +1,42 @@
+id: T-003
+table: mc_prd.ads_pollo_transaction_renewal_cohort_daily_dip
+domain: PAY
+purpose: 到期 cohort 续费日表。按到期日聚合到期订阅数、当日/7 日/当月续费数及金额。到期用户数、续订用户数和续订率都直接取这张表（R0 P5）。
+grain: 一行 = stat_date（到期日）× platform_type × plan_cycle × plan_tier × renew_stage × borderline_tag。每个维度都带一行 ALL 汇总（CUBE）
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')，每个分区只有一个 stat_date
+default_filters:
+  - is_7d_closed = 1        # 只要算 7 日续费率就必须加，否则把还没成熟的 cohort 也算进分母（P-13）
+  - 5 个维度都要明确指定：要么取 'ALL'，要么取某个具体值（P-20）
+rollup_dims: [platform_type, plan_cycle, plan_tier, renew_stage, borderline_tag]
+time_axis: stat_date = 订阅到期日（UTC+8）
+key_fields:
+  platform_type: ALL / WEB / APP / IOS / ANDROID。APP 是 IOS+ANDROID 的汇总行
+  plan_cycle: ALL / WEEKLY / MONTHLY / ANNUAL
+  plan_tier: ALL / LITE / PRO / ULTRA
+  renew_stage: ALL / FIRST（首续）/ REPEAT（复续）
+  borderline_tag: ALL / BORDERLINE_RAW（擦边用户）/ NON_BORDERLINE_RAW
+  expire_sub_cnt: 到期订阅数，即续费率分母
+  expire_user_cnt: 到期用户数。跨天相加得到的是用户·天，不是去重人数（P-23）
+  renew_7d_sub_cnt: 财务口径，等于 auto + upgrade + reset + downgrade 四项之和（P-21）
+  renew_7d_auto_sub_cnt / renew_7d_auto_user_cnt: 7 日内自动续费（RENEW）的订阅数 / 用户数；业务口径看 renew_7d_auto_user_cnt
+  renew_7d_upgrade_sub_cnt: 7 日内以升级方式续上
+  renew_7d_reset_sub_cnt: 7 日内以周期重置方式续上
+  renew_7d_downgrade_sub_cnt: 7 日内以降级方式续上
+  resub_7d_sub_cnt: 7 日内重新订阅（RESUBSCRIBE）。不计入 renew_7d
+  renew_same_day_*: 到期当日续费
+  renew_month_*: 当月续费
+  is_7d_closed: 7 日观察窗是否已经关闭
+  "*_name": 各维度对应的中文名
+traps: [P-13, P-20, P-21, P-23]
+producer: 未核对（CNB 无权限）。7 日窗口 [到期−1, 到期+7] 已由 DS 在 R1 C3 确认
+status: pilot
+owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-25
+evidence:
+  - "2026-11-25 核查（2026-10，5 个维度均为 ALL，is_7d_closed=1）：expire_sub_cnt 58,431；renew_7d_sub_cnt 31,019 = auto 30,534 + upgrade 191 + reset 251 + downgrade 43；expire_user_cnt 58,120"
+  - "R1 C3（DS 确认）：7 日窗口为 [到期−1, 到期+7]，严格说是 9 天；提前一天是因为业务会提前扣费"
+  - "2026-11-24 核查：近期分区 is_7d_closed 均为 0，符合预期"

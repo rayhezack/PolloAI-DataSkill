@@ -1,0 +1,30 @@
+id: T-004
+table: mc_prd.dwd_ai_video_pollo_user_dfp
+domain: USR
+purpose: 用户账号主表（每日全量快照）。R0 U2 曾指定为注册权威表；R1 用户域第 2 版起注册改取用户画像表 T-009，本表只作对账和账号属性查询。
+grain: 一行 = 一个账号 id（游客账号也在内）
+primary_key: [id]
+partition:
+  field: p_date
+  suffix: _dfp
+  read_rule: 取昨日分区 p_date = TO_CHAR(DATEADD(GETDATE(),-1,'dd'),'yyyymmdd')；做回溯时显式指定快照日。禁止使用 MAX(p_date)（B-04）
+default_filters:
+  - email IS NOT NULL      # 有 email 才算注册用户（R0 U2）
+time_axis: date_created（账号创建时间，UTC+8 待核实）
+key_fields:
+  id: 账号 id，等于其它表的 user_id
+  email: 非空表示已注册；为空表示游客账号
+  date_created: 账号创建时间，对 email 非空的账号就是注册时间（游客账号不会在原 id 上绑定 email，见 evidence）。注册日 = CAST(date_created AS DATE)
+  reg_source: 注册来源
+  reg_country: 注册国家
+  deleted: 是否注销
+producer: 未核对（CNB 无权限）
+status: pending_review
+owner: 数据组
+evidence:
+  - "2026-11-24 核查（20261123 分区）：84,252,277 行，id 唯一；email 非空 31,131,303"
+  - "2026-11-25 核查：20261122 分区 email 为空、20261124 分区 email 非空的同一 id 为 0 个（同期每天约 3.3 万新注册），游客不会在原账号上绑定 email"
+  - "分区只保留最近 3 天（20261122~20261124），回溯不能依赖历史快照"
+  - "内部用户标记不在本表，用 T-009 画像表的 is_internal_user_da（R1 用户域 Q3）"
+not_for:
+  - user_group 和 account_type 不用于任何口径（R1 C6）

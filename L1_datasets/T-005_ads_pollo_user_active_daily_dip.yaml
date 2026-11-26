@@ -1,0 +1,40 @@
+id: T-005
+table: mc_prd.ads_pollo_user_active_daily_dip
+domain: USR
+purpose: 用户活跃日汇总表（已聚合）。在订用户数取这张表的 vpu 字段（R1 Q2），还包含 DAU、登录活跃、注册访问、创作用户、新注册、留存（点位和窗口）等字段。各字段的口径放到用户域 R1 评审。
+grain: 一行 = stat_date × client_type × country × borderline_tag。三个维度都带一行汇总，取值为 '汇总'（CUBE）
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')
+default_filters:
+  - 三个维度都要钉住：client_type、country、borderline_tag，每个要么取 '汇总'，要么取具体值（P-26）
+rollup_dims: [client_type, country, borderline_tag]
+time_axis: stat_date（UTC+8）
+key_fields:
+  client_type: 汇总 / WEB / APP / IOS / ANDROID / 未知；11-25 起新增 WEB-PC / WEB-H5（WEB 的复制拆分行，P-40）。APP = IOS ∪ ANDROID 的合并行
+  country: 汇总 / 国家代码
+  borderline_tag: 汇总 / BORDERLINE_RAW / NON_BORDERLINE_RAW。两个明细行加起来不等于汇总行（P-26）
+  vpu: 在订用户数（时点值）→ M-PAY-019
+  subscribed_active_user_cnt: 当日活跃的在订用户数 → M-USR-006（R1 用户域 C3 确认）
+  login_active_user_cnt: 登录活跃用户数。10/31 全汇总值与 T-002 登录 DAU 完全一致
+  dau: 访客 UV（含未登录），活跃标记表 anon_id 去重（APP 按 uid）；11-24 起排除美国 Web 机器流量，08-01 起回刷（数仓 SSOT R34）→ M-USR-002
+  login_visitor_cnt: 有登录的访客数：当天带过 uid 埋点的访客 anon_id 去重（访客口径，11-20 新增）。数仓核心指标登记表定义 访问注册率 = login_visitor_cnt / dau，与本库 M-USR-003 不同（OQ-14）
+  registered_visit_user_cnt: 数仓 11-20 已废弃（每访客取代表 uid 的设备口径），下游切换完删除，不得使用。注册访问UV = 登录DAU（M-PAY-012，R1 用户域 Q2）
+  new_register_user_cnt: 当日新注册用户数
+  new_user_cnt: 当日新访客数（推测）
+  creation_user_cnt: 当日创作用户数
+  mau: 月活，近 30 天 [t-29, t] 活跃访客 anon_id 去重（滚动窗口，不是自然月）
+  retain_1d/3d/7d: 访客（dau 群）点位留存人数：stat_date 当天的访客在第 N 天回访的人数，取自留存表 ads_pollo_user_retention_daily_dip（user_group=dau）；未成熟为 NULL。留存率 = retain_Nd / 同一行 dau
+  retain_Nd_window: 窗口留存人数：N 日内至少回访一次（累计）
+  creation_retain_*: 创作留存人数（cohort = 当天提交创作，回访 = 再次提交），分母为同一行 creation_user_cnt
+traps: [P-26, P-40]
+producer: CNB bigdata_etl main@d8753d1 bigdata_dw/04_ADS/经营看板/Sq_ads_pollo_user_active_daily_dip.sql（DataWorks 节点 Sq_ads_pollo_user_active_daily_dip_rf，11-12 起写本表；旧节点 pollo/02_数仓/ADS/活跃留存/ 改写 *_old，约 12-03 下线）
+status: pending_review
+owner: 数据组
+evidence:
+  - "2026-11-25 核查（20261031，三个维度均为汇总）：vpu 76,398 = WEB 62,337 + APP 14,061；login_active_user_cnt 96,695，与 T-002 一致；dau 143,308"
+  - "2026-11-25 核查（20261031）：dau 全表直接求和 1,274,942，是正确值 143,308 的 8.9 倍；三个维度都钉住汇总才对（P-26）"
+  - "2026-11-25 核查：client_type 有 5 个取值，country 有 240 个，borderline_tag 有 3 个"
+  - "CNB bigdata_etl main@d8753d1：字段口径取自生产 SQL 头注释（11-12 / 11-20 / 11-24 / 11-25 修订说明）"
+  - "2026-11-25 核查（20261031，国家与擦边取汇总）：WEB 118,629、APP 28,338（IOS 11,263 + ANDROID 17,117）、汇总 143,308；该日尚无 WEB-PC / WEB-H5 行"

@@ -1,0 +1,46 @@
+id: T-001
+table: mc_prd.dwd_pollo_transaction_order_detail_view
+domain: PAY
+purpose: 订单明细宽表视图，是支付GMV、实收GMV、退款、订单数、支付用户数、交易类型的唯一来源。字段覆盖 dwd_pollo_transaction_order_dip 的全部字段，另加退款、subscribe_id 和支付失败字段。
+grain: 一行 = 一笔支付订单
+primary_key: [payment_id]
+partition:
+  field: p_date
+  suffix: _view（底表 _dip）
+  read_rule: p_date 与 pay_date 双约束，两者落在同一时间窗（G-02）
+default_filters:
+  - is_valid_order = 1                 # 默认只看有效订单（R0 P2）；内部账号在此已被置为 0。大盘含 API；做支付转化漏斗分析时另加 pay_type <> 'API'（README R3）
+time_axis: pay_date（UTC+8）
+key_fields:
+  payment_id: 订单唯一键；订单数用 COUNT(DISTINCT payment_id) 计
+  user_id: 支付用户
+  pay_type: 交易类型，枚举见 D-002
+  pay_platform: 支付端（WEB/IOS/ANDROID），见 D-001
+  reg_platform: 注册端；跨端人群用它，不用支付端（P-12）
+  amount_received_usd: 实付金额（USD），不扣退款，即支付GMV
+  refund_usd_amount: 该订单累计退款（USD）
+  revenue_usd_amount: 等于 amount_received_usd 减 refund_usd_amount，即实收GMV
+  is_refunded: 是否发生过退款
+  is_full_refund: 是否全额退款
+  last_refund_date: 最近一次退款的日期；退款金额按支付日归属，不按退款日（P-22）
+  is_valid_order: 有效订单标记，已排除内部账号和测试账号
+  is_paid_amount: 是否有实付金额；2026-10 的有效单中有 4 笔为 0 元
+  is_internal_account: 内部账号
+  is_internal_user: 内部用户
+  is_risk_order: 风险单；2026-10 有效单中为 0
+  is_free_trial: 免费试用；2026-10 有效单中为 0
+  sub_period_da: 订阅周期（月/年）
+  plan_tier_da: 套餐档位
+  usage_count: 积分额度；>=5000 视为 Ultra
+  sub_order_type_detail: 订阅子类型；算升级时排除 FIRST_SUB（P-09）
+traps: [P-03, P-04, P-07, P-08, P-12, P-22]
+producer: 未核对（CNB 无权限），底表 dwd_pollo_transaction_order_dip 的生产 SQL 待 R1 补
+status: pilot
+owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-25
+evidence:
+  - "2026-11-24 核查（2026-10，is_valid_order=1，非 API）：90,540 单，amount_received_usd 合计 $4,079,093.74，与 order_dip 一致"
+  - "2026-11-24 核查：各 pay_type 下 amount_received_usd − refund_usd_amount − revenue_usd_amount 的差值均为 0"
+  - "2026-11-25 核查（2026-10，含 API）：90,719 单，$4,108,793.73；其中 API 179 单、$29,700.00"
+  - "2026-11-24 核查：is_valid_order=0 的 7 单（$341）全部是内部账号或内部用户"

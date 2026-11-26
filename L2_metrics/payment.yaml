@@ -1,0 +1,389 @@
+# 支付域指标。filters 为必须照搬的完整条件，已包含表卡上的默认过滤。
+# R1 已于 2026-11-25 通过 DS 评审。
+metrics:
+  - id: M-PAY-001
+    name: 支付GMV
+    synonyms: [GMV, 收入, 流水, 销售额, 支付金额]
+    definition: 有效订单的实付金额（USD），不扣退款，含 API。只有做支付转化漏斗分析（主动付费、自动续订）时才剔除 API（R1 创作域 Q1 DS）。
+    table: T-001
+    type: atomic
+    expr: SUM(CAST(amount_received_usd AS DOUBLE))
+    filters: ["is_valid_order = 1", "p_date 与 pay_date 双约束"]
+    time_axis: pay_date
+    unit: USD
+    aggregation: total
+    dimensions: [D-001, D-002, D-004, D-005]
+    traps: [P-01, P-07, P-19]
+    disclaimer: 不扣退款，不等于净收入；是否含税尚未声明（OQ-04）。
+    open_question: OQ-04
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 含 API：$4,108,793.73，其中 API $29,700.00（2026-11-25 核查）", "R0 B-08/P2；R1 Q3；R1 创作域 Q1 DS 修订为含 API"]
+
+  - id: M-PAY-002
+    name: 实收GMV
+    synonyms: [净收入, 扣退款收入, 实收, net revenue]
+    definition: 支付GMV 扣除退款后的金额，退款按订单的支付日归属。
+    table: T-001
+    type: atomic
+    expr: SUM(CAST(revenue_usd_amount AS DOUBLE))
+    filters: ["is_valid_order = 1", "p_date 与 pay_date 双约束"]
+    time_axis: pay_date（退款也归到支付日）
+    unit: USD
+    aggregation: total
+    dimensions: [D-001, D-002, D-004, D-005]
+    traps: [P-22]
+    disclaimer: 近期数值会随后续退款下降，须注明「退款数据截至 yyyy-mm-dd」。
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 含 API：$3,995,232.08 = $4,108,793.73 − 退款 $113,561.65（2026-11-25 核查）", "退款会回写：非 API 退款 11-24 为 $108,212.89，11-25 为 $108,318.69（P-22）", "R0 P6；R1 C4"]
+
+  - id: M-PAY-003
+    name: 退款金额
+    synonyms: [退款, refund]
+    table: T-001
+    type: atomic
+    expr: SUM(CAST(refund_usd_amount AS DOUBLE))
+    filters: ["is_valid_order = 1", "p_date 与 pay_date 双约束"]
+    time_axis: pay_date（按支付日，不按退款日）
+    unit: USD
+    aggregation: total
+    dimensions: [D-001, D-002]
+    traps: [P-22]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 含 API：$113,561.65，其中 API $5,242.96（2026-11-25 核查）"]
+
+  - id: M-PAY-004
+    name: 退款率（金额）
+    synonyms: [退款率]
+    table: T-001
+    type: ratio
+    expr: M-PAY-003 / M-PAY-001
+    numerator: M-PAY-003
+    denominator: M-PAY-001
+    filters: ["同 M-PAY-001"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-001, D-002]
+    traps: [P-22]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 含 API：2.76%"]
+
+  - id: M-PAY-005
+    name: 支付订单数
+    synonyms: [订单数, 单量, 支付订单量]
+    table: T-001
+    type: atomic
+    expr: COUNT(DISTINCT payment_id)
+    filters: ["is_valid_order = 1", "p_date 与 pay_date 双约束"]
+    dedup_key: payment_id
+    unit: 单
+    aggregation: total
+    dimensions: [D-001, D-002]
+    traps: [P-03]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 含 API：90,719 单，其中 API 179 单（含 4 笔 0 元有效单；R1 Q4 定为不额外排除）"]
+
+  - id: M-PAY-006
+    name: 支付用户数
+    synonyms: [付费用户数, 付费用户, 付费人数, 购买人数, 支付人数, 支付UV]
+    definition: 期间内至少有一笔有效支付的去重用户。不是存量在订用户，存量用 M-PAY-019。
+    table: T-001
+    type: atomic
+    expr: COUNT(DISTINCT NULLIF(TRIM(CAST(user_id AS STRING)),''))
+    filters: ["is_valid_order = 1", "p_date 与 pay_date 双约束"]
+    dedup_key: user_id
+    unit: 人
+    aggregation: total
+    dimensions: [D-001, D-002, D-004, D-005]
+    traps: [P-08, P-19]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R0 B-03/P4", "2026-10 含 API：52,170 人（不含 API 为 52,104）"]
+
+  - id: M-PAY-007
+    name: 单均价
+    synonyms: [订单均价, AOV, 每单金额]
+    definition: 支付GMV ÷ 支付订单数。注意它和客单价（M-PAY-008）不是同一个指标。
+    table: T-001
+    type: ratio
+    expr: M-PAY-001 / M-PAY-005
+    numerator: M-PAY-001
+    denominator: M-PAY-005
+    filters: ["同 M-PAY-001"]
+    unit: USD/单
+    aggregation: rate
+    dimensions: [D-001, D-002]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R1 Q5 DS：单均价的分母为支付订单量", "2026-10 含 API：$45.29/单"]
+
+  - id: M-PAY-008
+    name: 客单价
+    synonyms: [ARPPU, 人均支付金额, 付费用户人均]
+    definition: 支付GMV ÷ 支付用户数。R1 修订：v1 G-04 的写法是按订单算，已作废。
+    table: T-001
+    type: ratio
+    expr: M-PAY-001 / M-PAY-006
+    numerator: M-PAY-001
+    denominator: M-PAY-006
+    filters: ["同 M-PAY-001"]
+    unit: USD/人
+    aggregation: rate
+    dimensions: [D-001, D-002]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R1 Q5 DS：客单价的分母为支付UV", "2026-10 含 API：$78.76/人"]
+
+  - id: M-PAY-009
+    name: 日均支付GMV
+    synonyms: [日均GMV, 日均收入]
+    table: T-001
+    type: derived
+    expr: M-PAY-001 / (DATEDIFF(<期间止>, <期间起>, 'dd') + 1)
+    numerator: M-PAY-001
+    denominator: 自然日数
+    filters: ["同 M-PAY-001"]
+    unit: USD/天
+    aggregation: per_day
+    traps: [P-01, P-06]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R0 B-02"]
+
+  - id: M-PAY-010
+    name: 首订用户数
+    synonyms: [新订阅用户, 首订人数, 新订人数]
+    table: T-001
+    type: atomic
+    expr: COUNT(DISTINCT user_id)
+    filters: ["is_valid_order = 1", "UPPER(pay_type) = 'NEW_SUB'", "p_date 与 pay_date 双约束"]
+    dedup_key: user_id
+    unit: 人
+    aggregation: total
+    dimensions: [D-001, D-004, D-005]
+    traps: [P-08]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R0 P3：首订只看 NEW_SUB", "R1 Q4：只看有效订单，不再加 is_paid_amount"]
+
+  - id: M-PAY-011
+    name: 首订GMV
+    synonyms: [新订收入]
+    table: T-001
+    type: atomic
+    expr: SUM(CAST(amount_received_usd AS DOUBLE))
+    filters: ["is_valid_order = 1", "UPPER(pay_type) = 'NEW_SUB'", "p_date 与 pay_date 双约束"]
+    unit: USD
+    aggregation: total
+    dimensions: [D-001, D-004, D-005]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R0 P3；R1 Q4"]
+
+  - id: M-PAY-012
+    name: 登录DAU
+    synonyms: [DAU, 日活, 活跃用户, 活跃人数, 登录活跃, 注册访问UV, 登录用户访客数]
+    definition: 当天有有效行为的登录用户。全站按同人同日去重，分端按各端分别去重。
+    table: T-002
+    type: atomic
+    expr: COUNT(DISTINCT user_id)   -- 按 stat_date 分组；跨天只报人日或日均
+    filters: ["is_active = 1", "p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    dedup_key: user_id × stat_date
+    unit: 人
+    aggregation: total
+    dimensions: [D-003, D-004]
+    traps: [P-24]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R0 B-05/B-10", "20261031 全站 96,695，与 T-005 login_active_user_cnt（全汇总）完全一致", "R1 用户域 Q2 DS：「注册访问UV」就是付费墙表 is_active=1 的去重用户数，即本指标"]
+
+  - id: M-PAY-013
+    name: 付费墙曝光率
+    synonyms: [曝光率, paywall 曝光率]
+    table: T-002
+    type: ratio
+    expr: SUM(is_paywall_expose) / SUM(is_active)   -- 分端按人日累加
+    denominator: 活跃人日
+    filters: ["is_active = 1", "p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-003, D-004, D-005]
+    traps: [P-24]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["v1 K-014；R1 Q6"]
+
+  - id: M-PAY-014
+    name: 付费墙提交率
+    synonyms: [提交率]
+    table: T-002
+    type: ratio
+    expr: SUM(is_paywall_submit) / SUM(is_paywall_expose)
+    denominator: 曝光人日
+    filters: ["p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-003, D-004, D-005]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["v1 K-014；R1 Q6"]
+
+  - id: M-PAY-015
+    name: 提交→支付率
+    synonyms: [支付成功率, 提交转化率, 主动支付转化率]
+    table: T-002
+    type: ratio
+    expr: SUM(is_pay) / SUM(is_paywall_submit)
+    denominator: 提交人日
+    filters: ["p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-003, D-004, D-005]
+    traps: [P-16, P-19]
+    disclaimer: 只统计主动付费链路，自动扣费（RENEW）按设计不在内，不要拿订单表去对。存在不提交直接支付的情况，所以比率可能超过 100%。
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["R0 P1；R1 Q6/C1"]
+
+  - id: M-PAY-016
+    name: 到期用户数
+    synonyms: [到期数, 到期人数, 到期订阅]
+    definition: 当天订阅到期的用户数，即续费率的分母。按订阅数统计时用 expire_sub_cnt。
+    table: T-003
+    type: atomic
+    expr: SUM(expire_user_cnt)
+    filters: ["5 个 rollup 维度全部钉住（默认 'ALL'）"]
+    unit: 人（跨天相加为人·天）
+    aggregation: total
+    dimensions: [D-006]
+    traps: [P-20, P-23]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10，5 个维度均为 ALL，is_7d_closed=1：58,120（订阅数 58,431）"]
+
+  - id: M-PAY-017
+    name: 7日续费率
+    synonyms: [续费率, 续订率, 7日续订率, renewal rate, 业务续费率]
+    definition: 业务口径。到期 cohort 中在 [到期−1, 到期+7]（共 9 天）内自动续费（RENEW）的用户占比。窗口提前 1 天是因为业务会在到期前一天提前扣费。
+    table: T-003
+    type: ratio
+    expr: SUM(renew_7d_auto_user_cnt) / SUM(expire_user_cnt)
+    denominator: 到期用户数（7 日已成熟）
+    filters: ["is_7d_closed = 1", "5 个 rollup 维度全部钉住"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-006]
+    traps: [P-13, P-20, P-21]
+    disclaimer: 用户只说「续费率」时，同时给出当日续费率（M-PAY-020）和 7 日续费率（R1 Q1）。
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 全 ALL：30,460 / 58,120 = 52.41%", "R1 Q1/C3"]
+
+  - id: M-PAY-018
+    name: 7日续费金额
+    synonyms: [续费GMV, 续费金额]
+    table: T-003
+    type: atomic
+    expr: SUM(renew_7d_auto_amount_usd)
+    filters: ["is_7d_closed = 1", "5 个 rollup 维度全部钉住"]
+    unit: USD
+    aggregation: total
+    dimensions: [D-006]
+    traps: [P-20, P-21]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 全 ALL：$865,127.09"]
+
+  - id: M-PAY-019
+    name: 在订用户数
+    synonyms: [有效订阅用户, 存量订阅用户, 有效权益用户, VPU, 在订用户]
+    definition: 统计日仍持有有效订阅的用户数，是存量口径（R0 P4、R1 Q2）。
+    table: T-005
+    type: atomic
+    expr: SUM(vpu)   -- 钉住 client_type/country/borderline_tag = '汇总' 后只剩一行
+    filters: ["client_type = '汇总'（或具体端）", "country = '汇总'（或具体国家）", "borderline_tag = '汇总'", "p_date = TO_CHAR(stat_date,'yyyymmdd')"]
+    unit: 人
+    aggregation: snapshot
+    traps: [P-26]
+    disclaimer: 时点值，不能跨天相加。期间口径取期末那天的值或日均值，并写明取的是哪一种。
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["20261031 全汇总：76,398；WEB 62,337 + APP 14,061 = 76,398", "R1 Q2 DS 指定"]
+
+  - id: M-PAY-020
+    name: 当日续费率
+    synonyms: [到期当日续费率, 当天续费率]
+    definition: 业务口径。到期 cohort 中在到期当日自动续费的用户占比（含提前 1 天扣费，待生产 SQL 确认）。
+    table: T-003
+    type: ratio
+    expr: SUM(renew_same_day_auto_user_cnt) / SUM(expire_user_cnt)
+    denominator: 到期用户数
+    filters: ["stat_date <= 昨日", "5 个 rollup 维度全部钉住"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-006]
+    traps: [P-20]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-25
+    evidence: ["2026-10 全 ALL：27,835 / 58,120 = 47.89%", "R1 Q1：续费要同时看当日和 7 日"]
+
+  - id: M-PAY-021
+    name: 7日续费率（财务口径）
+    synonyms: [财务续费率]
+    definition: 把升级、重置、降级续上的下一周期也计入。只在用户明确问财务口径时使用。
+    table: T-003
+    type: ratio
+    expr: SUM(renew_7d_user_cnt) / SUM(expire_user_cnt)
+    denominator: 到期用户数（7 日已成熟）
+    filters: ["is_7d_closed = 1", "5 个 rollup 维度全部钉住"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-006]
+    traps: [P-21]
+    status: pending_review
+    owner: 数据组
+    evidence: ["2026-10 全 ALL：30,944 / 58,120 = 53.24%", "R1 Q1：renew_7d_sub_cnt 属于财务口径；按用户计是 AI 为了和业务口径对齐的推断，待确认"]

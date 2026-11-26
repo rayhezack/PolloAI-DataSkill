@@ -1,0 +1,34 @@
+id: T-010
+table: mc_prd.ads_pollo_ad_attribution_delivery_daily_hip
+domain: AD
+purpose: 广告投放归因日表，广告域口径的唯一来源（R1 广告域 DS 指定，取代 T-008）。按投放日记录消耗、展示、点击、安装，以及该日广告带来的注册用户和他们自注册日起的累计 GMV、订单、首购。
+grain: 一行 = stat_date × source_end × channel × ad_platform × country × language × device_type（2026-10 实测每日唯一，42,823 行）
+primary_key: [stat_date, source_end, channel, ad_platform, country, language, device_type]
+partition:
+  field: p_date
+  suffix: _hip
+  read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')。统计截到 T-2：p_date <= TO_CHAR(DATEADD(GETDATE(),-2,'dd'),'yyyymmdd')（今天只到当前小时，昨天 App 花费未结清，P-39）
+default_filters:
+  - 无汇总行，所有行都是明细，直接 SUM（P-37）
+time_axis: stat_date = 投放日：花费按花费日（各账户时区）；注册、订单、GMV 按用户的投放日（App = Adjust 首次安装日，Web = 首访日，回连不上首访的用注册日）
+key_fields:
+  source_end: 投放端 APP / WEB → D-011
+  channel: 渠道类型。WEB 为 SEM / 信息流；APP 不拆渠道，取值固定为 '汇总'（不是汇总行，P-37）→ D-013
+  ad_platform: 广告平台 google / meta / bing / tiktok / asa / naver / yahoo / kwai 等 → D-012
+  country / language: 国家 / 语言（2026-10 有 246 个国家、16 种语言）
+  device_type: 设备类型。WEB 为 电脑 / 手机 / 平板 / 未知；APP 固定为 '不适用' → D-014
+  cost_usd / impressions / clicks: 消耗（USD）、展示、点击
+  install_cnt: 安装数，只有 APP 有值，WEB 为空
+  reg_user_cnt_dN: 投放注册用户数，注册日 − 投放日 ≤ N 天；_all 为全部。只含投放用户（Web 限 8 个平台，App 限付费 network），不含自然量
+  gmv_usd_dN / order_cnt_dN: 付款日 − 投放日 ∈ [0, N] 的累计 GMV / 订单（窗口从投放日起算，生产 SQL）。毛额：不扣退款，剔除风控单和 0 元单，含 App 商店付款。没有 d3、d7 列（d3/d7 只在注册日 cohort 表 T-008）
+  first_purchase_*_dN: 首购 = 全史第一笔订阅新购 + 全史第一笔 API credits，一人最多 2 单；首购 GMV / 订单只有 d0、d14、all，首购用户数有 D0~D360；first_sub_* 为首订，first_api_* 为 API 首购
+traps: [P-35, P-37, P-38, P-39, P-41]
+producer: CNB bigdata_etl main@d8753d1 pollo/02_数仓/广告域-广告投放归因/Sq_ads_pollo_ad_attribution_delivery_daily_hip.sql（v1.2，04:15 全量 + 07:15~22:15 每小时）；口径文档 ai_workspace/knowledge/legacy-caliber/ad-delivery.md（verified 2026-11-21，冲突以代码为准）
+status: pending_review
+owner: 数据组
+evidence:
+  - "口径文档硬规则：先 SUM 再相除；统计截到 T-2；DN 只用满 N 天的日期；回本、CAC 只用 Web google/bing/yahoo/naver 与 App meta/asa/tiktok（App google 2026-04-01 起）"
+  - "2026-11-25 核查（2026-10）：消耗 $753,408.02（APP $277,681.43、WEB $475,726.59），与旧表 T-008 各层级消耗合计一致"
+  - "2026-11-25 核查（2026-10）：注册 d0 611,189 / d14 630,736 / d30 635,005 / all 636,316；GMV d0 $353,883.09 / d14 $574,840.05 / d30 $656,987.32 / all $731,318.42"
+  - "2026-11-25 核查：country、language、ad_platform、source_end、device_type 均无 '汇总'/'ALL' 取值；按 7 个维度加 stat_date 每行唯一"
+  - "2026-11-25 核查（2026-10）：419 行没有消耗但带 6,625 个 d0 注册；没有注册的行上有 $16,020.55 消耗（消耗和归因在细粒度上错位，P-38）"

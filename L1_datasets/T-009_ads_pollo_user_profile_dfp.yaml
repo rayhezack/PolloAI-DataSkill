@@ -1,0 +1,29 @@
+id: T-009
+table: mc_prd.ads_pollo_user_profile_dfp
+domain: USR
+purpose: 用户画像宽表（每日全量快照），一行一个账号，带注册、内部标记、首付、首创作、生命周期、积分余额等用户级属性。注册用户数、注册日（新老维度）的唯一来源（R1 用户域第 2 版 DS），并用 is_internal_user_da 排除内部用户（R1 用户域 Q3）。
+grain: 一行 = 一个 user_id（含游客账号）
+primary_key: [user_id]
+partition:
+  field: p_date
+  suffix: _dfp
+  read_rule: 取昨日分区 p_date = TO_CHAR(DATEADD(GETDATE(),-1,'dd'),'yyyymmdd')，禁止 MAX(p_date)。表名不要写成 mc_prd.default.xxx，三段式名称会报错
+default_filters:
+  - 按用途选择，无统一默认过滤
+time_axis: register_date / register_time（注册时间，与 account_create_time 一致）
+key_fields:
+  user_id: 账号 id，等于 T-004 的 id
+  is_registered: 1 = 已注册（有 email）
+  is_visitor_account: 1 = 游客账号
+  register_date / register_time: 注册日期和时间
+  is_internal_user_da: 内部用户标记，DS 指定用它排除注册中的内部账号（R1 用户域 Q3）
+  is_internal_account: 另一个内部账号标记，范围比 is_internal_user_da 宽（2026-10 注册中 33 个对 18 个），一期不用
+  reg_platform / reg_country_code / acquisition_channel: 注册端、国家、获客渠道（维度候选，未评审）
+not_for:
+  - 首付、首创作、生命周期、积分余额等画像字段尚未评审，不用于任何口径
+producer: 未核对（CNB 无权限）
+status: pending_review
+owner: 数据组
+evidence:
+  - "2026-11-25 核查（20261124 分区）：T-004 中 20261031 注册的 36,769 个账号全部能关联上，register_date 全部一致，内部用户 0 个"
+  - "2026-11-25 核查：2026-10 注册 1,052,447 个，is_internal_user_da=1 的 18 个；register_time 与 account_create_time 100% 相同"

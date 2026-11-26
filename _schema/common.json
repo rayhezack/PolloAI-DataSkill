@@ -1,0 +1,4 @@
+{
+  "$id": "common",
+  "status": {"enum": ["draft", "pending_review", "pilot", "verified", "deprecated", "rejected"]}
+}
