@@ -6,7 +6,7 @@
 
 - 新成员先读 [接续与评审路线](review/00_Codex接续与评审路线.md)，了解当前进度和待评审内容。
 - 逐节评审从 [Section 01：口径维护与冲突裁决](review/Section01_口径维护与冲突裁决.md) 开始，每节说明现状、需要的决定和评审内容。
-- Section 02 分母、Section 03 创作渗透率场景已评审；当前待评：[Section 04：创作域的 3 日采纳与临时口径](review/Section04_创作域_采纳与临时口径.md)。
+- Section 02~04 已评审；当前待评：[Section 05：当天采纳的默认表与过滤](review/Section05_创作域_当天采纳选表.md)。
 - 环境安装、分支和 Pull Request 流程见 [协作指南](CONTRIBUTING.md)。
 - 安装校验依赖：`python3 -m pip install -r requirements.txt`；在仓库根目录执行 `python3 scripts/lint.py`。
 - 提交文件不代表口径已通过评审，使用前必须检查条目状态。

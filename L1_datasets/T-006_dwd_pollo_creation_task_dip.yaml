@@ -1,7 +1,7 @@
 id: T-006
 table: mc_prd.dwd_pollo_creation_task_dip
 domain: CRE
-purpose: 创作任务宽表。创作全链路指标唯一来源（R0 C4），覆盖任务、请求、成功、采纳、作品、积分、生成成本。一期不使用前端埋点（R0 C1）。
+purpose: 创作任务宽表，覆盖任务、请求、成功、按创建日的 3 日采纳、作品、积分和生成成本。创作渗透率的访问分母来自埋点表，当天采纳另按事件发生日统计；两者不替代本表的创作任务来源。
 grain: 一行 = 一个创作任务 record_id（任务粒度，不是作品粒度，R0 C2）
 primary_key: [record_id]
 partition:
@@ -17,12 +17,14 @@ key_fields:
   platform_type: WEB / IOS / ANDROID
   task_platform_group: WEB / APP
   submit_time: 提交给厂商的时间（取自作品表）。为空有三种情况：①没发到厂商的失败任务（风控、审核拦截或扣费、素材上传失败，占绝大部分，其中 95% 是风控和审核）；②语音转写，已发给厂商但不产出作品，所以恒为空；③导演模式导出，走内部渲染，不经厂商（R1 创作域第 2 版 DS）。数仓将新增「是否已提交给厂商」标志列（DW-04）
-  is_success_by_output: 按产物判定任务是否成功（DS 口径）。和 is_success 几乎一致。语音转写成功但无作品会被判成失败（每天约 250 个，DW-05）
+  is_success_by_output: 按成功作品判定任务成功。main@29f9758 已将无作品的语音转写改为按最新 succeed 状态判成功；旧核查有约 250 个/天被低估，生产部署和回刷待核验（DW-05）
+  is_submitted_to_provider: 最新代码新增的请求标志：submit_time 非空，或语音转写且执行记录数大于 0；生产列与回刷待核验，当前 M-CRE-002 仍用已批准的 submit_time 临时算法
+  return_credit: 最新代码按任务关联积分流水返还，缺流水时回退生成记录原值；生产部署和历史回刷待核验
   output_cnt: 产出作品数（含失败）
   success_output_cnt: 成功作品数
-  adopted_output_cnt_3d: 3 日内被采纳的作品数，采纳 = 下载、分享、复用任一（按作品去重）（P-27）
+  create_date_adopted_output_cnt_3d: 最新 DDL 中的 3 日采纳作品数字段；旧名 adopted_output_cnt_3d。按任务创建时刻起 72 小时且作品完成之后统计成功作品的下载/分享/复用，App content_click 不计；字段迁移及生产可查性待核验（main@29f9758）
   downloaded_output_cnt_3d / shared_output_cnt_3d / reused_output_cnt_3d: 3 日内下载 / 分享 / 复用的作品数，三者有重叠，不能相加
-  credit_consume: 等于 credit_decimal − return_credit（10/31 实测 99.98%）。return_credit 基本为 0，真实返还记在积分流水里，数仓将修正该字段（DW-01、P-28）
+  credit_consume: 最新 DDL 为 COALESCE(credit_decimal, credit, 0)，代表扣减毛额；return_credit 已在代码改取积分流水返还，净消耗应为 credit_consume - return_credit。此前历史字段解释不再适用于新代码；生产核验完成前仍用 DS 批准的成功任务临时口径（DW-01）
   credit_type: 积分类型：usage（订阅积分）/ reward（赠送）/ addon（积分包）/ api（P-31）
   cost_usd: 生成成本（USD）。约 12% 的任务为空，几乎都是失败任务；成功任务覆盖率 99.8%（P-29）
   cost_source: 成本来源，目前只有 TEMPORAL 或空
@@ -31,10 +33,11 @@ key_fields:
   generate_mode / tool_code / video_model / model_final: 生成方式、工具、模型（维度候选）
   agent_*: Agent 关联字段（二期）
 traps: [P-17, P-27, P-28, P-29, P-30, P-31, P-32]
-producer: 未核对（CNB 无权限）
+producer: CNB bigdata_etl main@29f9758 bigdata_dw/02_DWD/creation/Sq_dwd_pollo_creation_task_dip.sql（已读代码，尚未核验生产列及历史回刷）
 status: pending_review
 owner: 数据组
 evidence:
   - "2026-11-25 核查（20261031）：有效任务 248,185 个，其中 WEB 230,257、IOS 8,721、ANDROID 9,207；有效 = 非内部账号/内部用户"
   - "2026-11-25 核查（2026-10 全月有效任务）：任务 7,896,614；请求 7,351,742；成功 6,946,038；采纳任务 2,745,317；成功作品 9,201,758；3 日采纳作品 3,078,159；积分消耗 151,954,808；成本 $1,823,329.67（948,525 个任务成本为空）"
   - "2026-11-25 核查：adopted_output_cnt_3d ≤ 下载+分享+复用（100%），且在 99.6% 的任务上等于三者最大值；从不超过成功作品数"
+  - "2026-11-26 读取 main@29f9758：is_submitted_to_provider、转写成功判定及返还积分均已写入代码；需核验生产字段和回刷后再切换指标算法"

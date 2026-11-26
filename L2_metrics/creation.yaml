@@ -1,5 +1,5 @@
 # 创作域指标。层级参照 R0 B-11 DS SQL：任务 → 请求 → 成功 → 采纳；作品数和积分另算。
-# 所有指标默认 filters 含 is_valid_task=1 与 p_date/created_time 双约束；分端加 platform_type。
+# 任务创建日指标默认 is_valid_task=1 与 p_date/created_time 双约束；匹配链路和当天采纳另读各指标 filters。
 metrics:
   - id: M-CRE-001
     name: 创作任务数
@@ -29,9 +29,11 @@ metrics:
     unit: 个
     aggregation: total
     dimensions: [D-007, D-008, D-009]
-    status: pending_review
+    status: pilot
     owner: 数据组
-    evidence: ["R0 B-11 DS SQL：submit_task_cnt", "2026-10：7,351,742（占任务 93.1%）"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 04，2026-11-26 DS：确认当前口径可带限制试用；生产字段核验待补", "R0 B-11 DS SQL：submit_task_cnt", "2026-10：7,351,742（占任务 93.1%）"]
 
   - id: M-CRE-003
     name: 成功任务数
@@ -41,30 +43,35 @@ metrics:
     expr: COUNT(DISTINCT CASE WHEN is_success_by_output = 1 THEN record_id END)
     filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
     dedup_key: record_id
-    disclaimer: 语音转写成功但没有作品，目前被成功判定算成失败（每天约 250 个），数仓修正中（DW-05）。
+    disclaimer: 临时口径；旧加工对转写成功无作品的任务低估约 250 个/天。最新代码已修正，生产字段及历史回刷未核验（DW-05）；不得把代码提交视为生产数据已修复。
     unit: 个
     aggregation: total
     dimensions: [D-007, D-008, D-009]
-    status: pending_review
+    status: pilot
     owner: 数据组
-    evidence: ["R0 B-11 DS SQL：success_task_cnt", "2026-10：6,946,038（占任务 88.0%）"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 04，2026-11-26 DS：确认当前口径可带限制试用；生产字段核验待补", "R0 B-11 DS SQL：success_task_cnt", "2026-10：6,946,038（占任务 88.0%）"]
 
   - id: M-CRE-004
     name: 采纳任务数
     synonyms: [被采纳任务数]
-    definition: 3 日内至少有一个作品被下载、分享或复用的任务。
+    definition: 3 日内至少有一个作品被下载、分享或复用的任务，按任务创建日归属。不要求任务创建满 3 天，不额外标成熟期。Section 04 已确认继续使用。
     table: T-006
     type: atomic
-    expr: COUNT(DISTINCT CASE WHEN adopted_output_cnt_3d > 0 THEN record_id END)
+    expr: COUNT(DISTINCT CASE WHEN create_date_adopted_output_cnt_3d > 0 THEN record_id END)
     filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
     dedup_key: record_id
     unit: 个
     aggregation: total
     dimensions: [D-007, D-008, D-009]
     traps: [P-27]
-    status: pending_review
+    disclaimer: 3 日采纳的业务定义已评审，不加成熟期限制。最新源代码字段名为 create_date_adopted_output_cnt_3d，生产列迁移待核验；查询失败不得自行改成当天采纳或猜测别名。
+    status: pilot
     owner: 数据组
-    evidence: ["R0 B-11 DS SQL：adopted_task_cnt", "2026-10：2,745,317"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 04，2026-11-26 DS：确认当前口径可带限制试用；生产字段核验待补", "R0 B-11 DS SQL：adopted_task_cnt", "2026-10：2,745,317"]
 
   - id: M-CRE-005
     name: 成功作品数
@@ -85,32 +92,38 @@ metrics:
     synonyms: [采纳作品数, 采纳产物数]
     table: T-006
     type: atomic
-    expr: SUM(adopted_output_cnt_3d)
+    definition: 按任务创建日归属的 3 日采纳作品数；不要求创建满 3 天，不额外标成熟期。
+    expr: SUM(create_date_adopted_output_cnt_3d)
     filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
     unit: 件
     aggregation: total
     dimensions: [D-007, D-008, D-009]
     traps: [P-27]
-    status: pending_review
+    disclaimer: 最新源代码字段名为 create_date_adopted_output_cnt_3d，生产列迁移待核验；本指标按创建日归属，不替代当天采纳。
+    status: pilot
     owner: 数据组
-    evidence: ["R0 B-11（注释笔误已在 R0 I-2 更正）", "2026-10：3,078,159"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 04，2026-11-26 DS：确认当前口径可带限制试用；生产字段核验待补", "R0 B-11（注释笔误已在 R0 I-2 更正）", "2026-10：3,078,159"]
 
   - id: M-CRE-007
     name: 积分消耗
     synonyms: [创作消耗积分, 消耗积分, credits 消耗]
     table: T-006
     type: atomic
-    definition: 积分净消耗 = 消耗 − 返还。目标口径：数仓把任务表的 return_credit 修正为积分流水里的真实返还后，取全部有效任务 SUM(credit_consume)，与收入归因表、积分余额表一致（DW-01）。修正前临时只算成功任务。
+    definition: 积分净消耗 = 消耗 − 返还。目标口径按 main@29f9758 为全部有效任务 SUM(credit_consume - return_credit)，其中 credit_consume 是扣减毛额。生产部署及回刷核验前，继续执行 DS 批准的成功任务临时口径（DW-01）。
     expr: SUM(CASE WHEN is_success_by_output = 1 THEN credit_consume END)   -- 临时口径
     filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
     unit: 积分
     aggregation: total
     dimensions: [D-007, D-009]
     traps: [P-28, P-31]
-    disclaimer: 临时口径（只算成功任务），交付时必须注明。失败任务的积分实际已返还，但返还记在积分流水里，任务表的 return_credit 基本为 0。
-    status: pending_review
+    disclaimer: 临时口径（只算成功任务），交付时必须注明。原核查中任务表 return_credit 基本为 0；最新代码已改从积分流水取返还，但生产部署及历史回刷尚未核验，不可静默切换为全部任务毛额。
+    status: pilot
     owner: 数据组
-    evidence: ["R0 B-11 DS SQL：credit_consume", "R1 创作域第 2 版 DS：修正前只算成功任务", "2026-10 临时口径：118,480,427（全部有效任务直接求和为 151,954,808，没扣掉已返还的积分）"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 04，2026-11-26 DS：确认当前口径可带限制试用；生产字段核验待补", "R0 B-11 DS SQL：credit_consume", "R1 创作域第 2 版 DS：修正前只算成功任务", "2026-10 临时口径：118,480,427（全部有效任务直接求和为 151,954,808，没扣掉已返还的积分）"]
 
   - id: M-CRE-008
     name: 创作用户数
@@ -203,6 +216,7 @@ metrics:
     expr: M-CRE-003 / M-CRE-001
     numerator: M-CRE-003
     denominator: M-CRE-001
+    disclaimer: 成功任务数沿用 M-CRE-003 的临时成功判定及修复限制，不能把旧样本结果视为修复后的结果。
     filters: ["同 M-CRE-001"]
     unit: "%"
     aggregation: rate
@@ -287,6 +301,7 @@ metrics:
     expr: M-CRE-007 / M-CRE-008
     numerator: M-CRE-007
     denominator: M-CRE-008
+    disclaimer: 分子沿用 M-CRE-007 的成功任务临时积分口径，必须带临时口径说明。
     filters: ["同 M-CRE-007"]
     unit: 积分/人
     aggregation: rate
@@ -329,14 +344,14 @@ metrics:
   - id: M-CRE-019
     name: 当天采纳任务数
     synonyms: [当日采纳任务数, 当天采纳, 当日采纳]
-    definition: 当天发生过采纳（下载、分享、复用任一）的任务数，不限定任务创建日期（R1 创作域 C4 DS）。
-    table: TBD
+    definition: 当天发生过采纳（下载、分享、复用任一）的任务数，不限定任务创建日期。行为事件先按 content_click/content_download 和 button_name 识别作品，再通过作品 ID 关联到创作任务 record_id；代码已查明关联键；默认来源与过滤待 Section 05，生产覆盖率待核验。
+    table: T-011
     type: atomic
-    expr: 待定。DS 说明现有表可算：采纳事件表按发生日关联作品表，98% 能关到任务；10/31 约 9.9 万。等 DS 提供两张表名后补 SQL。不得用 adopted_output_cnt_3d 代替
-    filters: []
+    expr: COUNT(DISTINCT k.record_id) -- T-011 事件的 video_id 关作品事实 w.video_id，w.record_id 关 T-006 k.record_id；DWS 候选实现另待 OQ-21
+    filters: ["T-011: event_id IN ('content_click','content_download')", "T-011: event_time 落在统计日", "下载/分享/复用事件对应作品 ID 非空", "关联键已从 main@29f9758 查明，默认表与有效/成功过滤待 OQ-21"]
+    open_question: OQ-21
     unit: 个
     aggregation: total
-    open_question: OQ-10
-    status: draft
+    status: pending_review
     owner: 数据组
-    evidence: ["R1 创作域 C1/C4 DS：需要当天采纳口径", "R1 创作域第 2 版 DS：现有表可算，10/31 当天采纳任务约 9.9 万"]
+    evidence: ["Section 04 DS：当天采纳纳入一期，并提供行为事件表与事件过滤 SQL", "main@29f9758：adopt_event.video_id → creation_work.video_id/record_id → creation_task.record_id；生产 DWS 已有 adopt_date_task_cnt", "历史 10/31 约 9.9 万仅为参考，待 K-103 对账，不是当前金标"]

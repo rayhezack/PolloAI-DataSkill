@@ -4,7 +4,7 @@
 -- created: 2026-11-26
 -- scope: Web；UTC+8 自然日；单位为人、比例（0~1）
 -- parameters: ${start_date}, ${end_date}，均为 yyyymmdd，闭区间
--- definitions: M-USR-008、M-CRE-008、M-CRE-009；OQ-18 的 A/B 待 DS 裁决
+-- definitions: M-USR-008、M-CRE-008/009/020/021；Section 03 已决：独立口径用于大盘，匹配口径用于分析。
 -- source: Section 02 DS 埋点定义；R0/R1 已选创作任务宽表 T-006
 -- execution: 尚未远程运行，无金标结果；不得因所在目录名而视为已核验。
 -- 只输出两表至少一侧有用户数据的日期；全部无数据的自然日需另行核查，不能静默当作零。

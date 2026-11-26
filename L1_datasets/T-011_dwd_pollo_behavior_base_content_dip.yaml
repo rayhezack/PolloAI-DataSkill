@@ -1,0 +1,34 @@
+id: T-011
+table: mc_prd.dwd_pollo_behavior_base_content_dip
+domain: CRE
+purpose: 内容行为事件表。用于按采纳发生日统计当天采纳任务数；当前从 content_click 和 content_download 事件识别下载、分享、复用，并通过作品 ID 关联到创作任务。不能用 T-006 的 3 日采纳字段替代。
+grain: 一行 = 一条内容行为事件
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: 当天采纳按采纳发生日限定 p_date 与 event_time 同一统计窗；不得沿用任务创建日 cohort 的结束日加 3 天读取范围后直接计入当天指标
+default_filters:
+  - event_id IN ('content_click', 'content_download')
+  - content_click 只用 platform_type 不属于 IOS/ANDROID 且 button_name 匹配下载/分享/复用前缀、content_id 非空的事件
+  - content_download 使用 video_id 非空的事件；参考 SQL 没有限定此分支必须为 IOS/ANDROID，不自行加过滤
+time_axis: event_time（采纳发生时间，UTC+8）
+key_fields:
+  event_id: content_click（Web 内容操作）或 content_download（App 下载）
+  event_time: 行为发生时间；当天采纳按此字段归属
+  platform_type: 端；空值归为 OTHER
+  properties: 事件属性 JSON
+  record_id: 内容行为事件唯一 ID；不是创作任务 ID
+  properties.button_name: GET_JSON_OBJECT(properties,'$.button_name')，用于识别下载、分享、复用
+  properties.content_id: content_click 的作品 ID；不是独立物理列
+  properties.video_id: content_download 的作品 ID；不是独立物理列
+  properties.task_record_id: App 下载可能自带任务 ID；最新数仓代码不用它定归属，统一按作品事实取 record_id
+not_for:
+  - 3 日采纳作品数：使用 T-006 的 adopted_output_cnt_3d
+  - 当天采纳任务数在未确认作品到任务关联前直接对外发布
+traps: [P-27]
+producer: CNB bigdata_etl main@29f9758 pollo/02_数仓/DWD/Sq_dwd_pollo_behavior_base_content_dip.sql；采纳识别实现见 bigdata_dw/02_DWD/creation/Sq_dwd_pollo_creation_adopt_event_dip.sql
+status: pending_review
+owner: 数据组
+evidence:
+  - "Section 04 DS 提供行为事件 SQL：表 mc_prd.dwd_pollo_behavior_base_content_dip；Web 使用 content_click/content_id，App 使用 content_download/video_id"
+  - "main@29f9758：采纳事件 video_id 关 dwd_pollo_creation_work_dip.video_id，再按 record_id 关 T-006；DWS 已有按采纳日汇总，默认选表与过滤待 OQ-21"
