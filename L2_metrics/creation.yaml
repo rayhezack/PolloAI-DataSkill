@@ -132,20 +132,52 @@ metrics:
   - id: M-CRE-009
     name: 创作渗透率
     synonyms: [创作率, 活跃创作率]
-    definition: 当日创作用户数 ÷ 当日注册访问 UV（M-USR-008，埋点表按 uid 去重）。分子是否限定为同日访问用户待 Section 03 裁决：R0 为全部创作用户，Section 02 参考 SQL 为访问用户中的创作者。下列分子暂保留 R0 算法，不作为最终口径输出。
+    definition: 大盘报表口径：当日创作用户数 ÷ 当日注册访问 UV（M-USR-008，埋点表按 uid 去重）。大盘不要求创作用户出现在埋点访问人群中；全站直接按用户去重，分端分别计算。
     table: T-006
     type: ratio
-    expr: M-CRE-008 / M-USR-008   -- 分子暂保留 R0 独立创作 UV，待 OQ-18；期间按人日比率计算
+    expr: M-CRE-008 / M-USR-008   -- 大盘口径；期间按日计算后汇总，不把跨日用户直接去重为一个分母
     numerator: M-CRE-008
     denominator: M-USR-008
-    filters: ["分子按 M-CRE-008，分母按 M-USR-008", "分子分母同一天、同一端范围", "分子匹配范围待 OQ-18，未裁决前不可作为最终口径输出"]
-    open_question: OQ-18
+    filters: ["T-006: is_valid_task = 1，p_date 与 CAST(created_time AS DATE) 双约束", "T-007: event_id IS NOT NULL，uid IS NOT NULL 且 uid <> ''，p_date 与 CAST(event_time AS DATE) 双约束", "同一天、同一端范围；全站按 user_id/uid 各自去重"]
     unit: "%"
     aggregation: rate
     dimensions: [D-007, D-004]
     status: pending_review
     owner: 数据组
-    evidence: ["Section 02 DS 已确认埋点分母；分子范围与创作主表参考 SQL 的差异转 Section 03", "原 28,827 / 96,695 = 29.8% 使用旧分母，已不作为新口径证据"]
+    evidence: ["Section 03 DS 回复：大盘直接用当日创作 UV / 当日登录访问 UV；创作主表继续用 T-006", "原 28,827 / 96,695 = 29.8% 使用旧分母，已不作为新口径证据"]
+
+  - id: M-CRE-020
+    name: 创作访问匹配用户数
+    synonyms: [匹配创作UV, 访问用户创作UV, 创作链路匹配UV]
+    definition: 分析口径：当天既有有效埋点访问（T-007，uid 非空）又有有效创作任务（T-006，is_valid_task=1）的去重用户数。分端分析必须按同一 platform_type 匹配；全站分析跨端后按 user_id 去重。
+    table: T-007
+    type: atomic
+    expr: COUNT(DISTINCT uid) -- 与 T-006 按 user_id、业务日及端范围 INNER JOIN
+    filters: ["T-007: event_id IS NOT NULL，uid IS NOT NULL 且 uid <> ''", "T-006: is_valid_task = 1", "同一业务日；分端时两表 platform_type 相同"]
+    dedup_key: uid × CAST(event_time AS DATE)
+    unit: 人
+    aggregation: total
+    dimensions: [D-007, D-004]
+    status: pending_review
+    owner: 数据组
+    evidence: ["Section 03 DS 回复：分析创作链路需要以埋点登录访问 UV 为主表关联创作", "K-102 同时输出独立创作 UV 与匹配创作 UV，尚未远程执行"]
+
+  - id: M-CRE-021
+    name: 创作链路匹配渗透率
+    synonyms: [匹配创作渗透率, 分析创作渗透率]
+    definition: 分析口径：创作访问匹配用户数 ÷ 注册访问 UV。分端按同端访问与创作匹配；全站不考虑端差异，按用户去重。
+    table: T-007
+    type: ratio
+    expr: M-CRE-020 / M-USR-008
+    numerator: M-CRE-020
+    denominator: M-USR-008
+    filters: ["同一业务日、同一端范围", "分端时 T-007 与 T-006 的 platform_type 相同", "全站时跨端按用户去重"]
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-007, D-004]
+    status: pending_review
+    owner: 数据组
+    evidence: ["Section 03 DS 回复：分析口径需关联登录访问 UV 与创作", "K-102 同时输出两种渗透率，尚未远程执行"]
 
   - id: M-CRE-010
     name: 人均创作任务数
