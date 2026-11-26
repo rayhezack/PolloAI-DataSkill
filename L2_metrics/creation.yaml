@@ -132,19 +132,20 @@ metrics:
   - id: M-CRE-009
     name: 创作渗透率
     synonyms: [创作率, 活跃创作率]
-    definition: 当日创作用户数 ÷ 当日登录 DAU。分子不要求与分母匹配（R0 C5）。
+    definition: 当日创作用户数 ÷ 当日注册访问 UV（M-USR-008，埋点表按 uid 去重）。分子是否限定为同日访问用户待 Section 03 裁决：R0 为全部创作用户，Section 02 参考 SQL 为访问用户中的创作者。下列分子暂保留 R0 算法，不作为最终口径输出。
     table: T-006
     type: ratio
-    expr: M-CRE-008 / M-PAY-012   -- 按日计算；期间口径用日均分子 ÷ 日均分母
+    expr: M-CRE-008 / M-USR-008   -- 分子暂保留 R0 独立创作 UV，待 OQ-18；期间按人日比率计算
     numerator: M-CRE-008
-    denominator: M-PAY-012
-    filters: ["分子分母同一天、同一端范围"]
+    denominator: M-USR-008
+    filters: ["分子按 M-CRE-008，分母按 M-USR-008", "分子分母同一天、同一端范围", "分子匹配范围待 OQ-18，未裁决前不可作为最终口径输出"]
+    open_question: OQ-18
     unit: "%"
     aggregation: rate
     dimensions: [D-007, D-004]
     status: pending_review
     owner: 数据组
-    evidence: ["R0 C5", "20261031：28,827 / 96,695 = 29.8%"]
+    evidence: ["Section 02 DS 已确认埋点分母；分子范围与创作主表参考 SQL 的差异转 Section 03", "原 28,827 / 96,695 = 29.8% 使用旧分母，已不作为新口径证据"]
 
   - id: M-CRE-010
     name: 人均创作任务数

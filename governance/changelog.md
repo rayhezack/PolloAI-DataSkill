@@ -29,3 +29,5 @@
 | 2026-11-25 | governance/legacy_alignment.md、OQ-14~16 | 新建存量知识对照（初版），登记 7 处差异 | 仓库 ai_workspace/knowledge |
 | 2026-11-26 | Section 01、OQ-16、README、conventions、legacy_alignment | 维护方案 A 已评审：本库维护经评审的最终定义，DS 决定业务语义、指标算法及核心使用表，Codex 负责文档、配置和核验；生产侧引用迁移另行协调 | Section 01 DS 原始回复 |
 | 2026-11-26 | Section 02、OQ-17 | 整理创作渗透率埋点分母的选表、去重键及事件过滤问题，待 DS 评审；未改动指标算法与状态 | R1 创作域第 3 版的 DS 新回复尚未完整落地 |
+| 2026-11-26 | Section 02、OQ-17/18、M-USR-008、M-CRE-009、T-005/007、L3 | 分母评审完成：埋点非空 uid 去重，与付费墙 DAU 分离；新增分子匹配范围与参考 SQL 旧表差异待办 | Section 02 DS 原始回复及 SQL |
+| 2026-11-26 | K-102 | 新增 Web 独立创作与匹配创作 UV 对照 SQL 草稿，未远程运行，供 Section 03 后核验使用 | 按 Section 02 埋点定义与当前 T-006 重写 |

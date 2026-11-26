@@ -20,7 +20,7 @@ key_fields:
   login_active_user_cnt: 登录活跃用户数。10/31 全汇总值与 T-002 登录 DAU 完全一致
   dau: 访客 UV（含未登录），活跃标记表 anon_id 去重（APP 按 uid）；11-24 起排除美国 Web 机器流量，08-01 起回刷（数仓 SSOT R34）→ M-USR-002
   login_visitor_cnt: 有登录的访客数：当天带过 uid 埋点的访客 anon_id 去重（访客口径，11-20 新增）。数仓核心指标登记表定义 访问注册率 = login_visitor_cnt / dau，与本库 M-USR-003 不同（OQ-14）
-  registered_visit_user_cnt: 数仓 11-20 已废弃（每访客取代表 uid 的设备口径），下游切换完删除，不得使用。注册访问UV = 登录DAU（M-PAY-012，R1 用户域 Q2）
+  registered_visit_user_cnt: 数仓 11-20 已废弃（每访客取代表 uid 的设备口径），下游切换完删除，不得使用。注册访问 UV 现按 Section 02 改取埋点表非空 uid 去重（M-USR-008），不再映射到 M-PAY-012
   new_register_user_cnt: 当日新注册用户数
   new_user_cnt: 当日新访客数（推测）
   creation_user_cnt: 当日创作用户数

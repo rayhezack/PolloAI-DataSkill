@@ -18,7 +18,7 @@
 | G-10 | 首笔锚点 | 取每个用户的第一笔，排序规则：`ROW_NUMBER() OVER (PARTITION BY [period,] user_id ORDER BY pay_date, IF(pay_time IS NULL,1,0), pay_time, payment_id) = 1` |
 | G-11 | 档位 | 档位用 `sub_period_da`、`plan_tier_da` 判定；`usage_count>=5000` 记为 Ultra。 |
 | G-12 | 渠道归并 | 归为四组：付费投放、自然/SEO、未知、其他。**R0 修订**：来源表改取昨日分区。 |
-| G-13 | 埋点 | 一期的创作指标不使用前端埋点（R0 C1）。埋点事件的定义沿用 v1 G-13，只在入口渗透类分析中使用。 |
+| G-13 | 埋点 | 一期的创作任务、作品等指标取任务表；创作渗透率的注册访问 UV 分母使用埋点表（Section 02），按 uid 去重且 event_id、uid 非空。其他埋点事件分类沿用 v1 G-13。 |
 | G-14 | 留存类指标 | 全站口径不拆端，只要求同一用户；分端看时，基期和第 n 日必须在同一端（R1 创作域 Q4）。 |
 
 ## P 陷阱

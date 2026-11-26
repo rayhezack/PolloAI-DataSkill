@@ -1,7 +1,7 @@
 id: T-007
 table: mc_prd.ods_pollo_log_event_dip
 domain: USR
-purpose: 前端埋点事件表。一期只用于访客 UV（anon_id，R0 U1）和入口渗透类分析；创作指标不用它（R0 C1）。
+purpose: 前端埋点事件表，用于注册访问 UV（M-USR-008，Section 02 DS 确认）、自定义访客分析及入口渗透；创作任务指标仍取任务表，创作渗透率的访问分母取本表。
 grain: 一行 = 一条埋点事件
 primary_key: [record_id]
 partition:
@@ -13,7 +13,7 @@ default_filters:
 time_axis: event_time（UTC+8，R0 B-09）
 key_fields:
   anon_id: 匿名设备/浏览器 ID → 访客 UV（R0 U1）
-  uid: 登录用户 ID（未登录为空）
+  uid: 登录用户 ID。注册访问 UV 过滤 event_id IS NOT NULL、uid IS NOT NULL 且 uid <> ''，同日按 CAST(uid AS STRING) 去重（Section 02）
   platform_type / client_type: 端
   properties: 事件属性 JSON，用 GET_JSON_OBJECT 读取（v1 G-13）
   is_first_day: 是否首日访问
@@ -24,3 +24,4 @@ status: pending_review
 owner: 数据组
 evidence:
   - "2026-11-25 核查（20261031，event_id 非空）：anon_id UV 144,168；uid UV 96,779；未登录 anon UV 113,914"
+  - "Section 02，2026-11-26 DS：确认本表用于注册访问 UV，按非空 uid 去重，所有有效事件都算访问"

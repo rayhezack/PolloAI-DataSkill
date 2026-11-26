@@ -208,7 +208,7 @@ metrics:
 
   - id: M-PAY-012
     name: 登录DAU
-    synonyms: [DAU, 日活, 活跃用户, 活跃人数, 登录活跃, 注册访问UV, 登录用户访客数]
+    synonyms: [DAU, 日活, 活跃用户, 活跃人数, 登录活跃, 登录用户访客数]
     definition: 当天有有效行为的登录用户。全站按同人同日去重，分端按各端分别去重。
     table: T-002
     type: atomic
@@ -223,7 +223,7 @@ metrics:
     owner: 数据组
     reviewed_by: DS
     reviewed_at: 2026-11-25
-    evidence: ["R0 B-05/B-10", "20261031 全站 96,695，与 T-005 login_active_user_cnt（全汇总）完全一致", "R1 用户域 Q2 DS：「注册访问UV」就是付费墙表 is_active=1 的去重用户数，即本指标"]
+    evidence: ["R0 B-05/B-10", "20261031 全站 96,695，与 T-005 login_active_user_cnt（全汇总）完全一致", "Section 02 后注册访问 UV 独立为 M-USR-008；本指标继续表示付费墙表登录 DAU"]
 
   - id: M-PAY-013
     name: 付费墙曝光率

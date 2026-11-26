@@ -6,7 +6,7 @@
 
 - 新成员先读 [接续与评审路线](review/00_Codex接续与评审路线.md)，了解当前进度和待评审内容。
 - 逐节评审从 [Section 01：口径维护与冲突裁决](review/Section01_口径维护与冲突裁决.md) 开始，每节说明现状、需要的决定和评审内容。
-- 当前待评：[Section 02：创作域——注册访问 UV 的来源与去重方式](review/Section02_创作域_注册访问UV.md)。
+- Section 02 分母已评审；当前待评：[Section 03：创作渗透率的分子范围与创作主表](review/Section03_创作域_分子匹配口径.md)。
 - 环境安装、分支和 Pull Request 流程见 [协作指南](CONTRIBUTING.md)。
 - 安装校验依赖：`python3 -m pip install -r requirements.txt`；在仓库根目录执行 `python3 scripts/lint.py`。
 - 提交文件不代表口径已通过评审，使用前必须检查条目状态。

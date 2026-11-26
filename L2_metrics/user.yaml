@@ -108,3 +108,21 @@ metrics:
     status: draft
     owner: 数据组
     evidence: ["CNB bigdata_etl main@d8753d1 生产 SQL：retain_Nd = 日活(dau群)第 N 日留存数", "20261030：26,777 / 145,030 = 18.5%"]
+
+  - id: M-USR-008
+    name: 注册访问UV
+    synonyms: [注册访问 UV, 埋点登录账号访问UV, 创作渗透分母]
+    definition: 当天产生有效埋点的去重登录账号数，所有有效事件都算访问。与付费墙日表的登录 DAU（M-PAY-012）分开。跨天相加为人日，不能作为期间去重用户数。
+    table: T-007
+    type: atomic
+    expr: COUNT(DISTINCT CAST(uid AS STRING))   -- 必须按业务日分组
+    filters: ["event_id IS NOT NULL", "uid IS NOT NULL", "uid <> ''", "p_date 与 TO_CHAR(event_time,'yyyymmdd') 同窗约束"]
+    dedup_key: uid × CAST(event_time AS DATE)
+    time_axis: event_time（UTC+8）
+    unit: 人（跨天相加为人日）
+    aggregation: total
+    status: pending_review
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 02，2026-11-26 DS 已确认分母主表、按 uid 去重及事件过滤；待 K-102 远程核验"]
