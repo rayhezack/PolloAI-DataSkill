@@ -1,0 +1,29 @@
+{
+  "checked_on": "2026-11-26",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261126135817577gu6nke01999",
+  "columns": [
+    "p_date",
+    "grain_groups",
+    "duplicate_extra_rows"
+  ],
+  "data": [
+    {
+      "p_date": "20261031",
+      "grain_groups": 17895,
+      "duplicate_extra_rows": 0
+    },
+    {
+      "p_date": "20261124",
+      "grain_groups": 16389,
+      "duplicate_extra_rows": 0
+    },
+    {
+      "p_date": "20261125",
+      "grain_groups": 15305,
+      "duplicate_extra_rows": 0
+    }
+  ],
+  "limitation": "仅三个样本分区，不等于全历史唯一性证明"
+}

@@ -71,7 +71,7 @@
 
 原始回复与落地记录见 [Section 01](Section01_口径维护与冲突裁决.md)，本地差异见 [存量知识对照](../governance/legacy_alignment.md)。
 
-**Section 02~04 已评审。当前待评：** [Section 05：当天采纳的默认表与过滤](Section05_创作域_当天采纳选表.md)。数仓最新代码已有采纳日汇总，需 DS 选表与过滤，Codex 核验生产和回刷。
+**Section 02~05 业务口径已评审。当前待评：** [Section 06：用户域——访问注册率的命名与含义](Section06_用户域_访问注册率命名.md)。当天采纳默认 T-012，is_valid_task=1；创作域技术核验及旧实现对账由 Codex 继续完成，不重复提交既定口径。
 
 ## 5. Codex 后续自行处理的检查项
 

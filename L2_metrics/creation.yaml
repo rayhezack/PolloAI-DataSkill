@@ -43,7 +43,7 @@ metrics:
     expr: COUNT(DISTINCT CASE WHEN is_success_by_output = 1 THEN record_id END)
     filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
     dedup_key: record_id
-    disclaimer: 临时口径；旧加工对转写成功无作品的任务低估约 250 个/天。最新代码已修正，生产字段及历史回刷未核验（DW-05）；不得把代码提交视为生产数据已修复。
+    disclaimer: 临时口径；旧加工对转写成功无作品的任务低估约 250 个/天。最新代码已修正，11-24/25 转写成功样本已通过，完整历史回刷未核验（DW-05）；不得把代码提交视为生产数据已修复。
     unit: 个
     aggregation: total
     dimensions: [D-007, D-008, D-009]
@@ -66,7 +66,7 @@ metrics:
     aggregation: total
     dimensions: [D-007, D-008, D-009]
     traps: [P-27]
-    disclaimer: 3 日采纳的业务定义已评审，不加成熟期限制。最新源代码字段名为 create_date_adopted_output_cnt_3d，生产列迁移待核验；查询失败不得自行改成当天采纳或猜测别名。
+    disclaimer: 3 日采纳的业务定义已评审，不加成熟期限制。最新源代码字段名为 create_date_adopted_output_cnt_3d，生产列已可查、历史计算回刷待核验；查询失败不得自行改成当天采纳或猜测别名。
     status: pilot
     owner: 数据组
     reviewed_by: DS
@@ -99,7 +99,7 @@ metrics:
     aggregation: total
     dimensions: [D-007, D-008, D-009]
     traps: [P-27]
-    disclaimer: 最新源代码字段名为 create_date_adopted_output_cnt_3d，生产列迁移待核验；本指标按创建日归属，不替代当天采纳。
+    disclaimer: 最新源代码字段名为 create_date_adopted_output_cnt_3d，生产列已可查、历史计算回刷待核验；本指标按创建日归属，不替代当天采纳。
     status: pilot
     owner: 数据组
     reviewed_by: DS
@@ -111,14 +111,14 @@ metrics:
     synonyms: [创作消耗积分, 消耗积分, credits 消耗]
     table: T-006
     type: atomic
-    definition: 积分净消耗 = 消耗 − 返还。目标口径按 main@29f9758 为全部有效任务 SUM(credit_consume - return_credit)，其中 credit_consume 是扣减毛额。生产部署及回刷核验前，继续执行 DS 批准的成功任务临时口径（DW-01）。
+    definition: 积分净消耗 = 消耗 − 返还。目标口径按 main@29f9758 为全部有效任务 SUM(credit_consume - return_credit)，其中 credit_consume 是扣减毛额。近期样本已体现返还，完整历史回刷核验前继续执行 DS 批准的成功任务临时口径（DW-01）。
     expr: SUM(CASE WHEN is_success_by_output = 1 THEN credit_consume END)   -- 临时口径
     filters: ["is_valid_task = 1", "p_date 与 CAST(created_time AS DATE) 双约束"]
     unit: 积分
     aggregation: total
     dimensions: [D-007, D-009]
     traps: [P-28, P-31]
-    disclaimer: 临时口径（只算成功任务），交付时必须注明。原核查中任务表 return_credit 基本为 0；最新代码已改从积分流水取返还，但生产部署及历史回刷尚未核验，不可静默切换为全部任务毛额。
+    disclaimer: 临时口径（只算成功任务），交付时必须注明。原核查中任务表 return_credit 基本为 0；最新代码已改从积分流水取返还，近期样本已体现修复但完整历史回刷尚未核验，不可静默切换为全部任务毛额。
     status: pilot
     owner: 数据组
     reviewed_by: DS
@@ -344,14 +344,17 @@ metrics:
   - id: M-CRE-019
     name: 当天采纳任务数
     synonyms: [当日采纳任务数, 当天采纳, 当日采纳]
-    definition: 当天发生过采纳（下载、分享、复用任一）的任务数，不限定任务创建日期。行为事件先按 content_click/content_download 和 button_name 识别作品，再通过作品 ID 关联到创作任务 record_id；代码已查明关联键；默认来源与过滤待 Section 05，生产覆盖率待核验。
-    table: T-011
+    definition: 采纳日当天至少有一次下载、分享或复用的有效任务数，不限定任务创建日。默认从 T-012 用户采纳日汇总表读取，同一任务同一天多次采纳或多个作品被采纳仍算 1 个；跨日累计为任务日，不等于期间去重任务数。
+    table: T-012
     type: atomic
-    expr: COUNT(DISTINCT k.record_id) -- T-011 事件的 video_id 关作品事实 w.video_id，w.record_id 关 T-006 k.record_id；DWS 候选实现另待 OQ-21
-    filters: ["T-011: event_id IN ('content_click','content_download')", "T-011: event_time 落在统计日", "下载/分享/复用事件对应作品 ID 非空", "关联键已从 main@29f9758 查明，默认表与有效/成功过滤待 OQ-21"]
-    open_question: OQ-21
+    expr: SUM(adopt_date_task_cnt) -- 按 stat_date 分组，表内已按采纳日去重任务
+    filters: ["is_valid_task = 1", "p_date 与 TO_CHAR(stat_date,'yyyymmdd') 同窗约束", "分端时筛任务 platform_type；全站不按事件发生端过滤"]
+    time_axis: stat_date（采纳发生日，UTC+8）
+    disclaimer: 有效任务为既定默认，不能省略；不因成功标志异常自行删采纳记录，先核验数据一致性。当前选表与过滤已评审，生产核验另记录。
     unit: 个
     aggregation: total
-    status: pending_review
+    status: pilot
     owner: 数据组
-    evidence: ["Section 04 DS：当天采纳纳入一期，并提供行为事件表与事件过滤 SQL", "main@29f9758：adopt_event.video_id → creation_work.video_id/record_id → creation_task.record_id；生产 DWS 已有 adopt_date_task_cnt", "历史 10/31 约 9.9 万仅为参考，待 K-103 对账，不是当前金标"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 04 DS：当天采纳纳入一期；Section 05 DS：默认来源 A，默认必须限定有效任务", "main@29f9758 的用户采纳日汇总实现；默认 SQL 为 K-104，明细对账草稿为 K-103", "2026-11-26 实跑生产三分区：20261031/20261124/20261125 有效采纳任务为 100856/96365/89998，完整粒度重复额外行均为 0；结果见 L5_evals/evidence/section05_adoption_sample_result.json；全链路对账未完成，不是 verified"]

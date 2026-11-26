@@ -1,0 +1,49 @@
+{
+  "checked_on": "2026-11-26",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261126135817577gu6nke01999",
+  "scope": "全站，采纳发生日；valid_task_cnt 是默认指标",
+  "columns": [
+    "p_date",
+    "row_cnt",
+    "broad_task_cnt",
+    "valid_task_cnt",
+    "valid_success_task_cnt",
+    "valid_adopt_with_non_success_flag_cnt",
+    "valid_output_cnt"
+  ],
+  "data": [
+    {
+      "p_date": "20261031",
+      "row_cnt": 17895,
+      "broad_task_cnt": 100905,
+      "valid_task_cnt": 100856,
+      "valid_success_task_cnt": 100848,
+      "valid_adopt_with_non_success_flag_cnt": 8,
+      "valid_output_cnt": 112181
+    },
+    {
+      "p_date": "20261124",
+      "row_cnt": 16389,
+      "broad_task_cnt": 96438,
+      "valid_task_cnt": 96365,
+      "valid_success_task_cnt": 96343,
+      "valid_adopt_with_non_success_flag_cnt": 22,
+      "valid_output_cnt": 106587
+    },
+    {
+      "p_date": "20261125",
+      "row_cnt": 15305,
+      "broad_task_cnt": 90085,
+      "valid_task_cnt": 89998,
+      "valid_success_task_cnt": 89979,
+      "valid_adopt_with_non_success_flag_cnt": 19,
+      "valid_output_cnt": 99832
+    }
+  ],
+  "limitations": [
+    "仅核查三个分区，不代表全历史回刷与明细对账完成",
+    "成功标志不一致仍在技术排查中，不改变默认有效任务过滤"
+  ]
+}

@@ -16,9 +16,9 @@
 | # | 指标 | 本库（来源） | 仓库登记表 | 处理 |
 |---|---|---|---|---|
 | 1 | 访问注册率 | 当日注册 ÷ 当日访客 UV（R1 用户域 DS），10/31 为 25.7% | 有登录的访客数 ÷ DAU（`login_visitor_cnt / dau`），10/31 为 60.5% | OQ-14 |
-| 2 | 作品采纳率 | 采纳作品 ÷ **成功**作品（R1 创作域 Q2 DS） | 3 日内被采纳的作品 ÷ **生成**作品（R16，创作日报） | 待 DS 看，数值差未核对 |
-| 3 | 任务成功率 | `is_success_by_output`，创作任务表（R0 B-11 DS SQL） | 最新状态 succeed（R15），创作日报 `backend_task_success_cnt / backend_task_create_cnt` | 待 DS 看，数值差未核对 |
-| 4 | 创作任务数 / 创作 UV | 创作任务表 `is_valid_task = 1`（R0 C2） | 创作日报 `backend_task_create_cnt`（任意状态）/ `backend_task_create_uv` | 待 DS 看，数值差未核对 |
+| 2 | 作品采纳率 | 采纳作品 ÷ **成功**作品（R1 创作域 Q2 DS） | 3 日内被采纳的作品 ÷ **生成**作品（R16，创作日报） | 沿用已有 DS 定义，Codex 对账并登记看板差异；不重复提交既定口径 |
+| 3 | 任务成功率 | `is_success_by_output`，创作任务表（R0 B-11 DS SQL） | 最新状态 succeed（R15），创作日报 `backend_task_success_cnt / backend_task_create_cnt` | 沿用已有 DS 定义，Codex 对账并登记看板差异；不重复提交既定口径 |
+| 4 | 创作任务数 / 创作 UV | 创作任务表 `is_valid_task = 1`（R0 C2） | 创作日报 `backend_task_create_cnt`（任意状态）/ `backend_task_create_uv` | 沿用已有 DS 定义，Codex 对账并登记看板差异；不重复提交既定口径 |
 | 5 | GMV | 有效订单，不要求金额 > 0（R1 Q4），含 API（R1 创作域 Q1） | 实收 > 0、非风控单（R02、R07），经营日报 `gross_pay_amount` | 差异约 4 笔 0 元单；API 是否含待对照 |
 | 6 | 留存 | 访客留存用活跃日报 `retain_Nd`（dau 群） | 「访问留存」用留存日报 `user_group = 'visit'`（page_view 人群） | 两种人群，见 M-USR-007 |
 | 7 | 广告 GMV 起算日 | DS：自首次注册日起，D0/D3/D7/D30 | 投放日主表从投放日起算，无 D3/D7；注册日 cohort 表才从注册日起算 | OQ-15 |
@@ -28,4 +28,4 @@
 
 DS 在 [Section 01](../review/Section01_口径维护与冲突裁决.md) 选择方案 A：本库维护经评审的最终业务定义，旧指标登记表逐步改为引用。DS 决定业务语义、指标算法及核心使用表；Codex 负责文档、配置和核验。OQ-16 已决，生产侧引用迁移另行协调。
 
-上表是首次对照时的历史记录，7 处具体差异仍需按域核验与评审。第 8 行原记录为一致，但 DS 后续要求创作渗透率分母使用埋点表，其来源及去重已在 Section 02 / OQ-17 确认为 T-007 非空 uid 去重；分子匹配范围另待 Section 03 / OQ-18，不能继续视为已对齐。
+上表是首次对照时的历史记录，7 处具体差异仍需按域核验与评审。第 8 行原记录为一致，但 DS 后续要求创作渗透率分母使用埋点表，其来源及去重已在 Section 02 / OQ-17 确认为 T-007 非空 uid 去重；Section 03 / OQ-18 已拆为大盘独立计数与分析链路匹配，历史一致性记录不能替代新口径对账。

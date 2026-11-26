@@ -1,0 +1,39 @@
+id: T-012
+table: mc_prd.dws_pollo_creation_user_adopt_daily_dip
+domain: CRE
+purpose: 当天采纳任务数的默认来源（Section 05 DS 选择 A）。按采纳发生日汇总任务数，不限定任务创建日；默认只看 is_valid_task=1。行为和作品明细用于对账，不在日常问数时重复实现关联。
+grain: 一行 = stat_date × user_id × visitor_type × platform_type × web_client_type × req_country_code × task_type × is_valid_task × is_success_task
+primary_key: [stat_date, user_id, visitor_type, platform_type, web_client_type, req_country_code, task_type, is_valid_task, is_success_task]
+partition:
+  field: p_date
+  suffix: _dip
+  read_rule: p_date 与 stat_date 按同一采纳发生日窗口限定；不能按任务创建日裁掉早期创建的任务
+default_filters:
+  - is_valid_task = 1
+time_axis: stat_date（采纳发生日，UTC+8）
+key_fields:
+  stat_date: 采纳发生日，不是任务创建日或作品完成日
+  user_id: 任务所属用户；源加工排除了 user_id IS NULL 的任务
+  visitor_type: 任务登录状态 REGISTERED/VISITOR
+  platform_type: 任务所属端 WEB/IOS/ANDROID/UNKNOWN/OTHER；不是采纳事件发生端
+  web_client_type: 任务 Web 子端，取任务桥接表
+  req_country_code: 任务请求国家
+  task_type: 任务类型
+  is_valid_task: 任务有效标记；默认必须筛选 1，不作为可选范围
+  is_success_task: 任务成功标记；用于成功状态一致性核查，不因标记异常自行改变已采纳任务的计数
+  adopt_date_task_cnt: 同一采纳日对任务 record_id 去重；同任务多作品或多次采纳只算 1 个
+  adopt_date_output_cnt: 同一采纳日对作品 video_id 去重；与任务数不能混用
+not_for:
+  - 创建日归属的 3 日采纳：使用 T-006 的 create_date_adopted_output_cnt_3d
+  - 期间去重采纳任务数：每日任务数相加是任务日，同任务跨日采纳可能重复，需明确期间统计语义
+traps: [P-27]
+producer: CNB bigdata_etl main@29f9758 bigdata_dw/03_DWS/creation/Sq_dws_pollo_creation_user_adopt_daily_dip.sql；按采纳日重写近 3 天
+status: pilot
+owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-26
+evidence:
+  - "Section 05 DS：默认来源选 A，使用用户采纳日汇总表；有效任务默认必须限定"
+  - "main@29f9758：事件 video_id → 作品事实 record_id → 任务；当前表不要求任务创建在采纳日，不依赖事件自带 task_record_id"
+  - "2026-11-26 实跑 L5_evals/evidence/section05_adoption_sample.sql：20261031/20261124/20261125 有效采纳任务数为 100856/96365/89998"
+  - "同三分区按完整表粒度核查，重复额外行均为 0，见 L5_evals/evidence/section05_adoption_grain_result.json；仅进入 pilot，未完成全历史或明细对账"

@@ -1,0 +1,73 @@
+{
+  "checked_on": "2026-11-26",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261126135817577gu6nke01999",
+  "columns": [
+    "p_date",
+    "task_rows",
+    "unique_tasks",
+    "legacy_request_cnt",
+    "provider_request_cnt",
+    "succeeded_transcription_cnt",
+    "succeeded_transcription_misclassified_cnt",
+    "gross_credit_consume",
+    "returned_credit",
+    "net_credit_consume",
+    "temporary_success_credit_consume",
+    "create_date_adopted_output_cnt_3d",
+    "latest_etl_time"
+  ],
+  "data": [
+    {
+      "p_date": "20261031",
+      "task_rows": 248185,
+      "unique_tasks": 248185,
+      "legacy_request_cnt": 234363,
+      "provider_request_cnt": 0,
+      "succeeded_transcription_cnt": 0,
+      "succeeded_transcription_misclassified_cnt": 0,
+      "gross_credit_consume": "4882603.47",
+      "returned_credit": "41",
+      "net_credit_consume": "4882562.47",
+      "temporary_success_credit_consume": "3869181.5",
+      "create_date_adopted_output_cnt_3d": 99352,
+      "latest_etl_time": "2026-11-04 09:01:44.17"
+    },
+    {
+      "p_date": "20261124",
+      "task_rows": 247250,
+      "unique_tasks": 247250,
+      "legacy_request_cnt": 234003,
+      "provider_request_cnt": 234217,
+      "succeeded_transcription_cnt": 215,
+      "succeeded_transcription_misclassified_cnt": 0,
+      "gross_credit_consume": "4887488.44",
+      "returned_credit": "908834",
+      "net_credit_consume": "3978654.44",
+      "temporary_success_credit_consume": "4006399.06",
+      "create_date_adopted_output_cnt_3d": 94247,
+      "latest_etl_time": "2026-11-26 17:39:49.055"
+    },
+    {
+      "p_date": "20261125",
+      "task_rows": 248907,
+      "unique_tasks": 248907,
+      "legacy_request_cnt": 236453,
+      "provider_request_cnt": 236676,
+      "succeeded_transcription_cnt": 223,
+      "succeeded_transcription_misclassified_cnt": 0,
+      "gross_credit_consume": "4609246.34",
+      "returned_credit": "717304",
+      "net_credit_consume": "3891942.34",
+      "temporary_success_credit_consume": "3907495.91",
+      "create_date_adopted_output_cnt_3d": 87352,
+      "latest_etl_time": "2026-11-26 17:39:49.055"
+    }
+  ],
+  "limitations": [
+    "字段存在不代表历史分区已按新算法回刷",
+    "10/31 最新 ETL 早于修复代码日期，新请求标志为0，不可直接全历史套用",
+    "仅三个分区样本，不作为全历史验收"
+  ]
+}

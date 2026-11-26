@@ -1,7 +1,7 @@
 id: T-011
 table: mc_prd.dwd_pollo_behavior_base_content_dip
 domain: CRE
-purpose: 内容行为事件表。用于按采纳发生日统计当天采纳任务数；当前从 content_click 和 content_download 事件识别下载、分享、复用，并通过作品 ID 关联到创作任务。不能用 T-006 的 3 日采纳字段替代。
+purpose: 内容行为事件明细，用于采纳识别和明细对账。日常问当天采纳任务数默认读 T-012 用户采纳日汇总表（Section 05），不在每次问数时重复实现本表到作品/任务的关联。
 grain: 一行 = 一条内容行为事件
 partition:
   field: p_date
@@ -23,12 +23,12 @@ key_fields:
   properties.video_id: content_download 的作品 ID；不是独立物理列
   properties.task_record_id: App 下载可能自带任务 ID；最新数仓代码不用它定归属，统一按作品事实取 record_id
 not_for:
-  - 3 日采纳作品数：使用 T-006 的 adopted_output_cnt_3d
-  - 当天采纳任务数在未确认作品到任务关联前直接对外发布
+  - 3 日采纳作品数：使用 T-006 的 create_date_adopted_output_cnt_3d
+  - 日常当天采纳主表：默认使用 T-012；本表只用于明细诊断和对账
 traps: [P-27]
 producer: CNB bigdata_etl main@29f9758 pollo/02_数仓/DWD/Sq_dwd_pollo_behavior_base_content_dip.sql；采纳识别实现见 bigdata_dw/02_DWD/creation/Sq_dwd_pollo_creation_adopt_event_dip.sql
 status: pending_review
 owner: 数据组
 evidence:
   - "Section 04 DS 提供行为事件 SQL：表 mc_prd.dwd_pollo_behavior_base_content_dip；Web 使用 content_click/content_id，App 使用 content_download/video_id"
-  - "main@29f9758：采纳事件 video_id 关 dwd_pollo_creation_work_dip.video_id，再按 record_id 关 T-006；DWS 已有按采纳日汇总，默认选表与过滤待 OQ-21"
+  - "main@29f9758：采纳事件 video_id 关 dwd_pollo_creation_work_dip.video_id，再按 record_id 关 T-006；DWS 已有按采纳日汇总，Section 05 已选 T-012 且默认有效任务"
