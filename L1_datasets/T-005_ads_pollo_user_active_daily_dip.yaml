@@ -24,8 +24,8 @@ key_fields:
   new_register_user_cnt: 当日新注册用户数
   new_user_cnt: 当日新访客数（推测）
   creation_user_cnt: 当日创作用户数
-  mau: 月活，近 30 天 [t-29, t] 活跃访客 anon_id 去重（滚动窗口，不是自然月）
-  retain_1d/3d/7d: 访客（dau 群）点位留存人数：stat_date 当天的访客在第 N 天回访的人数，取自留存表 ads_pollo_user_retention_daily_dip（user_group=dau）；未成熟为 NULL。留存率 = retain_Nd / 同一行 dau
+  mau: 滚动30日访客活跃数，近 30 天 [t-29, t] 活跃访客去重（滚动窗口，不是自然月；M-USR-005）
+  retain_1d/3d/7d: 访客（dau 群）点位留存人数：stat_date 当天的访客在恰好第 N 天回访的人数，取自留存表 ads_pollo_user_retention_daily_dip（user_group=dau）；未成熟为 NULL。M-USR-007 留存率 = retain_Nd / 同一行 dau
   retain_Nd_window: 窗口留存人数：N 日内至少回访一次（累计）
   creation_retain_*: 创作留存人数（cohort = 当天提交创作，回访 = 再次提交），分母为同一行 creation_user_cnt
 traps: [P-26, P-40]
@@ -39,3 +39,4 @@ evidence:
   - "CNB bigdata_etl main@d8753d1：字段口径取自生产 SQL 头注释（11-12 / 11-20 / 11-24 / 11-25 修订说明）"
   - "2026-11-25 核查（20261031，国家与擦边取汇总）：WEB 118,629、APP 28,338（IOS 11,263 + ANDROID 17,117）、汇总 143,308；该日尚无 WEB-PC / WEB-H5 行"
   - "Section 06，2026-11-26 DS：同意将 login_visitor_cnt / dau 独立命名为访客登录占比，公式与访客注册转化率分别维护"
+  - "Section 07，2026-11-26 DS：滚动30日访客活跃数与访客D1/D3/D7点位留存均纳入一期；生产样本见 L5_evals/evidence/section07_user_retention_sample_result.json"

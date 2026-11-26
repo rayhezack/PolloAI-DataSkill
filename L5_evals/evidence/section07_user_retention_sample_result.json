@@ -1,0 +1,10 @@
+{
+  "checked_on":"2026-11-26","timezone":"Asia/Shanghai","instance_id":"20261126153201113g37dtislna",
+  "scope":"全站汇总行，访客 dau 基期，滚动30日活跃与点位留存",
+  "data":[
+    {"p_date":"20261030","rolling_30d_visitor_active":2984900,"visitor_uv":145030,"retain_1d":26777,"retain_3d":22329,"retain_7d":18748,"visitor_d1_retention":0.1846307660,"visitor_d3_retention":0.1539612494,"visitor_d7_retention":0.1292698062},
+    {"p_date":"20261031","rolling_30d_visitor_active":2991757,"visitor_uv":143308,"retain_1d":26806,"retain_3d":22106,"retain_7d":18143,"visitor_d1_retention":0.1870516649,"visitor_d3_retention":0.1542551707,"visitor_d7_retention":0.1266014458},
+    {"p_date":"20261124","rolling_30d_visitor_active":3009490,"visitor_uv":139687,"retain_1d":31088,"retain_3d":null,"retain_7d":null,"visitor_d1_retention":0.2225547116,"visitor_d3_retention":null,"visitor_d7_retention":null}
+  ],
+  "limitations":["D3/D7 未成熟日期返回 NULL，不补零","仅全站三个分区样本，不代表分端和全历史验收","访客活跃身份沿用 T-005 数仓加工，不等同于登录账号 MAU"]
+}

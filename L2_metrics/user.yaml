@@ -66,9 +66,9 @@ metrics:
     evidence: ["R0 B-06/U4"]
 
   - id: M-USR-005
-    name: MAU
-    synonyms: [月活, 30日活跃]
-    definition: 近 30 天 [t-29, t] 活跃访客 anon_id 去重，滚动窗口，不是自然月（生产 SQL）。是否纳入一期待 DS 定（OQ-12）。
+    name: 滚动30日访客活跃数
+    synonyms: [MAU, 月活, 30日活跃, 滚动30日活跃]
+    definition: 统计日及之前 29 天 [t-29,t] 的活跃访客去重数，沿用 T-005 的数仓加工。它是访客口径的滚动窗口，不是自然月，也不是登录账号 MAU；Section 07 已确认纳入一期。
     table: T-005
     type: atomic
     expr: SUM(mau)   -- 三个维度钉住为 '汇总'
@@ -76,10 +76,12 @@ metrics:
     unit: 人
     aggregation: snapshot
     traps: [P-26]
-    open_question: OQ-12
-    status: draft
+    disclaimer: 用户只说“月活/MAU”但未说明人群或窗口时先确认；不把本指标自动解释为自然月登录账号 MAU。全站与分端都必须钉住 T-005 汇总维度。
+    status: pilot
     owner: 数据组
-    evidence: ["CNB bigdata_etl main@d8753d1 生产 SQL 头注释：MAU = [t-29,t] 30 天窗口 COUNT(DISTINCT anon_id)", "20261031 全汇总：2,991,757；10/01 为 2,963,322，与滚动窗口一致"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["CNB bigdata_etl 生产 SQL：MAU = [t-29,t] 30 天窗口访客去重", "Section 07 DS：纳入一期，采用滚动30日访客活跃数", "2026-11-26 实跑全站样本：20261031 为 2,991,757；结果见 L5_evals/evidence/section07_user_retention_sample_result.json"]
 
   - id: M-USR-006
     name: 活跃在订用户数
@@ -97,9 +99,9 @@ metrics:
     evidence: ["20261031：11,244", "R1 用户域 C3 DS"]
 
   - id: M-USR-007
-    name: 访客Dn留存率
-    synonyms: [次日留存, 留存率, D1留存, D3留存, D7留存, 访客留存]
-    definition: stat_date 当天的访客（dau 群，anon_id）中，第 N 天回访的比例（点位）。窗口口径用 retain_Nd_window（N 日内至少回访一次）。是否纳入一期待 DS 定（OQ-12）。注意数仓核心指标登记表里的「访问留存」用的是留存表 user_group='visit'（page_view 人群），与本列不是同一人群。
+    name: 访客Dn点位留存率
+    synonyms: [次日留存, 留存率, D1留存, D3留存, D7留存, 访客留存, 点位留存]
+    definition: 统计日当天访客（dau 群）中，恰好第 N 天回访的比例，N 一期收 D1/D3/D7；分母为同一行 dau。不是新注册留存、登录账号留存或 N 日内至少回访一次的窗口留存。Section 07 已确认纳入一期。
     table: T-005
     type: ratio
     expr: SUM(retain_{N}d) / SUM(dau)   -- 同一行；三个维度钉住
@@ -107,10 +109,12 @@ metrics:
     unit: "%"
     aggregation: rate
     traps: [P-26]
-    open_question: OQ-12
-    status: draft
+    disclaimer: 只使用观察窗已结束的基期；未成熟的 retain_Nd 为 NULL，不填0。全站不拆端；分端时基期和回访必须同端。数仓旧登记表的 page_view 人群不是本指标。
+    status: pilot
     owner: 数据组
-    evidence: ["CNB bigdata_etl main@d8753d1 生产 SQL：retain_Nd = 日活(dau群)第 N 日留存数", "20261030：26,777 / 145,030 = 18.5%"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["CNB bigdata_etl 生产 SQL：retain_Nd = dau 群第 N 日点位回访数", "Section 07 DS：纳入一期，采用访客 D1/D3/D7 点位留存", "2026-11-26 实跑：20261031 D1/D3/D7 为18.7052%/15.4255%/12.6601%；未成熟日 D3/D7 为 NULL"]
 
   - id: M-USR-008
     name: 注册访问UV
