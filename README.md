@@ -1,18 +1,21 @@
 # Pollo 取数业务知识库（semantic）
 
-一套给 AI 和人共用的取数口径，目标是形成统一事实源（SSOT）。协作仓库：[rayhezack/PolloAI-DataSkill](https://github.com/rayhezack/PolloAI-DataSkill)。当前处于分域评审阶段，与生产仓库既有口径登记表的维护关系仍待裁决（OQ-16）。
+一套给 AI 和人共用的取数口径，目标是形成统一事实源（SSOT）。协作仓库：[rayhezack/PolloAI-DataSkill](https://github.com/rayhezack/PolloAI-DataSkill)。DS 已确定由本库维护经评审的最终定义，旧指标登记表逐步改为引用；当前仍处于分域评审阶段（Section 01 / OQ-16）。
 
 ## 协作入口
 
 - 新成员先读 [接续与评审路线](review/00_Codex接续与评审路线.md)，了解当前进度和待评审内容。
 - 逐节评审从 [Section 01：口径维护与冲突裁决](review/Section01_口径维护与冲突裁决.md) 开始，每节说明现状、需要的决定和评审内容。
+- 当前待评：[Section 02：创作域——注册访问 UV 的来源与去重方式](review/Section02_创作域_注册访问UV.md)。
 - 环境安装、分支和 Pull Request 流程见 [协作指南](CONTRIBUTING.md)。
 - 安装校验依赖：`python3 -m pip install -r requirements.txt`；在仓库根目录执行 `python3 scripts/lint.py`。
 - 提交文件不代表口径已通过评审，使用前必须检查条目状态。
 
 ## 给 AI 的硬规则（优先级最高）
 
-**裁决顺序**：本库 L2 指标/维度与 L4 核验 SQL > L3 陷阱条款 > 生产代码与源 SQL > 个人习惯和历史报表。个人习惯和历史报表不能作为依据。
+**评审权责**：DS 决定业务语义、指标算法及核心使用表；Codex 按结论维护文档、配置、SQL 和核验。生产代码与数仓说明用于提供实现证据，不能自动替代 DS 的选表与口径决定。
+
+**裁决顺序**：在条目已评审且适用于当前问题的前提下，本库 L2 指标/维度与 L4 核验 SQL > L3 陷阱条款 > 生产代码与源 SQL > 个人习惯和历史报表。仍未裁决的冲突须明确说明并提交 DS，不得自行选一方覆盖；个人习惯和历史报表不能作为口径依据。
 
 | # | 规则 |
 |---|---|

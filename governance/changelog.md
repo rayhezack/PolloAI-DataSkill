@@ -27,3 +27,5 @@
 | 2026-11-25 | M-USR-005、新增 M-USR-007、P-40 | MAU 为滚动 30 天访客；访客留存率 = retain_Nd / dau；活跃日表新增 Web 子端行的陷阱 | 生产 SQL |
 | 2026-11-25 | M-AD-004~008、P-35、P-39、P-41、T-008 | 注册窗口 = 注册日 − 投放日 ≤ N；GMV 窗口从投放日起算；统计截到 T-2；回本平台范围；T-008 改称注册日 cohort 表 | 生产 SQL、仓库广告口径文档 |
 | 2026-11-25 | governance/legacy_alignment.md、OQ-14~16 | 新建存量知识对照（初版），登记 7 处差异 | 仓库 ai_workspace/knowledge |
+| 2026-11-26 | Section 01、OQ-16、README、conventions、legacy_alignment | 维护方案 A 已评审：本库维护经评审的最终定义，DS 决定业务语义、指标算法及核心使用表，Codex 负责文档、配置和核验；生产侧引用迁移另行协调 | Section 01 DS 原始回复 |
+| 2026-11-26 | Section 02、OQ-17 | 整理创作渗透率埋点分母的选表、去重键及事件过滤问题，待 DS 评审；未改动指标算法与状态 | R1 创作域第 3 版的 DS 新回复尚未完整落地 |
