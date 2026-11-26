@@ -21,7 +21,7 @@
 
 **现有文件不能直接视为已验收的 Agent 知识库：**
 
-- `L3_glossary.yaml` 尚不存在，但 README 已要求 Agent 先查它。
+- 首次盘点时 `L3_glossary.yaml` 缺失；Section 06 已补注册访问及两个访客比率的部分索引，其他术语继续补齐。
 - `L4_verified_queries/` 只有 `K-101.sql`，且为 pending_review 的设备实验 SQL，尚无四域常规问数的核验模板。
 - `L5_evals/golden.yaml` 尚不存在，尚无可复跑的验收题集。
 - R0 已采纳的分析方法文件 `L3_analysis_patterns.md` 尚不存在。
@@ -71,7 +71,7 @@
 
 原始回复与落地记录见 [Section 01](Section01_口径维护与冲突裁决.md)，本地差异见 [存量知识对照](../governance/legacy_alignment.md)。
 
-**Section 02~05 业务口径已评审。当前待评：** [Section 06：用户域——访问注册率的命名与含义](Section06_用户域_访问注册率命名.md)。当天采纳默认 T-012，is_valid_task=1；创作域技术核验及旧实现对账由 Codex 继续完成，不重复提交既定口径。
+**Section 02~06 业务口径已评审。当前待评：** [Section 07：用户域——月活与访客留存的一期范围](Section07_用户域_月活与访客留存.md)。当天采纳默认 T-012，is_valid_task=1；创作域技术核验及旧实现对账由 Codex 继续完成，不重复提交既定口径。
 
 ## 5. Codex 后续自行处理的检查项
 

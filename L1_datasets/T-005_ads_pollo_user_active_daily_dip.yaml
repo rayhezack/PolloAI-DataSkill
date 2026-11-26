@@ -19,7 +19,7 @@ key_fields:
   subscribed_active_user_cnt: 当日活跃的在订用户数 → M-USR-006（R1 用户域 C3 确认）
   login_active_user_cnt: 登录活跃用户数。10/31 全汇总值与 T-002 登录 DAU 完全一致
   dau: 访客 UV（含未登录），活跃标记表 anon_id 去重（APP 按 uid）；11-24 起排除美国 Web 机器流量，08-01 起回刷（数仓 SSOT R34）→ M-USR-002
-  login_visitor_cnt: 有登录的访客数：当天带过 uid 埋点的访客 anon_id 去重（访客口径，11-20 新增）。数仓核心指标登记表定义 访问注册率 = login_visitor_cnt / dau，与本库 M-USR-003 不同（OQ-14）
+  login_visitor_cnt: 有登录的访客数：当天带过 uid 埋点的访客去重（访客口径，11-20 新增）。Section 06 将 login_visitor_cnt / dau 单独命名为“访客登录占比”M-USR-009，不再与新注册转化率混用，也不替换为账号口径 M-USR-008
   registered_visit_user_cnt: 数仓 11-20 已废弃（每访客取代表 uid 的设备口径），下游切换完删除，不得使用。注册访问 UV 现按 Section 02 改取埋点表非空 uid 去重（M-USR-008），不再映射到 M-PAY-012
   new_register_user_cnt: 当日新注册用户数
   new_user_cnt: 当日新访客数（推测）
@@ -38,3 +38,4 @@ evidence:
   - "2026-11-25 核查：client_type 有 5 个取值，country 有 240 个，borderline_tag 有 3 个"
   - "CNB bigdata_etl main@d8753d1：字段口径取自生产 SQL 头注释（11-12 / 11-20 / 11-24 / 11-25 修订说明）"
   - "2026-11-25 核查（20261031，国家与擦边取汇总）：WEB 118,629、APP 28,338（IOS 11,263 + ANDROID 17,117）、汇总 143,308；该日尚无 WEB-PC / WEB-H5 行"
+  - "Section 06，2026-11-26 DS：同意将 login_visitor_cnt / dau 独立命名为访客登录占比，公式与访客注册转化率分别维护"

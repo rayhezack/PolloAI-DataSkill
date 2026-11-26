@@ -1,0 +1,24 @@
+schema_version: 1
+coverage: 当前仅覆盖 Section 02/06 已评审的注册访问及两个访客比率；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
+usage: 先匹配 ambiguous_terms，再匹配 terms；命中后仍须检查指标卡的状态、适用范围和过滤条件，不因术语可检索就视为 verified。
+terms:
+  - term: 访客注册转化率
+    metric: M-USR-003
+    aliases: [注册转化率, 访客注册率, 新注册转化率]
+    meaning: 当日新注册用户数 ÷ 当日访客 UV
+    reviewed_source: review/Section06_用户域_访问注册率命名.md
+  - term: 访客登录占比
+    metric: M-USR-009
+    aliases: [访客登录比例, 已登录访客占比, 登录访客占比]
+    meaning: login_visitor_cnt ÷ dau，含老用户，按访客口径
+    reviewed_source: review/Section06_用户域_访问注册率命名.md
+  - term: 注册访问UV
+    metric: M-USR-008
+    aliases: [注册访问 UV, 埋点登录账号访问UV, 创作渗透分母]
+    meaning: 有效埋点中的非空 uid 按自然日去重，是账号数
+    reviewed_source: review/Section02_创作域_注册访问UV.md
+ambiguous_terms:
+  - term: 访问注册率
+    candidate_metrics: [M-USR-003, M-USR-009]
+    action: clarify
+    prompt: 你指当日新注册用户数占访客的比率，还是发生过登录行为的访客占比？

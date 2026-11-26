@@ -31,8 +31,8 @@ metrics:
     evidence: ["20261031：143,308；埋点 anon_id 自算为 144,168（差 0.6%）", "R1 用户域 Q1 DS"]
 
   - id: M-USR-003
-    name: 访问注册率
-    synonyms: [注册转化率, 访客注册率]
+    name: 访客注册转化率
+    synonyms: [注册转化率, 访客注册率, 新注册转化率]
     definition: 当日注册用户数（M-USR-001，用户画像表）÷ 当日访客 UV。分母默认用 T-005 dau；用埋点表对 anon_id 去重也可以，DS 认为两者都行（R1 用户域 Q4），交付时注明用的哪个。
     table: T-009
     type: ratio
@@ -40,11 +40,14 @@ metrics:
     numerator: M-USR-001
     denominator: M-USR-002
     filters: ["分子分母同一天、同一端范围"]
+    disclaimer: 当日新注册账号数与访客总量的比率，不是逐访客关联的注册漏斗。“访问注册率”有历史歧义，未明确语义时须确认指本指标还是 M-USR-009。
     unit: "%"
     aggregation: rate
     status: pending_review
     owner: 数据组
-    evidence: ["Q3 口径说明；R1 用户域 Q4 DS", "20261031：36,769 / 143,308 = 25.7%（埋点分母 144,168 时为 25.5%）"]
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Q3 口径说明；R1 用户域 Q4 DS", "Section 06 DS：两个比率都保留，原公式及 ID 不变，名称改为访客注册转化率", "2026-11-26 实跑：20261031 注册36769 / 访客143308 = 25.6573%，20261124 为22.5855%；画像快照20261125，SQL和结果见 L5_evals/evidence/section06_user_ratios.sql 及JSON"]
 
   - id: M-USR-004
     name: 期间新客登录DAU
@@ -126,3 +129,23 @@ metrics:
     reviewed_by: DS
     reviewed_at: 2026-11-26
     evidence: ["Section 02，2026-11-26 DS 已确认分母主表、按 uid 去重及事件过滤；待 K-102 远程核验"]
+
+  - id: M-USR-009
+    name: 访客登录占比
+    synonyms: [访客登录比例, 已登录访客占比, 登录访客占比]
+    definition: 同一统计日、同一汇总维度下，发生过登录行为的访客数 login_visitor_cnt ÷ 访客 UV dau；含老用户，不是新注册转化，也不能把 login_visitor_cnt 换成按 uid 去重的注册访问 UV。
+    table: T-005
+    type: ratio
+    expr: CAST(SUM(login_visitor_cnt) AS DOUBLE) / NULLIF(SUM(dau), 0)   -- 每日按 stat_date 分组
+    denominator: M-USR-002
+    filters: ["client_type = '汇总'", "country = '汇总'", "borderline_tag = '汇总'", "p_date 与 TO_CHAR(stat_date,'yyyymmdd') 同窗约束"]
+    time_axis: stat_date（UTC+8）
+    unit: "%"
+    aggregation: rate
+    traps: [P-26, P-40]
+    disclaimer: 全站默认取三个维度的汇总行；分端按表卡选一组不重叠端，不能把 APP 与 IOS/ANDROID 或 WEB 与子端相加。多日累计比率按访客人日加权，不作为期间去重访客的登录比例。“访问注册率”裸词需确认具体含义。
+    status: pending_review
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
+    evidence: ["Section 06 DS：保留 login_visitor_cnt / dau，单独命名为访客登录占比；与 M-USR-003 分开", "2026-11-26 实跑：20261031 登录访客86699 / 访客143308 = 60.4984%，20261124 为57.8300%；三个全站日样本见 L5_evals/evidence/section06_user_ratios_result.json；模板K-105"]

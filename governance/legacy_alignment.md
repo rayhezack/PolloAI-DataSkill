@@ -15,7 +15,7 @@
 
 | # | 指标 | 本库（来源） | 仓库登记表 | 处理 |
 |---|---|---|---|---|
-| 1 | 访问注册率 | 当日注册 ÷ 当日访客 UV（R1 用户域 DS），10/31 为 25.7% | 有登录的访客数 ÷ DAU（`login_visitor_cnt / dau`），10/31 为 60.5% | OQ-14 |
+| 1 | 原“访问注册率”同名差异 | 当日注册 ÷ 当日访客 UV，现命名访客注册转化率 M-USR-003 | login_visitor_cnt / dau，现单独命名访客登录占比 M-USR-009 | Section 06 / OQ-14 已决：都保留、分别命名；历史裸词先确认 |
 | 2 | 作品采纳率 | 采纳作品 ÷ **成功**作品（R1 创作域 Q2 DS） | 3 日内被采纳的作品 ÷ **生成**作品（R16，创作日报） | 沿用已有 DS 定义，Codex 对账并登记看板差异；不重复提交既定口径 |
 | 3 | 任务成功率 | `is_success_by_output`，创作任务表（R0 B-11 DS SQL） | 最新状态 succeed（R15），创作日报 `backend_task_success_cnt / backend_task_create_cnt` | 沿用已有 DS 定义，Codex 对账并登记看板差异；不重复提交既定口径 |
 | 4 | 创作任务数 / 创作 UV | 创作任务表 `is_valid_task = 1`（R0 C2） | 创作日报 `backend_task_create_cnt`（任意状态）/ `backend_task_create_uv` | 沿用已有 DS 定义，Codex 对账并登记看板差异；不重复提交既定口径 |

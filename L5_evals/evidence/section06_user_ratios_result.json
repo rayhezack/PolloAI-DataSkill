@@ -1,0 +1,57 @@
+{
+  "checked_on": "2026-11-26",
+  "timezone": "Asia/Shanghai",
+  "profile_snapshot": "20261125",
+  "instance_id": "20261126142031380gtvka3yc21",
+  "columns": [
+    "p_date",
+    "visitor_uv",
+    "logged_in_visitor_uv",
+    "signup_uv",
+    "visitor_signup_rate",
+    "visitor_login_share",
+    "rolling_30d_visitor_uv",
+    "visitor_d1_retained",
+    "visitor_d1_retention"
+  ],
+  "data": [
+    {
+      "p_date": "20261030",
+      "visitor_uv": 145030,
+      "logged_in_visitor_uv": 86183,
+      "signup_uv": 36015,
+      "visitor_signup_rate": 0.24832793215196855,
+      "visitor_login_share": 0.5942425705026546,
+      "rolling_30d_visitor_uv": 2984900,
+      "visitor_d1_retained": 26777,
+      "visitor_d1_retention": 0.18463076604840378
+    },
+    {
+      "p_date": "20261031",
+      "visitor_uv": 143308,
+      "logged_in_visitor_uv": 86699,
+      "signup_uv": 36769,
+      "visitor_signup_rate": 0.2565732548078265,
+      "visitor_login_share": 0.604983671532643,
+      "rolling_30d_visitor_uv": 2991757,
+      "visitor_d1_retained": 26806,
+      "visitor_d1_retention": 0.1870516649454322
+    },
+    {
+      "p_date": "20261124",
+      "visitor_uv": 139687,
+      "logged_in_visitor_uv": 80781,
+      "signup_uv": 31549,
+      "visitor_signup_rate": 0.22585494713180182,
+      "visitor_login_share": 0.5783000565550123,
+      "rolling_30d_visitor_uv": 3009490,
+      "visitor_d1_retained": 31088,
+      "visitor_d1_retention": 0.2225547116052317
+    }
+  ],
+  "limitations": [
+    "仅全站三个业务日样本，不代表分端和全历史已验收",
+    "月活和访客留存样本仅用于说明字段，纳入一期仍待 Section 07",
+    "注册人数是账号数，访客分母是数仓访客口径，不是逐访客注册漏斗"
+  ]
+}
