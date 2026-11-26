@@ -30,8 +30,10 @@ key_fields:
   creation_retain_*: 创作留存人数（cohort = 当天提交创作，回访 = 再次提交），分母为同一行 creation_user_cnt
 traps: [P-26, P-40]
 producer: CNB bigdata_etl main@d8753d1 bigdata_dw/04_ADS/经营看板/Sq_ads_pollo_user_active_daily_dip.sql（DataWorks 节点 Sq_ads_pollo_user_active_daily_dip_rf，11-12 起写本表；旧节点 pollo/02_数仓/ADS/活跃留存/ 改写 *_old，约 12-03 下线）
-status: pending_review
+status: pilot
 owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-26
 evidence:
   - "2026-11-25 核查（20261031，三个维度均为汇总）：vpu 76,398 = WEB 62,337 + APP 14,061；login_active_user_cnt 96,695，与 T-002 一致；dau 143,308"
   - "2026-11-25 核查（20261031）：dau 全表直接求和 1,274,942，是正确值 143,308 的 8.9 倍；三个维度都钉住汇总才对（P-26）"
@@ -40,3 +42,4 @@ evidence:
   - "2026-11-25 核查（20261031，国家与擦边取汇总）：WEB 118,629、APP 28,338（IOS 11,263 + ANDROID 17,117）、汇总 143,308；该日尚无 WEB-PC / WEB-H5 行"
   - "Section 06，2026-11-26 DS：同意将 login_visitor_cnt / dau 独立命名为访客登录占比，公式与访客注册转化率分别维护"
   - "Section 07，2026-11-26 DS：滚动30日访客活跃数与访客D1/D3/D7点位留存均纳入一期；生产样本见 L5_evals/evidence/section07_user_retention_sample_result.json"
+  - "Section 08 DS：用户域整体同意进入 pilot（限制见 Section 08）"

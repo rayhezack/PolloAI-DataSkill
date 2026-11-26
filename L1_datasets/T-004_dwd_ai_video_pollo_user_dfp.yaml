@@ -19,8 +19,10 @@ key_fields:
   reg_country: 注册国家
   deleted: 是否注销
 producer: 未核对（CNB 无权限）
-status: pending_review
+status: pilot
 owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-26
 evidence:
   - "2026-11-24 核查（20261123 分区）：84,252,277 行，id 唯一；email 非空 31,131,303"
   - "2026-11-25 核查：20261122 分区 email 为空、20261124 分区 email 非空的同一 id 为 0 个（同期每天约 3.3 万新注册），游客不会在原账号上绑定 email"
@@ -28,3 +30,4 @@ evidence:
   - "内部用户标记不在本表，用 T-009 画像表的 is_internal_user_da（R1 用户域 Q3）"
 not_for:
   - user_group 和 account_type 不用于任何口径（R1 C6）
+  - "Section 08 DS：用户域整体同意进入 pilot（限制见 Section 08）"

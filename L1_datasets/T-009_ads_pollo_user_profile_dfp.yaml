@@ -22,8 +22,11 @@ key_fields:
 not_for:
   - 首付、首创作、生命周期、积分余额等画像字段尚未评审，不用于任何口径
 producer: 未核对（CNB 无权限）
-status: pending_review
+status: pilot
 owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-26
 evidence:
   - "2026-11-25 核查（20261124 分区）：T-004 中 20261031 注册的 36,769 个账号全部能关联上，register_date 全部一致，内部用户 0 个"
   - "2026-11-25 核查：2026-10 注册 1,052,447 个，is_internal_user_da=1 的 18 个；register_time 与 account_create_time 100% 相同"
+  - "Section 08 DS：用户域整体同意进入 pilot（限制见 Section 08）"

@@ -68,8 +68,10 @@ dimensions:
     applies_to: [T-001, T-002, T-004]
     notes: JOIN shared_cte.signup ON user_id。用户直接说「新用户」这类裸词时，要回问指的是当日新还是期间新（B-06）。
     traps: [P-25]
-    status: pending_review
+    status: pilot
     owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
     evidence: ["R0 B-06 / U4 DS 采纳"]
 
   - id: D-005
@@ -80,8 +82,10 @@ dimensions:
     applies_to: [T-001, T-002, T-004]
     notes: 例如 Q3 的期间是 2026-07-01 至 2026-09-30。周度按业务周，从周日开始到周六结束（R1 C5）。
     traps: [P-25]
-    status: pending_review
+    status: pilot
     owner: 数据组
+    reviewed_by: DS
+    reviewed_at: 2026-11-26
     evidence: ["R0 B-06 / U4 DS 采纳"]
 
   - id: D-006

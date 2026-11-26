@@ -20,8 +20,11 @@ key_fields:
   entry_source / ad_id: 来源、广告 ID
 traps: [P-14, P-15]
 producer: 未核对（CNB 无权限）
-status: pending_review
+status: pilot
 owner: 数据组
+reviewed_by: DS
+reviewed_at: 2026-11-26
 evidence:
   - "2026-11-25 核查（20261031，event_id 非空）：anon_id UV 144,168；uid UV 96,779；未登录 anon UV 113,914"
   - "Section 02，2026-11-26 DS：确认本表用于注册访问 UV，按非空 uid 去重，所有有效事件都算访问"
+  - "Section 08 DS：用户域整体同意进入 pilot（限制见 Section 08）"
