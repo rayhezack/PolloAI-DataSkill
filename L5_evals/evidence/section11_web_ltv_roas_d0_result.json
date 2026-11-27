@@ -1,0 +1,68 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261127054249993gi1ktrapbx",
+  "scope": "M-AD-006/013；Web可比平台；20261001~20261027、D0",
+  "row_count": 4,
+  "data": [
+    {
+      "source_end": "WEB",
+      "ad_platform": "bing",
+      "window_name": "0",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "43144.46",
+      "reg_user_cnt_d0": 29235,
+      "gmv_usd_n": "18165.914668",
+      "ltv_usd": 0.6213755658628357,
+      "roas": "0.421048604339931477"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "google",
+      "window_name": "0",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "353941.3019",
+      "reg_user_cnt_d0": 365254,
+      "gmv_usd_n": "131537.152282",
+      "ltv_usd": 0.3601251520366649,
+      "roas": "0.371635498812635181"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "naver",
+      "window_name": "0",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "3660.1998",
+      "reg_user_cnt_d0": 1708,
+      "gmv_usd_n": "3405.303623",
+      "ltv_usd": 1.9937374841920374,
+      "roas": "0.930360037449321756"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "yahoo",
+      "window_name": "0",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "6729.2092",
+      "reg_user_cnt_d0": 3725,
+      "gmv_usd_n": "6243.347624",
+      "ltv_usd": 1.6760664762416106,
+      "roas": "0.927798116902057377"
+    }
+  ],
+  "limitations": [
+    "仅所列日期和聚合范围的生产样本，不等于全历史或整个Agent验收",
+    "D0/D14/D30均固定20261001~20261027同批27天；不混用不同成熟截止日期",
+    "LTV按DS定义GMV_N/D0归因注册；ROAS为毛额回收，不计算ROI；平台仅google/bing/yahoo/naver"
+  ],
+  "as_of_date": "20261127"
+}

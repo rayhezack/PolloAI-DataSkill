@@ -1,10 +1,11 @@
--- K-110 Web广告渠道CAC（当日/期间注册口径）；M-AD-014；status: pending_review。
--- 业务公式已由Section11 DS回复确认；本模板尚未远程核验，不标注为已核验结果。
+-- K-110 Web广告渠道CAC（当日/期间注册口径）；M-AD-014；status: pilot。
+-- 业务公式已由Section11 DS回复确认；本版两日生产样本已执行，见section11_paid_cac_channels_result.json。
 -- 成本按花费日、注册按注册日，按同一日期和ad_platform对应；不是投放日D0注册口径。
 -- 复用已纳入的注册日表T-008：cohort_user_cnt只含广告归因注册，不含自然注册。
 -- start_date/end_date/as_of_date均为yyyymmdd；默认截到T-2。金额USD，分母0/NULL返回NULL。
 -- 保留全部match_level；只取总产品/总首购主行。先汇总渠道成本与渠道注册再相除。
 -- 当前按ad_platform输出，如google、bing；SEM/信息流大类的映射另查，不能混用。
+-- 若有渠道注册而成本为NULL，需随结果标明成本覆盖缺口；NULL不等于0，不宣称完整成本已齐。
 WITH channel_totals AS (
     SELECT LOWER(ad_platform) AS ad_platform, MIN(p_date) AS period_start,
            MAX(p_date) AS period_end, SUM(cost_usd) AS cost_usd,

@@ -1,0 +1,39 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261127054249993gi1ktrapbx",
+  "scope": "M-AD-007；仅Web、全部付费渠道；20261030~20261031",
+  "row_count": 3,
+  "data": [
+    {
+      "row_type": "daily",
+      "period_start": "20261030",
+      "period_end": "20261030",
+      "cost_usd": "17257.343",
+      "paid_signup_uv": 18361,
+      "cac_usd": 0.9398912368607375
+    },
+    {
+      "row_type": "daily",
+      "period_start": "20261031",
+      "period_end": "20261031",
+      "cost_usd": "19774.8916",
+      "paid_signup_uv": 19661,
+      "cac_usd": 1.005792767407558
+    },
+    {
+      "row_type": "period_total",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": "37032.2346",
+      "paid_signup_uv": 38022,
+      "cac_usd": 0.9739686129083164
+    }
+  ],
+  "limitations": [
+    "仅所列日期和聚合范围的生产样本，不等于全历史或整个Agent验收",
+    "X与Yandex样本有注册但成本为NULL；汇总成本为已入库成本，存在成本覆盖缺口，不能将结果当成完整成本CAC",
+    "大盘与渠道取同日/同期注册，不含自然注册；金额源沿广告账户时区"
+  ]
+}

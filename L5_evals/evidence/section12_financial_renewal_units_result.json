@@ -1,0 +1,27 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261127054249993gi1ktrapbx",
+  "scope": "M-PAY-021待评审统计单位对照；全站五维ALL；20261030~20261031",
+  "row_count": 1,
+  "data": [
+    {
+      "first_expiry_date": "20261030",
+      "last_expiry_date": "20261031",
+      "mature_day_count": 2,
+      "expire_user_days": 3386,
+      "financial_renew_user_days": 1801,
+      "expire_sub_cnt": 3405,
+      "financial_renew_sub_cnt": 1807,
+      "auto_renew_user_days": 1766,
+      "financial_user_rate": 0.5318960425280567,
+      "financial_subscription_rate": 0.530690161527166,
+      "business_auto_user_rate": 0.5215593620791494
+    }
+  ],
+  "limitations": [
+    "仅所列日期和聚合范围的生产样本，不等于全历史或整个Agent验收",
+    "用户跨日相加为用户·天，不代表期间去重人数；财务续费用户/订阅单位尚待DS确认，两个数仅作对照"
+  ]
+}

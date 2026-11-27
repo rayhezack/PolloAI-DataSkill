@@ -1,10 +1,11 @@
--- K-109 Web投放日LTV与ROAS；status: pending_review；Section10 DS公式已确认。
+-- K-109 Web投放日LTV与ROAS；status: pilot；Section10 DS公式已确认。
+-- 2026-11-27生产样本D0/D14/D30已执行，固定20261001~20261027；完整结果见L5_evals/evidence/section11_web_ltv_roas_d*_result.json。
 -- M-AD-001/005/006/013；金额USD；LTV为USD/D0广告归因注册用户，ROAS为比值（1=100%）。
 -- 参数start_date/end_date/as_of_date为yyyymmdd；window仅允许0/14/30/60/90/180/360/all。
 -- 先固定同一批成熟投放日期，再分别汇总成本、GMV_N、D0注册；不计算ROI。
 -- window=all表示截至观测日累计，仍截到T-2，不称完整终身价值。
 -- 单次只算一个窗口；比较多窗口曲线时，end_date应统一到最大N的成熟截止日。
--- 本模板限Web可比归因平台；不用于大盘CAC，CAC另用K-107（全Web成本/全Web注册）。
+-- 本模板限Web可比归因平台；不用于大盘CAC，CAC另用K-107（全部Web付费渠道成本/全部Web付费渠道注册）。
 WITH base AS (
     SELECT p_date, LOWER(ad_platform) AS ad_platform, cost_usd, reg_user_cnt_d0,
            CASE '${window}'

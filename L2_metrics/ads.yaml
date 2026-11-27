@@ -95,12 +95,12 @@ metrics:
     aggregation: rate
     dimensions: [D-012]
     traps: [P-35, P-38, P-41]
-    disclaimer: 本库LTV按投放日GMV_N/D0归因注册定义，不改成注册日起算或改用大盘注册分母。App本轮不实施；试用范围见Section11；SQL生产核验待补，业务公式已确认，不再要求重复评审。
+    disclaimer: 本库LTV按投放日GMV_N/D0归因注册定义，不改成注册日起算或改用大盘注册分母。App本轮不实施；试用范围见Section11；D0/D14/D30生产样本已核验；其他窗口与日期按同一公式执行，不把样本当全历史验收。
     status: pilot
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
-    evidence: ["Section10最新原文：LTV的分子和分母是GMV_N和D0注册数；仅Web、删除ROI", "K-109.sql按已确认公式编写；section11_web_ltv_roas_check.json记录本地检查通过、远程连接超时"]
+    evidence: ["Section10最新原文：LTV的分子和分母是GMV_N和D0注册数；仅Web、删除ROI", "K-109.sql按已确认公式编写；section11_web_ltv_roas_check.json已更新为生产样本通过；D0/D14/D30同批27天，公式重算一致"]
 
   - id: M-AD-007
     name: Web付费渠道大盘注册获客成本 CAC
@@ -110,17 +110,17 @@ metrics:
     type: ratio
     expr: SUM(cost_usd) / NULLIF(SUM(cohort_user_cnt),0)
     denominator: 全部Web付费渠道当日/同期注册人数合计（T-008 cohort_user_cnt，不含自然注册）
-    filters: ["source_end='WEB'，统计全部付费广告平台，不套ROAS的P-41平台白名单", "product_type='ALL' AND is_first_purchase='汇总'，保留全部match_level", "p_date与stat_date双约束且截到T-2；成本按花费日、注册按注册日对齐同一范围", "先合计付费渠道成本与付费注册再相除；不关联T-009全Web注册，不用安装或投放日D0注册替代", "缺失或零分母返回NULL；源表渠道覆盖及内部账号处理继续由Codex核查"]
+    filters: ["source_end='WEB'，统计全部付费广告平台，不套ROAS的P-41平台白名单", "product_type='ALL' AND is_first_purchase='汇总'，保留全部match_level", "p_date与stat_date双约束且截到T-2；成本按花费日、注册按注册日对齐同一范围", "先合计付费渠道成本与付费注册再相除；不关联T-009全Web注册，不用安装或投放日D0注册替代", "缺失或零分母返回NULL；源表两日样本已与画像核对：无内部账号、无非WEB画像；其他日期逐次核查"]
     time_axis: 同日/同期Web付费渠道成本与付费渠道注册比率；不是逐广告点击cohort转化成本。
     unit: USD/Web付费渠道注册用户
     aggregation: rate
     traps: [P-33, P-34, P-38]
-    disclaimer: DS已纠正：大盘分母也只能是全部付费渠道注册。原包含自然注册的0.6589等结果仅为错误旧定义的历史结果，不用于本口径。本版K-107需重算生产证据，不新增重复业务审批。
-    status: pending_review
+    disclaimer: DS已纠正：大盘分母也只能是全部付费渠道注册。原包含自然注册的0.6589等结果仅为错误旧定义的历史结果，不用于本口径。本版K-107两天生产样本已实跑；X/Yandex有注册但无成本，合计金额为已入库成本，缺口登记DW-07。
+    status: pilot
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
-    evidence: ["DS最新明确：Web大盘总CAC的分母应为全部付费渠道注册人数", "与M-AD-014/K-110复用已纳入的注册日广告表；生产定义明确cohort_user_cnt不含自然/SEO等非投放注册", "K-107.sql已按付费渠道合计重写；section10_web_cac_result.json标记旧定义已失效，本版生产重算待补"]
+    evidence: ["DS最新明确：Web大盘总CAC的分母应为全部付费渠道注册人数", "与M-AD-014/K-110复用已纳入的注册日广告表；生产定义明确cohort_user_cnt不含自然/SEO等非投放注册", "K-107.sql生产结果见section11_paid_cac_total_result.json；渠道加总与大盘一致，旧含自然注册结果失效"]
 
   - id: M-AD-009
     name: 广告安装数
@@ -204,7 +204,7 @@ metrics:
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
-    evidence: ["Section10 DS：ROAS=SUM(GMV_N)/SUM(cost_usd)；最新指令删除ROI，本轮仅Web", "原M-AD-008已删除且编号不复用；K-109本地边界检查通过，成熟样本远程核验连接超时待补"]
+    evidence: ["Section10 DS：ROAS=SUM(GMV_N)/SUM(cost_usd)；最新指令删除ROI，本轮仅Web", "原M-AD-008已删除且编号不复用；K-109本地边界及D0/D14/D30生产样本通过，结果见section11_web_ltv_roas_d*_result.json"]
 
   - id: M-AD-014
     name: Web广告渠道注册获客成本 CAC
@@ -220,9 +220,9 @@ metrics:
     aggregation: rate
     dimensions: [D-012]
     traps: [P-33, P-34, P-38]
-    disclaimer: Section11已确认分母必须是该渠道注册。复用已纳入的注册日表；来源的内部账号处理与成本一致性仍需技术核查。K-110尚未远程核验，不能将模板称为已执行证据；成本缺失不得解释为免费获客。
-    status: pending_review
+    disclaimer: Section11已确认分母必须是该渠道注册。注册日表两天样本已与画像核对，渠道注册和成本汇总与大盘一致。X/Yandex成本为NULL，不解释为免费获客；数据覆盖缺口见DW-07。
+    status: pilot
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
-    evidence: ["Section11 DS原文：广告渠道CAC分母应看广告渠道注册用户数，而不是大盘注册", "CNB main@29f9758 注册日表生产说明：cohort_user_cnt按注册日、cost_usd按花费日，平台总量保留全部match_level", "K-110.sql：待生产核验；已评审的业务公式与技术执行证据分开记录"]
+    evidence: ["Section11 DS原文：广告渠道CAC分母应看广告渠道注册用户数，而不是大盘注册", "CNB main@29f9758 注册日表生产说明：cohort_user_cnt按注册日、cost_usd按花费日，平台总量保留全部match_level", "K-110.sql生产结果见section11_paid_cac_channels_result.json；画像对照见section11_paid_signup_source_quality_result.json"]

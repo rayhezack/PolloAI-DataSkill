@@ -384,6 +384,7 @@ metrics:
     aggregation: rate
     dimensions: [D-006]
     traps: [P-21]
+    open_question: OQ-23
     status: pending_review
     owner: 数据组
-    evidence: ["2026-10 全 ALL：30,944 / 58,120 = 53.24%", "R1 Q1：renew_7d_sub_cnt 属于财务口径；按用户计是 AI 为了和业务口径对齐的推断，待确认"]
+    evidence: ["2026-10 全 ALL：30,944 / 58,120 = 53.24%", "R1 Q1：renew_7d_sub_cnt 属于财务口径；按用户计是 AI 为了和业务口径对齐的推断，待Section12确认", "2026-11-27生产样本见section12_financial_renewal_units_result.json：按用户53.1896%、按订阅53.0690%；只作单位选择对照"]

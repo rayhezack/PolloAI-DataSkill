@@ -1,0 +1,71 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261127054332424gd9fkp6jikk2",
+  "scope": "M-AD-014；仅Web、按广告平台；20261030~20261031",
+  "row_count": 7,
+  "data": [
+    {
+      "ad_platform": "bing",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": "2597.41",
+      "channel_signup_uv": 1637,
+      "channel_cac_usd": 1.5866890653634698
+    },
+    {
+      "ad_platform": "google",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": "33654.8729",
+      "channel_signup_uv": 35961,
+      "channel_cac_usd": 0.9358714412836129
+    },
+    {
+      "ad_platform": "meta",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": "8.71",
+      "channel_signup_uv": 9,
+      "channel_cac_usd": 0.9677777777777778
+    },
+    {
+      "ad_platform": "naver",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": "257.512",
+      "channel_signup_uv": 90,
+      "channel_cac_usd": 2.8612444444444445
+    },
+    {
+      "ad_platform": "x",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": null,
+      "channel_signup_uv": 48,
+      "channel_cac_usd": null
+    },
+    {
+      "ad_platform": "yahoo",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": "513.7297",
+      "channel_signup_uv": 276,
+      "channel_cac_usd": 1.861339492753623
+    },
+    {
+      "ad_platform": "yandex",
+      "period_start": "20261030",
+      "period_end": "20261030",
+      "cost_usd": null,
+      "channel_signup_uv": 1,
+      "channel_cac_usd": null
+    }
+  ],
+  "limitations": [
+    "仅所列日期和聚合范围的生产样本，不等于全历史或整个Agent验收",
+    "X与Yandex样本有注册但成本为NULL；汇总成本为已入库成本，存在成本覆盖缺口，不能将结果当成完整成本CAC",
+    "大盘与渠道取同日/同期注册，不含自然注册；金额源沿广告账户时区"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261127054249993gi1ktrapbx",
+  "scope": "M-AD-006/013；Web可比平台；20261001~20261027、D30",
+  "row_count": 4,
+  "data": [
+    {
+      "source_end": "WEB",
+      "ad_platform": "bing",
+      "window_name": "30",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "43144.46",
+      "reg_user_cnt_d0": 29235,
+      "gmv_usd_n": "30670.607923",
+      "ltv_usd": 1.0491057952112195,
+      "roas": "0.710881719761934672"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "google",
+      "window_name": "30",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "353941.3019",
+      "reg_user_cnt_d0": 365254,
+      "gmv_usd_n": "263810.752744",
+      "ltv_usd": 0.7222665672217142,
+      "roas": "0.745351704725703841"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "naver",
+      "window_name": "30",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "3660.1998",
+      "reg_user_cnt_d0": 1708,
+      "gmv_usd_n": "6857.52889",
+      "ltv_usd": 4.0149466569086645,
+      "roas": "1.873539496395797847"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "yahoo",
+      "window_name": "30",
+      "first_delivery_date": "20261001",
+      "last_delivery_date": "20261027",
+      "delivery_day_count": 27,
+      "cost_usd": "6729.2092",
+      "reg_user_cnt_d0": 3725,
+      "gmv_usd_n": "20518.629579",
+      "ltv_usd": 5.508356933959732,
+      "roas": "3.049188837672040275"
+    }
+  ],
+  "limitations": [
+    "仅所列日期和聚合范围的生产样本，不等于全历史或整个Agent验收",
+    "D0/D14/D30均固定20261001~20261027同批27天；不混用不同成熟截止日期",
+    "LTV按DS定义GMV_N/D0归因注册；ROAS为毛额回收，不计算ROI；平台仅google/bing/yahoo/naver"
+  ],
+  "as_of_date": "20261127"
+}

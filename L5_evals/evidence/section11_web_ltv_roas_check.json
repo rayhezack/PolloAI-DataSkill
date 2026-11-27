@@ -5,6 +5,40 @@
   "template": "L4_verified_queries/K-109.sql",
   "business_review": "Section10 DS：LTV=GMV_N/D0注册；ROAS=GMV_N/成本；仅Web；删除ROI",
   "remote_validation": {
+    "status": "passed_sample",
+    "start_date": "20261001",
+    "end_date": "20261027",
+    "as_of_date": "20261127",
+    "windows": [
+      "0",
+      "14",
+      "30"
+    ],
+    "platform_count": 4,
+    "results_received": true,
+    "result_files": [
+      "L5_evals/evidence/section11_web_ltv_roas_d0_result.json",
+      "L5_evals/evidence/section11_web_ltv_roas_d14_result.json",
+      "L5_evals/evidence/section11_web_ltv_roas_d30_result.json"
+    ]
+  },
+  "local_validation": {
+    "status": "passed",
+    "method": "SQLite内存数据库执行同一SQL模板；用Python日期函数替代TO_DATE/TO_CHAR/DATEADD；只验证本地逻辑，未验证MaxCompute方言和生产结果",
+    "script": "L5_evals/evidence/section11_web_ltv_roas_logic_check.py",
+    "checks": [
+      "仅Web、剔除App",
+      "平台白名单",
+      "T-2截止",
+      "D14成熟边界包含11-12、剔除11-13（as_of=11-27）",
+      "同批日期的D0/D14固定D0注册分母",
+      "零注册/零花费返回NULL",
+      "all仍截到T-2",
+      "D3/D7无投放日列，不支持窗口不静默换注册日起算"
+    ]
+  },
+  "release_scope": "Web业务公式已确认；本次补生产样本和交叉重算证据，不要求重复业务审批，不代表全历史验证。",
+  "prior_remote_validation": {
     "status": "incomplete_connection_error",
     "start_date": "20261001",
     "end_date": "20261031",
@@ -23,21 +57,5 @@
       "端点HTTPS连通性检查SSL connection timeout"
     ],
     "results_received": false
-  },
-  "local_validation": {
-    "status": "passed",
-    "method": "SQLite内存数据库执行同一SQL模板；用Python日期函数替代TO_DATE/TO_CHAR/DATEADD；只验证本地逻辑，未验证MaxCompute方言和生产结果",
-    "script": "L5_evals/evidence/section11_web_ltv_roas_logic_check.py",
-    "checks": [
-      "仅Web、剔除App",
-      "平台白名单",
-      "T-2截止",
-      "D14成熟边界包含11-12、剔除11-13（as_of=11-27）",
-      "同批日期的D0/D14固定D0注册分母",
-      "零注册/零花费返回NULL",
-      "all仍截到T-2",
-      "D3/D7无投放日列，不支持窗口不静默换注册日起算"
-    ]
-  },
-  "release_scope": "本记录只说明K-109技术核验进度，不新增业务禁用或审批条件；Section10业务公式已确认，未取得生产结果的查询不能被声称已核验。原Section11有限试用审批建议已撤回。"
+  }
 }

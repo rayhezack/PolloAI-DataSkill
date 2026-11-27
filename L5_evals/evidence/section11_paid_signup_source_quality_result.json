@@ -1,0 +1,63 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261127054249993gi1ktrapbx",
+  "scope": "Web广告归因注册与画像端别/内部标记；20261030~20261031；画像快照20261126",
+  "row_count": 7,
+  "data": [
+    {
+      "ad_platform": "bing",
+      "attributed_signup_uv": 1637,
+      "profile_missing_uv": 0,
+      "internal_uv": 0,
+      "non_web_profile_uv": 0
+    },
+    {
+      "ad_platform": "google",
+      "attributed_signup_uv": 35961,
+      "profile_missing_uv": 0,
+      "internal_uv": 0,
+      "non_web_profile_uv": 0
+    },
+    {
+      "ad_platform": "meta",
+      "attributed_signup_uv": 9,
+      "profile_missing_uv": 0,
+      "internal_uv": 0,
+      "non_web_profile_uv": 0
+    },
+    {
+      "ad_platform": "naver",
+      "attributed_signup_uv": 90,
+      "profile_missing_uv": 0,
+      "internal_uv": 0,
+      "non_web_profile_uv": 0
+    },
+    {
+      "ad_platform": "x",
+      "attributed_signup_uv": 48,
+      "profile_missing_uv": 0,
+      "internal_uv": 0,
+      "non_web_profile_uv": 0
+    },
+    {
+      "ad_platform": "yahoo",
+      "attributed_signup_uv": 276,
+      "profile_missing_uv": 0,
+      "internal_uv": 0,
+      "non_web_profile_uv": 0
+    },
+    {
+      "ad_platform": "yandex",
+      "attributed_signup_uv": 1,
+      "profile_missing_uv": 0,
+      "internal_uv": 0,
+      "non_web_profile_uv": 0
+    }
+  ],
+  "limitations": [
+    "仅所列日期和聚合范围的生产样本，不等于全历史或整个Agent验收",
+    "两个日期样本中画像均匹配，无内部账号或非WEB画像；源代码把非IOS/ANDROID归为WEB，不能据样本推断全部历史端别严格一致"
+  ]
+}

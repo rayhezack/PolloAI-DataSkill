@@ -31,12 +31,13 @@ key_fields:
   is_7d_closed: 7 日观察窗是否已经关闭
   "*_name": 各维度对应的中文名
 traps: [P-13, P-20, P-21, P-23]
-producer: 未核对（CNB 无权限）。7 日窗口 [到期−1, 到期+7] 已由 DS 在 R1 C3 确认
+producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 bigdata_dw/04_ADS/支付链路/Sq_ads_pollo_transaction_renewal_cohort_daily_dip.sql；renew_7d_sub_cnt按subscription_id去重，renew_7d_user_cnt按user_id去重；7日窗口沿用DS已确认的[到期−1,到期+7]
 status: pilot
 owner: 数据组
 reviewed_by: DS
 reviewed_at: 2026-11-25
 evidence:
+  - "2026-11-27核验20261030~31：到期用户日3386/订阅3405，财务续费用户日1801/订阅1807；K-111及section12_financial_renewal_units_result.json；财务指标统计单位待Section12确认"
   - "2026-11-25 核查（2026-10，5 个维度均为 ALL，is_7d_closed=1）：expire_sub_cnt 58,431；renew_7d_sub_cnt 31,019 = auto 30,534 + upgrade 191 + reset 251 + downgrade 43；expire_user_cnt 58,120"
   - "R1 C3（DS 确认）：7 日窗口为 [到期−1, 到期+7]，严格说是 9 天；提前一天是因为业务会提前扣费"
   - "2026-11-24 核查：近期分区 is_7d_closed 均为 0，符合预期"

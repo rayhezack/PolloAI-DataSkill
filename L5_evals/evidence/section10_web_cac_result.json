@@ -46,5 +46,5 @@
   "superseded_reason": "旧结果分母包含自然渠道注册；DS最新明确大盘CAC仅用全部Web付费渠道注册。旧数字不能用于当前M-AD-007。",
   "current_definition": "Web全部付费渠道广告成本合计/全部Web付费渠道注册人数合计",
   "current_sql": "L4_verified_queries/K-107.sql",
-  "current_definition_remote_result": "pending_recalculation"
+  "current_definition_remote_result": "L5_evals/evidence/section11_paid_cac_total_result.json"
 }

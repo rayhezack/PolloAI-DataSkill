@@ -8,6 +8,7 @@ partition:
   suffix: _dip
   read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')
 default_filters:
+  - source_end = 'WEB'（本轮仅Web，App不纳入）
   - is_first_purchase = '汇总' AND product_type = 'ALL'   # 主行：带消耗、安装、归因用户、GMV；其它行是首购 GMV 拆分行（P-33）
 time_axis: stat_date 对 cohort_user_cnt 和 GMV 为注册日，对 cost_usd 为花费日，对 install_cnt 为安装日；金额/人数北京时间，消耗沿账户时区；渠道CAC按DS确认采用同日/同期成本与注册比率；生产旧说明建议周/月用于减小日期错位，不能把该建议当成DS未批准的日指标禁用规则。
 key_fields:
@@ -23,9 +24,10 @@ key_fields:
   product_type: ALL / SUBSCRIPTION_NEW / API
 traps: [P-33, P-34, P-35]
 producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 pollo/02_数仓/广告域-广告投放归因/Sq_ads_pollo_ad_attribution_daily_dip.sql；口径见 ai_workspace/knowledge/legacy-caliber/ad-delivery.md。match_level：1 有钱有人 / 3 有人无钱 / 4 有钱无人 / 5 只有安装，看总量不要过滤
-status: pending_review
+status: pilot
 owner: 数据组
 evidence:
+  - "2026-11-27按DS最新CAC定义实跑：20261031 Web付费注册19661、成本$19774.8916；两日渠道加总与大盘一致，画像样本无内部/非WEB账号；X/Yandex成本缺失见DW-07"
   - "2026-11-25 核查（2026-10 主行）：level 1 消耗 $638,861.24、归因用户 588,477、D0/D7/D30 GMV $354,155 / $505,895 / $621,241；level 4 只有消耗 $114,546.78；level 3 只有 GMV（D7 $46,159）；level 5 只有安装"
   - "2026-11-25 核查：行类型（汇总, ALL）401,958 行；（1, SUBSCRIPTION_NEW）7,923 行；（0, SUBSCRIPTION_NEW）190 行；API 6 行"
 reviewed_by: DS
