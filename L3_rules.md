@@ -60,10 +60,10 @@
 | P-32 | 用 T-005 的创作字段代替任务表 | T-005 的 creation_user_cnt、creation_retain_* 与 T-006 自算相差约 0.1–0.3%（10/31 创作用户 28,837 对 28,827）。创作链路以 T-006 为准（R0 C4），T-005 只作快速参考 | M-CRE-008/014 |
 | P-33 | 注册日广告表主行和拆分行混加 | 仅 T-008：总量须固定 `product_type='ALL' AND is_first_purchase='汇总'`；不能与产品/首购拆分行相加。T-010 无这些汇总维度，不能套该过滤 | T-008 |
 | P-34 | 注册日广告表遗漏匹配层级 | 仅 T-008：1 人钱皆有、3 有人无钱、4 有钱无人、5 只有安装；平台总量不过滤 match_level，否则丢钱/用户/GMV。成本日、注册日、安装日不同，日粒度不能解释为同批获客比率；campaign 键须另核验 | T-008、D-010 |
-| P-35 | Dn 指标未成熟就用 | `_dN` 是累计值，未满 N 天时是部分值不是空值，混进去会拉低回收率。算 DN 只用 `p_date <= TO_CHAR(DATEADD(GETDATE(), -(N+1), 'dd'), 'yyyymmdd')`；如不同 N 分别截断日期，不可把不同批 cohort 当成同批曲线；比较曲线需统一到最大 N 的成熟日期。all 仅为截至观测日累计。广告主表只有 d0/d14/d30/d60/d90/d180/d360/all，没有 D3、D7 | M-AD-004~008、M-AD-011/012 |
+| P-35 | Dn 指标未成熟就用 | `_dN` 是累计值，未满 N 天时是部分值不是空值，混进去会拉低回收率。算 DN 只用 `p_date <= TO_CHAR(DATEADD(GETDATE(), -(N+1), 'dd'), 'yyyymmdd')`；如不同 N 分别截断日期，不可把不同批 cohort 当成同批曲线；比较曲线需统一到最大 N 的成熟日期。all 仅为截至观测日累计。广告主表只有 d0/d14/d30/d60/d90/d180/d360/all，没有 D3、D7 | M-AD-004/005/006/011/012/013 |
 | P-36 | 用 `submit_time` 非空算请求任务时没注明漏算 | 语音转写已发给厂商但 `submit_time` 恒为空，会被漏算。数仓上线「是否已提交给厂商」标志列前，请求任务数是临时口径（DW-04） | M-CRE-002 |
 | P-37 | 广告表找汇总行 / 把 APP 的 `channel='汇总'` 当汇总行 | 广告归因表（T-010）没有汇总行，全是明细，直接求和。APP 投放不拆渠道，`channel` 固定写 '汇总'、`device_type` 固定写 '不适用'，它们就是 APP 的明细行，不能过滤掉 | T-010、D-013 |
-| P-38 | 在细粒度上算 ROI、CAC | 消耗和注册、GMV 可能落在不同行（2026-10：419 行无消耗但有 6,625 个注册；无注册的行上有 $16,021 消耗），按设备、国家拆会失真。ROI、CAC 至少汇总到 投放端 × 广告平台 再算；CAC 的 WEB 分母固定 reg_user_cnt_d0、APP 固定 install_cnt，不能合并跨端分母；LTV/ROI 衔接待 OQ-22 | M-AD-006~008 |
+| P-38 | 归因收益在细粒度相除、或混用大盘CAC | 成本与归因GMV/注册在国家设备上可能错位，归因LTV/ROAS先按端×平台汇总再相除。M-AD-007独立定义为当天全部Web广告成本/当天全部Web注册，含自然注册，不套平台归因白名单、不用安装或reg_user_cnt_d0作分母。不能将全Web注册重复用作每个平台的获客分母。ROI已删除 | M-AD-006/007/013 |
 | P-39 | 广告主表取到了今天或昨天 | 今天的花费只到当前小时，昨天的 App 花费（Adjust 日任务、Meta App 西半球时区）当天还没结清。统计截到 T-2：`p_date <= TO_CHAR(DATEADD(GETDATE(), -2, 'dd'), 'yyyymmdd')`；只看 Web google/bing 可用到昨天，仍是临时值 | T-010 |
 | P-40 | 用户活跃日表按端求和时把子端行也加进去 | `client_type` 里 APP 是 IOS ∪ ANDROID 的合并行；11-25 起又加了 WEB-PC / WEB-H5，是 WEB 的拆分行（两者相加 = WEB，子端 UNKNOWN 的访客只在 WEB 行）。分端时只能选一组不重叠的取值，如 {WEB, IOS, ANDROID, 未知} 或 {WEB, APP, 未知}。另：11-24 起 DAU 排除美国 Web 机器流量，08-01 起已回刷 | T-005 |
-| P-41 | 回本、CAC 算进了人钱对不上的平台 | 只用 Web 的 google/bing/yahoo/naver 和 App 的 meta/asa/tiktok，App google 从 2026-04-01 起；Web meta/x/reddit/linkedin 人和钱对不上，Kwai/Snapchat 花费恒为 0 表示没数据。算 CPC/CPM 前去掉没有点击曝光的 Yahoo（仓库广告口径文档） | M-AD-006~008 |
+| P-41 | 归因LTV/ROAS纳入人钱无法对齐的平台 | 本轮仅Web：归因LTV/ROAS仅google/bing/yahoo/naver；不对其他平台零成本作免费获客解释。该白名单不限制M-AD-007大盘CAC：CAC分子须含全部Web广告成本，分母为全部Web注册（含自然）。App本轮不实施。CPC/CPM计算前排除没有点击/曝光的Yahoo（生产口径说明） | M-AD-006/013 |

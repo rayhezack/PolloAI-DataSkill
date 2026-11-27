@@ -27,7 +27,7 @@ producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 pollo/02
 status: pending_review
 owner: 数据组
 evidence:
-  - "口径文档硬规则：先 SUM 再相除；统计截到 T-2；DN 只用满 N 天的日期；回本、CAC 只用 Web google/bing/yahoo/naver 与 App meta/asa/tiktok（App google 2026-04-01 起）"
+  - "生产历史说明：先SUM再相除、截到T-2、DN只用成熟日期。其CAC平台白名单已被DS后续大盘CAC定义覆盖；当前仅归因ROAS/LTV沿用P-41可比平台"
   - "2026-11-25 核查（2026-10）：消耗 $753,408.02（APP $277,681.43、WEB $475,726.59），与旧表 T-008 各层级消耗合计一致"
   - "2026-11-25 核查（2026-10）：注册 d0 611,189 / d14 630,736 / d30 635,005 / all 636,316；GMV d0 $353,883.09 / d14 $574,840.05 / d30 $656,987.32 / all $731,318.42"
   - "2026-11-25 核查：country、language、ad_platform、source_end、device_type 均无 '汇总'/'ALL' 取值；按 7 个维度加 stat_date 每行唯一"
@@ -36,4 +36,4 @@ reviewed_by: DS
 reviewed_at: "2026-11-27"
 not_for:
   - 投放日起算 D3/D7 或 campaign/adgroup 下钻，本表无对应字段。
-  - 跨端统一 CAC；Web 使用 D0 注册，App 使用安装，不能混合分母。
+  - 单独计算当前Web大盘CAC；本表只提供source_end=WEB的全部广告成本，分母须取T-009当天Web总注册，不能用本表reg_user_cnt_d0或install_cnt。

@@ -83,6 +83,9 @@
   "limitations": [
     "仅2026-10月度聚合样本，不代表全历史/分日/广告计划级验收",
     "业务定义与全域pilot批准分开；LTV/ROI待Section10",
-    "投放成本沿广告账户时区；人数及GMV沿北京时间"
-  ]
+    "投放成本沿广告账户时区；人数及GMV沿北京时间",
+    "Section09分端CAC定义已被DS后续仅Web大盘注册CAC覆盖；本结果不是当前M-AD-007的核验证据"
+  ],
+  "definition_status": "historical_superseded",
+  "superseded_by": "L5_evals/evidence/section10_web_cac_result.json"
 }

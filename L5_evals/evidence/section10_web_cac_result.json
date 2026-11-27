@@ -1,0 +1,44 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "as_of_date": "20261127",
+  "snapshot_date": "20261126",
+  "instance_id": "20261127023006870gpaxj5vtdjm2",
+  "metric_id": "M-AD-007",
+  "scope": "仅Web：全部Web广告平台花费/全部Web注册（含自然与广告注册、排除内部用户）；按成本日与注册日对齐",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "row_count": 3,
+  "data": [
+    {
+      "row_type": "daily",
+      "period_start": "20261030",
+      "period_end": "20261030",
+      "cost_usd": "17257.343",
+      "signup_uv": 29079,
+      "cac_usd": 0.593464114997077
+    },
+    {
+      "row_type": "daily",
+      "period_start": "20261031",
+      "period_end": "20261031",
+      "cost_usd": "19774.8916",
+      "signup_uv": 30014,
+      "cac_usd": 0.6588555873925501
+    },
+    {
+      "row_type": "period_total",
+      "period_start": "20261030",
+      "period_end": "20261031",
+      "cost_usd": "37032.2346",
+      "signup_uv": 59093,
+      "cac_usd": 0.6266771800382449
+    }
+  ],
+  "limitations": [
+    "仅20261030/20261031两个自然日样本及其期间合计，不代表全历史验收",
+    "广告平台成本沿账户时区，沿用数仓stat_date日期；不是逐用户广告归因或因果增量获客成本",
+    "注册来源画像20261126快照，历史人数可能受画像后续修订影响",
+    "无数据日期不能当0；模板保留单侧缺失，缺失侧或零分母时CAC为NULL；双方均缺失的日期需单独核查分区覆盖",
+    "App/UNKNOWN不在本轮范围；ROAS/LTV另有适用人群，不从LTV/CAC输出ROI"
+  ]
+}

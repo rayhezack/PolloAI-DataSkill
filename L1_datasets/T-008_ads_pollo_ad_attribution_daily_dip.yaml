@@ -32,5 +32,5 @@ reviewed_by: DS
 reviewed_at: "2026-11-27"
 not_for:
   - 投放日 D3/D7；本表的 D3/D7 从注册日起算，不得静默替换。
-  - 默认 CAC；Section09 的分端分母只锁定 T-010。
+  - 默认Web大盘CAC；其分子用T-010的Web成本，分母用T-009的Web总注册，不使用本表归因用户。
   - 日粒度 CAC/ROAS 或未校准的 campaign 级成本比值；Web Google PMax/DG 等须额外核验归因键。

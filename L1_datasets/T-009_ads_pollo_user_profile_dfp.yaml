@@ -18,10 +18,11 @@ key_fields:
   register_date / register_time: 注册日期和时间
   is_internal_user_da: 内部用户标记，DS 指定用它排除注册中的内部账号（R1 用户域 Q3）
   is_internal_account: 另一个内部账号标记，范围比 is_internal_user_da 宽（2026-10 注册中 33 个对 18 个），一期不用
-  reg_platform / reg_country_code / acquisition_channel: 注册端、国家、获客渠道（维度候选，未评审）
+  reg_platform: 注册端 WEB/IOS/ANDROID/UNKNOWN；本轮CAC明确用WEB筛选注册，其他端不纳入
+  reg_country_code / acquisition_channel: 注册国家、获客渠道（维度候选，未评审）
 not_for:
   - 首付、首创作、生命周期、积分余额等画像字段尚未评审，不用于任何口径
-producer: 未核对（CNB 无权限）
+producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 bigdata_dw/04_ADS/用户增长/Sq_ads_pollo_user_profile_dfp.sql；DDL确认reg_platform统一为WEB/IOS/ANDROID/UNKNOWN
 status: pilot
 owner: 数据组
 reviewed_by: DS

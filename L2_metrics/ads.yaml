@@ -1,5 +1,6 @@
 # Section09：默认 T-010；注册日 cohort/D3/D7/支持的 campaign 下钻用 T-008。
-# 已确认 CAC：WEB cost/reg_d0；APP cost/install。LTV/ROI 衔接待 Section10，广告全域尚未批准 pilot。
+# 最新 DS 裁决：本次仅 Web；CAC=当天Web广告总成本/当天Web总注册（含自然渠道）。
+# ROI 已删除，M-AD-008 编号保留为历史编号、不复用；ROAS 使用 M-AD-013。App不在本轮范围。
 metrics:
   - id: M-AD-001
     name: 广告消耗
@@ -77,62 +78,46 @@ metrics:
     evidence: ["2026-10：d0 $353,883.09 / d14 $574,840.05 / d30 $656,987.32（2026-11-25 样本含未满 D30 日期，不是成熟 D30 总量）/ all $731,318.42"]
 
   - id: M-AD-006
-    name: 广告LTV（Dn）
+    name: Web广告LTV（Dn）
     synonyms: [LTV, 用户价值, 人均回收]
-    definition: 原草案为归因 GMV_N ÷ 同窗口注册人数 reg_N。Section09 只确认 CAC 的固定分端分母，未批准变更 LTV；是否改用 Web D0 注册/App 安装待 Section10。不自动把本指标变成每安装回收。
+    definition: Section10 选择固定获客分母：本次只记录 Web GMV_N / D0广告归因注册数，分母不随价值观察窗口N变化。此为投放日表中的每D0注册回收比率；该表GMV含投放后晚注册用户，尚不能代表严格固定注册cohort的生命周期收入。与大盘CAC采用不同人群，不通过两者相除派生ROI。
     table: T-010
     type: ratio
-    expr: M-AD-005 / M-AD-004
+    expr: SUM(gmv_usd_d{N}) / NULLIF(SUM(reg_user_cnt_d0),0)
     numerator: M-AD-005
-    denominator: M-AD-004
-    filters: ["同 M-AD-005", "分端 × 广告平台汇总；P-41 可比平台；不混合不同成熟日期样本"]
-    unit: USD/注册用户（草案）
+    denominator: SUM(reg_user_cnt_d0)（固定D0广告归因注册，不是M-USR-001大盘注册）
+    filters: ["source_end='WEB'；App本轮不纳入", "同 M-AD-005 的日期与成熟窗口；N=all时用gmv_usd_all", "按广告平台先汇总再相除；P-41可比Web平台"]
+    unit: USD/D0广告归因注册用户
     aggregation: rate
-    dimensions: [D-011, D-012]
+    dimensions: [D-012]
     traps: [P-35, P-38, P-41]
-    open_question: OQ-22
-    status: draft
-    owner: 数据组
-    evidence: ["Section09 CAC 新分母与原 LTV 分母不一致，不能约分；Section10 待评审"]
-
-  - id: M-AD-007
-    name: 获客成本 CAC
-    synonyms: [CAC, 获客成本]
-    definition: Section09 DS 确认：Web = SUM(cost_usd) / SUM(reg_user_cnt_d0)；App = SUM(cost_usd) / SUM(install_cnt)。分母固定，不随 Dn 改变。必须分端输出并标注 Web 美元/注册用户、App 美元/安装；不得合并成跨端统一 CAC。App 同范围 CAC 与 CPI 数值相同，不将此结论延伸为 LTV 的分母已获批准。
-    table: T-010
-    type: ratio
-    expr: SUM(cost_usd) / NULLIF(CASE WHEN source_end='WEB' THEN SUM(reg_user_cnt_d0) WHEN source_end='APP' THEN SUM(install_cnt) END,0)
-    numerator: M-AD-001
-    denominator: WEB 的 SUM(reg_user_cnt_d0)；APP 的 M-AD-009
-    filters: ["p_date = TO_CHAR(stat_date,'yyyymmdd') 且日期双约束", "统计截到 T-2（P-39）", "先按 source_end × ad_platform 汇总，分子分母同批日期", "WEB 平台仅 google/bing/yahoo/naver；APP 仅 meta/asa/tiktok，google 从20260401起（P-41）", "APP 2025年尚未校准，不纳入当前核验模板；模板从20260101起"]
-    unit: WEB USD/注册用户；APP USD/安装
-    aggregation: rate
-    dimensions: [D-011, D-012]
-    traps: [P-38, P-39, P-41]
+    disclaimer: 固定分母原则已确认；严格注册cohort收入与投放日窗口的技术适配尚未完成，本指标保持pending_review，不能作为严格用户生命周期LTV输出。App本轮不实施。
     status: pending_review
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
-    evidence: ["review/Section09_广告域_表分工与CAC.md：分端固定分母；业务算法已确认，全域 pilot 与 SQL 验收另行评审", "K-107.sql；L5_evals/evidence/section09_cac.sql"]
+    evidence: ["Section10 DS 选择固定cohort分母；后续仅Web、删除ROI及CAC新裁决见Section10最新结论", "T-010窗口起点为投放日，严格注册cohort适配待核验；不把语义原则的确认等同于源表完全匹配"]
 
-  - id: M-AD-008
-    name: 广告ROI（Dn）
-    synonyms: [ROI, 回收率, 回本率, D0 ROI, D14 ROI, D30 ROI]
-    definition: 历史 DS 定义为 LTV ÷ CAC。Section09 后 CAC 与原 LTV 分母不一致，不能继续声称该比率等于 GMV ÷ 消耗；ROI 与 ROAS 是否同义、LTV 是否调整，待 Section10。未定前不输出本指标，也不判断毛额回本。
+  - id: M-AD-007
+    name: Web大盘注册获客成本 CAC
+    synonyms: [CAC, 获客成本, 大盘总CAC, Web CAC, Web注册获客成本]
+    definition: 当天Web全部广告成本 / 当天Web总注册用户数。分子取T-010的source_end=WEB全部广告平台成本；分母沿用M-USR-001注册定义，另限定T-009的reg_platform=WEB，包含自然和广告渠道，排除内部用户并按user_id去重。App和UNKNOWN不纳入。不是只用广告归因注册，也不是安装分母；期间用总成本/总注册，不能平均每日CAC。
     table: T-010
     type: ratio
-    expr: M-AD-006 / M-AD-007
-    numerator: M-AD-006
-    denominator: M-AD-007
-    filters: ["同 M-AD-005", "同 M-AD-007；分子分母同批成熟日期、投放端与广告平台"]
-    unit: 比值（待评审）
+    expr: M-AD-001 / M-USR-001
+    numerator: M-AD-001
+    denominator: M-USR-001
+    filters: ["成本：source_end='WEB'；所有广告平台，不套用ROAS的P-41白名单", "注册：画像昨日快照，reg_platform='WEB'、is_registered=1、COALESCE(is_internal_user_da,0)<>1，COUNT(DISTINCT user_id)", "按成本日和注册日对齐同一北京时间自然日/期间，先各自汇总再关联", "成本日期双约束并截到T-2（P-39）；注册日期同窗", "缺失任一侧或分母为0时CAC返回NULL；标明画像快照日"]
+    time_axis: 广告成本按花费日，注册按注册日；成本源沿账户时区，日期按数仓stat_date对齐，不宣称逐用户同批归因。
+    unit: USD/Web注册用户
     aggregation: rate
-    dimensions: [D-011, D-012]
-    traps: [P-35, P-38, P-41]
-    open_question: OQ-22
-    status: draft
+    traps: [P-39]
+    disclaimer: 仅Web，包含自然注册的大盘经营比率；不等于逐广告归因获客成本。按广告平台拆分时不能把同一批全Web注册重复充当各平台获客分母；平台级CAC需独立已评审的注册归因规则。
+    status: pending_review
     owner: 数据组
-    evidence: ["Section09 新 CAC 不能与原 LTV 直接约分；历史 GMV/消耗数字不是 LTV/CAC 新定义的验证"]
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
+    evidence: ["DS于2026-11-27明确：大盘总广告成本/当天总注册；随后限定仅Web、App暂不包含，覆盖Section09旧分端方案", "K-107.sql；L5_evals/evidence/section10_web_cac.sql及结果"]
 
   - id: M-AD-009
     name: 广告安装数
@@ -157,8 +142,8 @@ metrics:
     expr: M-AD-001 / M-AD-009   -- 仅 APP
     numerator: M-AD-001
     denominator: M-AD-009
-    definition: 同范围下为 App CAC 的同值比率；若用于获客决策，沿用 M-AD-007 的日期、平台和历史覆盖限制。
-    filters: ["source_end = 'APP'", "同 M-AD-007 的日期、平台、覆盖限制；分子分母同批行"]
+    definition: App广告成本/安装数，独立于Web大盘注册CAC；App不在本轮实施范围。
+    filters: ["source_end = 'APP'", "p_date与stat_date双约束、统计截到T-2；分子分母同批日期，先汇总再相除"]
     unit: USD/次
     aggregation: rate
     dimensions: [D-012]
@@ -197,3 +182,23 @@ metrics:
     status: pending_review
     owner: 数据组
     evidence: ["2026-10：d0 $290,973.70 / all $377,055.03"]
+
+  - id: M-AD-013
+    name: Web广告归因毛额回收率 ROAS（Dn）
+    synonyms: [ROAS, 广告回收率, 广告回本率, D0 ROAS, D14 ROAS, D30 ROAS]
+    definition: Section10 DS确认GMV_N/广告成本；本轮仅Web。分子分母共用相同投放日期、端和广告平台，有限N只用成熟日期。窗口从投放日算；金额不扣退款、拒付、佣金等，100%仅表示毛额覆盖广告花费。与大盘CAC不同，不把P-41限制套到大盘CAC。
+    table: T-010
+    type: ratio
+    expr: M-AD-005 / M-AD-001
+    numerator: M-AD-005
+    denominator: M-AD-001
+    filters: ["source_end='WEB'；App本轮不纳入", "p_date与stat_date双约束且截到T-2；有限N满足stat_date+N<=昨日；all为截至观测日累计", "仅google/bing/yahoo/naver（P-41）；先按平台汇总再相除", "成本和GMV同批日期；跨N曲线用最大N的成熟日期固定样本；零成本返回NULL"]
+    unit: 比值（1=100%）
+    aggregation: rate
+    dimensions: [D-012]
+    traps: [P-35, P-38, P-39, P-41]
+    status: pending_review
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
+    evidence: ["Section10 DS：ROAS=SUM(GMV_N)/SUM(cost_usd)；最新指令删除ROI，本轮仅Web", "原M-AD-008已删除且编号不复用；新增独立ROAS编号，成熟样本核验待完成"]
