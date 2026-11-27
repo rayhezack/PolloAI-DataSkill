@@ -1,5 +1,5 @@
 schema_version: 1
-coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09/10 广告CAC、LTV、ROAS和选表路由；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
+coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09~11广告CAC、LTV、ROAS和选表路由、Section12续费金额与用户续订率；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
 usage: 先匹配 unsupported_terms，再匹配 ambiguous_terms、terms 和 table_routes；命中后仍须检查指标卡的状态、适用范围和过滤条件，不因术语可检索就视为 verified。
 terms:
   - term: 访客注册转化率
@@ -37,7 +37,35 @@ terms:
     aliases: [渠道CAC, 广告渠道CAC, Google渠道CAC]
     meaning: 该Web广告渠道当天/同期的广告成本/该渠道注册人数，不用整个Web注册作分母；同组渠道合计也须成本与注册范围对应。
     reviewed_source: review/Section11_广告域_Web试用范围.md
+  - term: 当日续费金额
+    metric: M-PAY-022
+    aliases: [当日续费, 当天续费金额, 当日财务续费金额]
+    meaning: renew_same_day_amount_usd直接求和，单位USD；不是人数比率。
+    reviewed_source: review/Section12_支付域_财务续费率统计单位.md
+  - term: 7日续费金额
+    metric: M-PAY-023
+    aliases: [7日续费, 7日财务续费金额, 续费金额, 续费GMV]
+    meaning: renew_7d_amount_usd直接求和，单位USD，观察窗成熟；不是金额比率。
+    reviewed_source: review/Section12_支付域_财务续费率统计单位.md
+  - term: 当日续订率
+    metric: M-PAY-024
+    aliases: [当天续订率, 当日财务续订率]
+    meaning: renew_same_day_user_cnt/expire_user_cnt；用户比例，含全续订类型。
+    reviewed_source: review/Section12_支付域_财务续费率统计单位.md
+  - term: 7日续订率
+    metric: M-PAY-021
+    aliases: [财务续订率, 全类型7日续订率]
+    meaning: renew_7d_user_cnt/expire_user_cnt；用户比例，不是订阅数比例。
+    reviewed_source: review/Section12_支付域_财务续费率统计单位.md
 ambiguous_terms:
+  - term: 续费率
+    candidate_metrics: [M-PAY-022, M-PAY-023]
+    action: follow_reviewed_amount_meaning
+    prompt: Section12 DS用此词指定续费金额；默认分别返回当日/7日续费金额，单位USD，不标成百分比。若明确要求金额比率，现有回复未给分母，不能擅自除以到期应续金额。
+  - term: 续订率
+    candidate_metrics: [M-PAY-024, M-PAY-021, M-PAY-020, M-PAY-017]
+    action: resolve_from_context
+    prompt: 默认按全续订类型用户数/到期用户数分别给当日和7日；明确问自动续订/业务口径时用M-PAY-020/017。不能按订阅数计算。
   - term: CAC
     candidate_metrics: [M-AD-007, M-AD-014]
     action: resolve_from_context

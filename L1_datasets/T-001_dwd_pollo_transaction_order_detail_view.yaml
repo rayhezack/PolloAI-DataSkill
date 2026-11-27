@@ -34,7 +34,7 @@ key_fields:
   usage_count: 积分额度；>=5000 视为 Ultra
   sub_order_type_detail: 订阅子类型；算升级时排除 FIRST_SUB（P-09）
 traps: [P-03, P-04, P-07, P-08, P-12, P-22]
-producer: 未核对（CNB 无权限），底表 dwd_pollo_transaction_order_dip 的生产 SQL 待 R1 补
+producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 bigdata_dw/02_DWD/transaction/ddl_dwd_pollo_transaction_order_detail_view.sql；底表Sq_dwd_pollo_transaction_order_dip.sql；实付美元=业务amount_received/100×汇率，含税含义另见OQ-04，不根据代码未扣税推断
 status: pilot
 owner: 数据组
 reviewed_by: DS

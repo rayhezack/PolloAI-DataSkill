@@ -26,6 +26,8 @@ key_fields:
   renew_7d_reset_sub_cnt: 7 日内以周期重置方式续上
   renew_7d_downgrade_sub_cnt: 7 日内以降级方式续上
   resub_7d_sub_cnt: 7 日内重新订阅（RESUBSCRIBE）。不计入 renew_7d
+  renew_same_day_amount_usd / renew_7d_amount_usd: Section12指定当日/7日续费金额，直接求和、单位USD；全续订类型，不自行除以应续金额
+  renew_same_day_user_cnt / renew_7d_user_cnt: 续订用户数；对应窗口除以expire_user_cnt为续订率，按用户不按订阅
   renew_same_day_*: 到期当日续费
   renew_month_*: 当月续费
   is_7d_closed: 7 日观察窗是否已经关闭
@@ -37,7 +39,8 @@ owner: 数据组
 reviewed_by: DS
 reviewed_at: 2026-11-25
 evidence:
-  - "2026-11-27核验20261030~31：到期用户日3386/订阅3405，财务续费用户日1801/订阅1807；K-111及section12_financial_renewal_units_result.json；财务指标统计单位待Section12确认"
+  - "Section12 DS明确金额与用户率分开；K-112生产样本20261030~31：当日金额$46011.4119、7日金额$57048.9884，当日用户率1547/3386、7日1801/3386；自动专项另列"
+  - "2026-11-27核验20261030~31：到期用户日3386/订阅3405，财务续费用户日1801/订阅1807；K-111及section12_financial_renewal_units_result.json；Section12已确认续费金额与用户续订率分开，金额字段核验见K-112"
   - "2026-11-25 核查（2026-10，5 个维度均为 ALL，is_7d_closed=1）：expire_sub_cnt 58,431；renew_7d_sub_cnt 31,019 = auto 30,534 + upgrade 191 + reset 251 + downgrade 43；expire_user_cnt 58,120"
   - "R1 C3（DS 确认）：7 日窗口为 [到期−1, 到期+7]，严格说是 9 天；提前一天是因为业务会提前扣费"
   - "2026-11-24 核查：近期分区 is_7d_closed 均为 0，符合预期"

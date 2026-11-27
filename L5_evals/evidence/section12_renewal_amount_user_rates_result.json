@@ -1,0 +1,52 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "as_of_date": "20261127",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "instance_id": "20261127054249993gi1ktrapbx",
+  "scope": "T-003全站五维ALL；20261030~20261031到期cohort；当日及成熟7日续费金额与用户续订率；自动续订另列",
+  "metric_ids": [
+    "M-PAY-021",
+    "M-PAY-022",
+    "M-PAY-023",
+    "M-PAY-024",
+    "M-PAY-017",
+    "M-PAY-018",
+    "M-PAY-020"
+  ],
+  "row_count": 2,
+  "data": [
+    {
+      "window_name": "7d",
+      "first_expiry_date": "20261030",
+      "last_expiry_date": "20261031",
+      "cohort_day_count": 2,
+      "expire_user_days": 3386,
+      "renewal_amount_usd": "57048.9884",
+      "renewal_user_days": 1801,
+      "user_renewal_rate": 0.5318960425280567,
+      "auto_renewal_amount_usd": "53778.893",
+      "auto_renewal_user_days": 1766,
+      "auto_user_renewal_rate": 0.5215593620791494
+    },
+    {
+      "window_name": "same_day",
+      "first_expiry_date": "20261030",
+      "last_expiry_date": "20261031",
+      "cohort_day_count": 2,
+      "expire_user_days": 3386,
+      "renewal_amount_usd": "46011.4119",
+      "renewal_user_days": 1547,
+      "user_renewal_rate": 0.45688127584170113,
+      "auto_renewal_amount_usd": "43005.0458",
+      "auto_renewal_user_days": 1519,
+      "auto_user_renewal_rate": 0.44861193148257533
+    }
+  ],
+  "limitations": [
+    "金额为USD直接汇总，不是金额比率；Section12未给金额比率分母，未自行除以应续金额",
+    "按到期日归属，不是统计期内发生的全部扣款；跨日人数相加为用户·天",
+    "全类型含自动/升级/重置/降级，自动专项另外输出；本次两个窗口均为同批两个已成熟日期",
+    "两个样本日期可执行并重算通过，不代表全历史或系统验收"
+  ]
+}

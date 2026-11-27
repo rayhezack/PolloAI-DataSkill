@@ -282,7 +282,7 @@ metrics:
   - id: M-PAY-016
     name: 到期用户数
     synonyms: [到期数, 到期人数, 到期订阅]
-    definition: 当天订阅到期的用户数，即续费率的分母。按订阅数统计时用 expire_sub_cnt。
+    definition: 当天订阅到期的用户数，即用户续订率的分母。订阅数仅作另行分析，不用于当前用户续订率。
     table: T-003
     type: atomic
     expr: SUM(expire_user_cnt)
@@ -298,8 +298,8 @@ metrics:
     evidence: ["2026-10，5 个维度均为 ALL，is_7d_closed=1：58,120（订阅数 58,431）"]
 
   - id: M-PAY-017
-    name: 7日续费率
-    synonyms: [续费率, 续订率, 7日续订率, renewal rate, 业务续费率]
+    name: 7日自动续订率
+    synonyms: [7日自动续订率, 自动续订率, 业务续订率, 业务续费率]
     definition: 业务口径。到期 cohort 中在 [到期−1, 到期+7]（共 9 天）内自动续费（RENEW）的用户占比。窗口提前 1 天是因为业务会在到期前一天提前扣费。
     table: T-003
     type: ratio
@@ -310,16 +310,17 @@ metrics:
     aggregation: rate
     dimensions: [D-006]
     traps: [P-13, P-20, P-21]
-    disclaimer: 用户只说「续费率」时，同时给出当日续费率（M-PAY-020）和 7 日续费率（R1 Q1）。
+    disclaimer: Section12命名修订：本指标仅自动续订用户率。裸词“续订率”默认全续订类型的M-PAY-024/021；按DS回复问“续费率/续费”时先返回M-PAY-022/023金额，不把金额展示为百分比。
     status: pilot
     owner: 数据组
     reviewed_by: DS
-    reviewed_at: 2026-11-25
+    reviewed_at: "2026-11-27"
     evidence: ["2026-10 全 ALL：30,460 / 58,120 = 52.41%", "R1 Q1/C3"]
 
   - id: M-PAY-018
-    name: 7日续费金额
-    synonyms: [续费GMV, 续费金额]
+    name: 7日自动续费金额
+    synonyms: [自动续费金额, 自动续费GMV, 7日自动扣费金额]
+    definition: 仅RENEW自动扣费金额；不代替Section12指定的全续订类型7日续费金额M-PAY-023。
     table: T-003
     type: atomic
     expr: SUM(renew_7d_auto_amount_usd)
@@ -331,7 +332,7 @@ metrics:
     status: pilot
     owner: 数据组
     reviewed_by: DS
-    reviewed_at: 2026-11-25
+    reviewed_at: "2026-11-27"
     evidence: ["2026-10 全 ALL：$865,127.09"]
 
   - id: M-PAY-019
@@ -353,9 +354,9 @@ metrics:
     evidence: ["20261031 全汇总：76,398；WEB 62,337 + APP 14,061 = 76,398", "R1 Q2 DS 指定"]
 
   - id: M-PAY-020
-    name: 当日续费率
-    synonyms: [到期当日续费率, 当天续费率]
-    definition: 业务口径。到期 cohort 中在到期当日自动续费的用户占比（含提前 1 天扣费，待生产 SQL 确认）。
+    name: 当日自动续订率
+    synonyms: [到期当日自动续订率, 当天自动续订率, 当日业务续订率]
+    definition: 业务口径。到期 cohort 中在到期当日自动续费的用户占比（沿用已确认的提前1天扣费，即[到期−1,到期]）。
     table: T-003
     type: ratio
     expr: SUM(renew_same_day_auto_user_cnt) / SUM(expire_user_cnt)
@@ -368,23 +369,84 @@ metrics:
     status: pilot
     owner: 数据组
     reviewed_by: DS
-    reviewed_at: 2026-11-25
+    reviewed_at: "2026-11-27"
     evidence: ["2026-10 全 ALL：27,835 / 58,120 = 47.89%", "R1 Q1：续费要同时看当日和 7 日"]
 
   - id: M-PAY-021
-    name: 7日续费率（财务口径）
-    synonyms: [财务续费率]
-    definition: 把升级、重置、降级续上的下一周期也计入。只在用户明确问财务口径时使用。
+    name: 7日续订率
+    synonyms: [7日续订率, 财务续订率, 全类型7日续订率]
+    definition: Section12 DS确认：续订用户数/到期用户数，按用户而非订阅。全续订类型包括自动扣费、升级、重置、降级，不含RESUBSCRIBE。按到期日cohort统计，7日窗沿用[到期-1,到期+7]。
     table: T-003
     type: ratio
-    expr: SUM(renew_7d_user_cnt) / SUM(expire_user_cnt)
-    denominator: 到期用户数（7 日已成熟）
-    filters: ["is_7d_closed = 1", "5 个 rollup 维度全部钉住"]
+    expr: SUM(renew_7d_user_cnt) / NULLIF(SUM(expire_user_cnt),0)
+    denominator: 到期用户数（同批7日已成熟到期日期；跨日相加为用户·天）
+    filters: ["p_date与stat_date双约束", "is_7d_closed=1", "五个rollup维度全部钉住，默认ALL", "分子分母同批到期cohort，零分母返回NULL"]
+    time_axis: stat_date为订阅到期日，不是扣费日。
     unit: "%"
     aggregation: rate
     dimensions: [D-006]
-    traps: [P-21]
-    open_question: OQ-23
-    status: pending_review
+    traps: [P-13, P-20, P-21, P-23]
+    disclaimer: 续订率看用户比例；续费金额另见M-PAY-022/023。业务只看自动续订时用M-PAY-017，不把全类型和自动续订混用。
+    status: pilot
     owner: 数据组
-    evidence: ["2026-10 全 ALL：30,944 / 58,120 = 53.24%", "R1 Q1：renew_7d_sub_cnt 属于财务口径；按用户计是 AI 为了和业务口径对齐的推断，待Section12确认", "2026-11-27生产样本见section12_financial_renewal_units_result.json：按用户53.1896%、按订阅53.0690%；只作单位选择对照"]
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
+    evidence: ["Section12 DS：续订率=续订用户数/到期用户数", "K-111原对照样本20261030~31全类型续订用户日1801/到期用户日3386=53.1896%；最新金额及用户率核验见K-112及section12_renewal_amount_user_rates_result.json"]
+
+  - id: M-PAY-022
+    name: 当日续费金额
+    synonyms: [当日续费, 当天续费金额, 当日财务续费金额]
+    definition: 到期cohort在[到期-1,到期]内续上下一周期的实收金额，含自动、升级、重置、降级；金额直接汇总，单位USD。Section12明确字段renew_same_day_amount_usd，不自行增加金额比率分母。
+    table: T-003
+    type: atomic
+    expr: SUM(renew_same_day_amount_usd)
+    filters: ["p_date与stat_date双约束且到期日<=昨日", "五个rollup维度全部钉住，默认ALL"]
+    time_axis: stat_date为到期日cohort，不是当天发生的全部扣款。
+    unit: USD
+    aggregation: total
+    dimensions: [D-006]
+    traps: [P-20, P-21]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
+    evidence: ["Section12 DS明确指定renew_same_day_amount_usd与renew_7d_amount_usd，分别看当日和7d", "CNB main@29f9758生产SQL；K-112实跑20261030~31当日金额$46011.4119；结果见section12_renewal_amount_user_rates_result.json"]
+
+  - id: M-PAY-023
+    name: 7日续费金额
+    synonyms: [7日续费, 7日财务续费金额, 续费GMV, 续费金额]
+    definition: 到期cohort在[到期-1,到期+7]内续上下一周期的实收金额，含自动、升级、重置、降级；只汇总已成熟到期日期。不是续订人数比率，不自行除以应续金额。
+    table: T-003
+    type: atomic
+    expr: SUM(renew_7d_amount_usd)
+    filters: ["p_date与stat_date双约束", "is_7d_closed=1", "五个rollup维度全部钉住，默认ALL"]
+    time_axis: stat_date为到期日cohort。
+    unit: USD
+    aggregation: total
+    dimensions: [D-006]
+    traps: [P-13, P-20, P-21]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
+    evidence: ["Section12 DS指定renew_7d_amount_usd；原M-PAY-018仅自动续费金额，另行保留并明确命名", "K-112实跑20261030~31已成熟cohort的7日金额$57048.9884；section12_renewal_amount_user_rates_result.json"]
+
+  - id: M-PAY-024
+    name: 当日续订率
+    synonyms: [当日续订率, 当天续订率, 当日财务续订率]
+    definition: 到期用户中，在[到期-1,到期]内续上下一周期的用户占比；含自动、升级、重置、降级，不含RESUBSCRIBE。自动续订专项用M-PAY-020。
+    table: T-003
+    type: ratio
+    expr: SUM(renew_same_day_user_cnt) / NULLIF(SUM(expire_user_cnt),0)
+    denominator: 同批到期用户数（跨日相加为用户·天）
+    filters: ["p_date与stat_date双约束且到期日<=昨日", "五个rollup维度全部钉住，默认ALL", "分子分母同批到期日期，零分母NULL"]
+    time_axis: stat_date为到期日cohort。
+    unit: "%"
+    aggregation: rate
+    dimensions: [D-006]
+    traps: [P-20, P-21, P-23]
+    status: pilot
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
+    evidence: ["Section12 DS：续订率看用户数，续订用户/到期用户；当日与7日窗口分开记录", "K-112实跑20261030~31当日续订用户日1547/到期用户日3386=45.6881%；section12_renewal_amount_user_rates_result.json"]
