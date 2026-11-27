@@ -4,7 +4,7 @@ metrics:
   - id: M-PAY-001
     name: 支付GMV
     synonyms: [GMV, 收入, 流水, 销售额, 支付金额]
-    definition: 有效订单的实付金额（USD），不扣退款，含 API。只有做支付转化漏斗分析（主动付费、自动续订）时才剔除 API（R1 创作域 Q1 DS）。
+    definition: 有效订单的实付金额（USD），包含税款和服务费，不扣退款，含API。只有做支付转化漏斗分析（主动付费、自动续订）时才剔除 API（R1 创作域 Q1 DS）。
     table: T-001
     type: atomic
     expr: SUM(CAST(amount_received_usd AS DOUBLE))
@@ -14,18 +14,17 @@ metrics:
     aggregation: total
     dimensions: [D-001, D-002, D-004, D-005]
     traps: [P-01, P-07, P-19]
-    disclaimer: 不扣退款，不等于净收入；是否含税尚未声明（OQ-04）。
-    open_question: OQ-04
+    disclaimer: 包含税款和服务费，不扣退款；不是剔除税费/服务费后的收入，也不等于净利润。
     status: pilot
     owner: 数据组
     reviewed_by: DS
-    reviewed_at: 2026-11-25
-    evidence: ["2026-10 含 API：$4,108,793.73，其中 API $29,700.00（2026-11-25 核查）", "R0 B-08/P2；R1 Q3；R1 创作域 Q1 DS 修订为含 API"]
+    reviewed_at: "2026-11-27"
+    evidence: ["Section13 DS明确：实付金额含税款和服务费；仅补充金额组成，既有GMV/扣退款公式未变", "2026-10 含 API：$4,108,793.73，其中 API $29,700.00（2026-11-25 核查）", "R0 B-08/P2；R1 Q3；R1 创作域 Q1 DS 修订为含 API"]
 
   - id: M-PAY-002
     name: 实收GMV
     synonyms: [净收入, 扣退款收入, 实收, net revenue]
-    definition: 支付GMV 扣除退款后的金额，退款按订单的支付日归属。
+    definition: 支付GMV扣除退款后的金额，退款按订单支付日归属；基数包含税款和服务费，不额外扣除税款或服务费。
     table: T-001
     type: atomic
     expr: SUM(CAST(revenue_usd_amount AS DOUBLE))
@@ -35,12 +34,12 @@ metrics:
     aggregation: total
     dimensions: [D-001, D-002, D-004, D-005]
     traps: [P-22]
-    disclaimer: 近期数值会随后续退款下降，须注明「退款数据截至 yyyy-mm-dd」。
+    disclaimer: 本指标仅扣退款，不能解释为剔除税款/服务费后的净收入或利润；近期数值会随后续退款下降，须注明「退款数据截至 yyyy-mm-dd」。
     status: pilot
     owner: 数据组
     reviewed_by: DS
-    reviewed_at: 2026-11-25
-    evidence: ["2026-10 含 API：$3,995,232.08 = $4,108,793.73 − 退款 $113,561.65（2026-11-25 核查）", "退款会回写：非 API 退款 11-24 为 $108,212.89，11-25 为 $108,318.69（P-22）", "R0 P6；R1 C4"]
+    reviewed_at: "2026-11-27"
+    evidence: ["Section13 DS明确：实付金额含税款和服务费；仅补充金额组成，既有GMV/扣退款公式未变", "2026-10 含 API：$3,995,232.08 = $4,108,793.73 − 退款 $113,561.65（2026-11-25 核查）", "退款会回写：非 API 退款 11-24 为 $108,212.89，11-25 为 $108,318.69（P-22）", "R0 P6；R1 C4"]
 
   - id: M-PAY-003
     name: 退款金额

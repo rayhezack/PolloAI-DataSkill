@@ -1,5 +1,5 @@
 schema_version: 1
-coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09~11广告CAC、LTV、ROAS和选表路由、Section12续费金额与用户续订率；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
+coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09~11广告CAC、LTV、ROAS和选表路由、Section12续费金额与用户续订率、Section13支付金额组成；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
 usage: 先匹配 unsupported_terms，再匹配 ambiguous_terms、terms 和 table_routes；命中后仍须检查指标卡的状态、适用范围和过滤条件，不因术语可检索就视为 verified。
 terms:
   - term: 访客注册转化率
@@ -57,6 +57,16 @@ terms:
     aliases: [财务续订率, 全类型7日续订率]
     meaning: renew_7d_user_cnt/expire_user_cnt；用户比例，不是订阅数比例。
     reviewed_source: review/Section12_支付域_财务续费率统计单位.md
+  - term: 支付GMV
+    metric: M-PAY-001
+    aliases: [GMV, 支付金额, 支付流水]
+    meaning: 有效订单实付金额，包含税款和服务费，不扣退款，含API；不是扣税费或服务费后的收入。
+    reviewed_source: review/Section13_支付域_GMV含税说明.md
+  - term: 实收GMV
+    metric: M-PAY-002
+    aliases: [扣退款收入, 实收]
+    meaning: 支付GMV减退款，仅扣退款，不额外扣税款或服务费，不等于净利润。
+    reviewed_source: review/Section13_支付域_GMV含税说明.md
 ambiguous_terms:
   - term: 续费率
     candidate_metrics: [M-PAY-022, M-PAY-023]

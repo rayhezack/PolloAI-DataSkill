@@ -17,9 +17,9 @@ key_fields:
   pay_type: 交易类型，枚举见 D-002
   pay_platform: 支付端（WEB/IOS/ANDROID），见 D-001
   reg_platform: 注册端；跨端人群用它，不用支付端（P-12）
-  amount_received_usd: 实付金额（USD），不扣退款，即支付GMV
+  amount_received_usd: 实付金额（USD），包含税款和服务费，不扣退款，即支付GMV（Section13 DS确认）
   refund_usd_amount: 该订单累计退款（USD）
-  revenue_usd_amount: 等于 amount_received_usd 减 refund_usd_amount，即实收GMV
+  revenue_usd_amount: 等于amount_received_usd减refund_usd_amount，即实收GMV；仅扣退款，不额外扣税款或服务费，不是净利润
   is_refunded: 是否发生过退款
   is_full_refund: 是否全额退款
   last_refund_date: 最近一次退款的日期；退款金额按支付日归属，不按退款日（P-22）
@@ -34,12 +34,13 @@ key_fields:
   usage_count: 积分额度；>=5000 视为 Ultra
   sub_order_type_detail: 订阅子类型；算升级时排除 FIRST_SUB（P-09）
 traps: [P-03, P-04, P-07, P-08, P-12, P-22]
-producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 bigdata_dw/02_DWD/transaction/ddl_dwd_pollo_transaction_order_detail_view.sql；底表Sq_dwd_pollo_transaction_order_dip.sql；实付美元=业务amount_received/100×汇率，含税含义另见OQ-04，不根据代码未扣税推断
+producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 bigdata_dw/02_DWD/transaction/ddl_dwd_pollo_transaction_order_detail_view.sql；底表Sq_dwd_pollo_transaction_order_dip.sql；实付美元=业务amount_received/100×汇率，金额组成由Section13 DS确认为包含税款和服务费，OQ-04已决
 status: pilot
 owner: 数据组
 reviewed_by: DS
-reviewed_at: 2026-11-25
+reviewed_at: "2026-11-27"
 evidence:
+  - "Section13 DS原始回复：含税和服务费收入；聊天确认：含税和服务费的金额。金额公式未变，无需因本次说明重算历史GMV"
   - "2026-11-24 核查（2026-10，is_valid_order=1，非 API）：90,540 单，amount_received_usd 合计 $4,079,093.74，与 order_dip 一致"
   - "2026-11-24 核查：各 pay_type 下 amount_received_usd − refund_usd_amount − revenue_usd_amount 的差值均为 0"
   - "2026-11-25 核查（2026-10，含 API）：90,719 单，$4,108,793.73；其中 API 179 单、$29,700.00"
