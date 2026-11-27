@@ -1,4 +1,5 @@
--- K-108 注册日 cohort GMV 核验；pending_review；T-008；USD。
+-- status: pending_review
+-- K-108 注册日 cohort GMV 核验；T-008；USD。
 -- 本模板只输出 D3/D7，不能冒充投放日起算的 D3/D7；不计算LTV；内部ROI已删除。
 -- 参数均为北京时间 yyyymmdd。分母和成本未输出；所有行用同一批已满 D7 的注册日期。
 -- 保留全部 match_level；只取总产品/总首购主行，避免与产品拆分重复。

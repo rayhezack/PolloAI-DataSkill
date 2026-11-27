@@ -1,4 +1,5 @@
--- K-110 Web广告渠道CAC（当日/期间注册口径）；M-AD-014；status: pilot。
+-- status: pilot
+-- K-110 Web广告渠道CAC（当日/期间注册口径）；M-AD-014。
 -- 业务公式已由Section11 DS回复确认；本版两日生产样本已执行，见section11_paid_cac_channels_result.json。
 -- 成本按花费日、注册按注册日，按同一日期和ad_platform对应；不是投放日D0注册口径。
 -- 复用已纳入的注册日表T-008：cohort_user_cnt只含广告归因注册，不含自然注册。

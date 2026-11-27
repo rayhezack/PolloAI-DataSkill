@@ -1,4 +1,5 @@
--- K-109 Web投放日LTV与ROAS；status: pilot；Section10 DS公式已确认。
+-- status: pilot
+-- K-109 Web投放日LTV与ROAS；Section10 DS公式已确认。
 -- 2026-11-27生产样本D0/D14/D30已执行，固定20261001~20261027；完整结果见L5_evals/evidence/section11_web_ltv_roas_d*_result.json。
 -- M-AD-001/005/006/013；金额USD；LTV为USD/D0广告归因注册用户，ROAS为比值（1=100%）。
 -- 参数start_date/end_date/as_of_date为yyyymmdd；window仅允许0/14/30/60/90/180/360/all。

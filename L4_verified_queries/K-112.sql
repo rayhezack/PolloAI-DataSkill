@@ -1,4 +1,5 @@
--- K-112 续费金额与用户续订率；status: pilot；Section12 DS已确认。
+-- status: pilot
+-- K-112 续费金额与用户续订率；Section12 DS已确认。
 -- 2026-11-27生产实跑20261030~31已通过；证据section12_renewal_amount_user_rates_result.json。
 -- 财务续费金额：renew_same_day_amount_usd / renew_7d_amount_usd，单位USD，无分母。
 -- 续订率：续订用户/到期用户；财务含自动、升级、重置、降级；自动续订另列，不混用。
