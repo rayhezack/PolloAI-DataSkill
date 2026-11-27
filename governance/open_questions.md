@@ -27,4 +27,4 @@
 | OQ-21 | 当天采纳任务数的默认来源与过滤 | M-CRE-019、T-012、K-104 | DS | ✅ 已决：用户采纳日汇总表；is_valid_task=1 是既定默认；不另列含无效任务的业务选项，成功状态一致性由 Codex 核查 | Section 05 DS 回复，2026-11-26 |
 | OQ-22 | LTV固定分母、ROAS及ROI处置 | M-AD-006/013 | DS | ✅ 已决：LTV明确为GMV_N/D0注册数；ROAS=GMV_N/成本；内部ROI删除，历史编号M-AD-008不复用。本轮仅Web；公式已确认，K-109 D0/D14/D30同批成熟生产样本已补齐 | Section10回复及后续最新裁决，2026-11-27 |
 | OQ-23 | 续费金额与用户续订率的区分 | M-PAY-021~024 | DS | ✅ 已决：续费看renew_same_day_amount_usd/renew_7d_amount_usd，按当日/7d直接汇总USD；续订率=续订用户/到期用户，不用订阅数；保留业务自动续订专项 | Section12 DS原始回复，2026-11-27 |
-| OQ-24 | Agent域数据基建与边界：App是否只算ShowMaker；下载埋点覆盖；最终产物delivery_role；积分不足结构化事件；外部用户过滤；来源表和字段待基建落地 | M-AGT-001~023 | 业务/研发/数仓 | 待Agent基建；当前先纳入业务指标定义，所有Agent来源表标TBD，不自行指定生产表；支付链路已有App/Web归因SQL，创作链路先锁定指标与颗粒度 | 飞书《Pollo AI Agent 数据基建》2026-11-27读取；本地镜像SQL查询/Agent基建/agent_metrics_definition.md |
+| OQ-24 | Agent域数据基建与边界：App是否只算ShowMaker；下载埋点覆盖；最终产物delivery_role；积分不足结构化事件；外部用户过滤；来源表和字段待基建落地 | M-AGT-001~023 | 业务/研发/数仓 | ✅ 已决纳入Agent业务定义；五项基建问题待数据基建落地，所有Agent来源表继续标TBD，不自行指定生产表；支付链路已有App/Web归因SQL，创作链路先锁定指标与颗粒度 | 飞书《Pollo AI Agent 数据基建》2026-11-27读取；本地镜像SQL查询/Agent基建/agent_metrics_definition.md |

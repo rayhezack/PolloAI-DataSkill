@@ -6,7 +6,7 @@
 
 - 新成员先读 [接续与评审路线](review/00_Codex接续与评审路线.md)，了解当前进度和待评审内容。
 - 逐节评审从 [Section 01：口径维护与冲突裁决](review/Section01_口径维护与冲突裁决.md) 开始，每节说明现状、需要的决定和评审内容。
-- Section 02~13 业务口径已评审；最新结论见 [Section10：仅Web大盘CAC、保留ROAS、删除ROI](review/Section10_广告域_LTV与ROI衔接.md)。最新补充见[Section11：范围说明与渠道CAC分母](review/Section11_广告域_Web试用范围.md)：大盘与单渠道CAC均只用付费渠道注册，排除自然注册；前者合计全部付费渠道，后者按渠道拆分，不再增加有限试用审批。付费注册CAC及D0/D14/D30 LTV/ROAS生产样本已补齐，成本缺失渠道见DW-07。Section12已确认续费金额与用户续订率分开；[Section13已确认](review/Section13_支付域_GMV含税说明.md)：GMV实付金额包含税款和服务费，实收GMV仅扣退款。新增[Section14：Agent指标纳入与基建待办](review/Section14_Agent域_指标纳入与基建待办.md)待评审，来源表等待数据基建，不提前指定。
+- Section 02~14 业务口径已评审；下一步评审 [Section15：R2 黄金问题集与问数路由](review/Section15_R2黄金问题集与问数路由.md)。最新结论见 [Section10：仅Web大盘CAC、保留ROAS、删除ROI](review/Section10_广告域_LTV与ROI衔接.md)。最新补充见[Section11：范围说明与渠道CAC分母](review/Section11_广告域_Web试用范围.md)：大盘与单渠道CAC均只用付费渠道注册，排除自然注册；前者合计全部付费渠道，后者按渠道拆分，不再增加有限试用审批。付费注册CAC及D0/D14/D30 LTV/ROAS生产样本已补齐，成本缺失渠道见DW-07。Section12已确认续费金额与用户续订率分开；[Section13已确认](review/Section13_支付域_GMV含税说明.md)：GMV实付金额包含税款和服务费，实收GMV仅扣退款。[Section14：Agent指标纳入与基建待办](review/Section14_Agent域_指标纳入与基建待办.md)已确认纳入，来源表等待数据基建，不提前指定。
 - 环境安装、分支和 Pull Request 流程见 [协作指南](CONTRIBUTING.md)。
 - 安装校验依赖：`python3 -m pip install -r requirements.txt`；在仓库根目录执行 `python3 scripts/lint.py`。
 - 提交文件不代表口径已通过评审，使用前必须检查条目状态。

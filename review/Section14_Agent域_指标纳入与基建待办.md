@@ -1,6 +1,6 @@
 # Section 14：Agent 域——指标体系纳入知识库与基建待办
 
-日期：2026-11-27。状态：业务定义已纳入，数据基建待建设。来源：飞书 [Pollo AI Agent 数据基建](https://bcn0tgplxp2e.feishu.cn/wiki/L2E9w8BfwiZklXk7UTDcOrvlnKc?from=from_copylink)，以及本地镜像 `/Users/ray/Desktop/Codex Projects/Pollo Projects/SQL查询/Agent基建/agent_metrics_definition.md`。
+日期：2026-11-27。状态：**已评审通过；业务定义已纳入，数据基建待建设。**来源：飞书 [Pollo AI Agent 数据基建](https://bcn0tgplxp2e.feishu.cn/wiki/L2E9w8BfwiZklXk7UTDcOrvlnKc?from=from_copylink)，以及本地镜像 `/Users/ray/Desktop/Codex Projects/Pollo Projects/SQL查询/Agent基建/agent_metrics_definition.md`。
 
 **核心结论：Agent 域现在纳入知识库的指标层，暂不指定生产表。等基建完成后，再把 `TBD` 替换为经过评审的表卡和 SQL。**
 
@@ -33,18 +33,10 @@ Agent 创作链路按用户×日统计主漏斗；会话采纳率按 session×�
 
 这些问题统一登记为 OQ-24。来源表、字段和生产分区待基建文档落地后，再建立 T-013 之后的 Agent 表卡和 K-113 之后的执行模板；当前不把候选源表写成正式表卡。
 
-## 评审范围
+## 评审结论
 
-本节不要求你重新选择北极星或公式。请只确认：
-
-- 这套 Agent 指标是否纳入知识库作为待基建业务定义；
-- 五项待确认是否作为 OQ-24 跟踪；
-- 数据基建完成后再评审真实表、字段、过滤、去重和 SQL。
-
-**你的结论：**
-
-可写“同意纳入，按 OQ-24 跟进”，或直接补充需要修改的 Agent 指标定义。
+已确认：这套 Agent 指标纳入知识库作为待基建业务定义，五项问题统一按 OQ-24 跟踪；数据基建完成后，再评审真实表、字段、过滤、去重和 SQL。
 
 ## 交付边界
 
-本次已完成业务指标卡和待办登记，没有执行 Agent 生产 SQL，也没有把候选来源表标成可用口径。Agent 域的 R2 题目会先验证路由和回问行为，待基建有表后再补生产金标。
+本次已完成业务指标卡和待办登记，没有执行 Agent 生产 SQL，也没有把候选来源表标成可用口径。下一步进入 R2 黄金问题集评审：先验证路由和回问行为，待基建有表后再补生产金标。
