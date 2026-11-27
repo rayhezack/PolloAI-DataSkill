@@ -1,5 +1,5 @@
 schema_version: 1
-coverage: 当前仅覆盖 Section 02/06 已评审的注册访问及两个访客比率；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
+coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09 广告CAC和选表路由；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
 usage: 先匹配 ambiguous_terms，再匹配 terms；命中后仍须检查指标卡的状态、适用范围和过滤条件，不因术语可检索就视为 verified。
 terms:
   - term: 访客注册转化率
@@ -17,8 +17,30 @@ terms:
     aliases: [注册访问 UV, 埋点登录账号访问UV, 创作渗透分母]
     meaning: 有效埋点中的非空 uid 按自然日去重，是账号数
     reviewed_source: review/Section02_创作域_注册访问UV.md
+  - term: 获客成本 CAC
+    metric: M-AD-007
+    aliases: [CAC, 获客成本]
+    meaning: 默认 T-010；Web 消耗/D0注册，App 消耗/安装，按端×平台输出，不合并两种分母；未批准广告全域pilot。
+    reviewed_source: review/Section09_广告域_表分工与CAC.md
 ambiguous_terms:
+  - term: 广告LTV/ROI/ROAS
+    aliases: [LTV, ROI, ROAS, 广告回收率, 广告回本率]
+    candidate_metrics: [M-AD-006, M-AD-008]
+    action: clarify
+    prompt: Section09的新CAC与旧LTV分母不同，LTV与ROI/ROAS衔接待Section10评审；不得直接输出旧恒等式。明确GMV/消耗的诊断计算需标注未批准的指标命名。
   - term: 访问注册率
     candidate_metrics: [M-USR-003, M-USR-009]
     action: clarify
     prompt: 你指当日新注册用户数占访客的比率，还是发生过登录行为的访客占比？
+table_routes:
+  - intent: 默认广告消耗、投放日注册/GMV、CAC
+    table: T-010
+    window_origin: 投放日
+    available_windows: [D0, D14, D30, D60, D90, D180, D360, all]
+    reviewed_source: review/Section09_广告域_表分工与CAC.md
+  - intent: 明确的注册cohort、注册日起算D3/D7、支持的campaign/adgroup下钻
+    table: T-008
+    window_origin: 注册日（用户/GMV）；消耗与安装分别按花费日/安装日
+    available_windows: [D0, D3, D7, D14, D30, D60, D90, D180]
+    guard: 明确问投放日D3/D7时先说明主表不支持，不能静默改注册日起算；成本比率及campaign归因另核验。
+    reviewed_source: review/Section09_广告域_表分工与CAC.md

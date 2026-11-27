@@ -1,0 +1,172 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "as_of_date": "20261127",
+  "instance_id": "20261127013402725grnsz2plna",
+  "scope": "T-008；2026-10 注册日 cohort；全平台；ALL/汇总主行；保留所有 match_level",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "row_count": 17,
+  "data": [
+    {
+      "source_end": "APP",
+      "ad_platform": "appier",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 32,
+      "gmv_usd_d3": "318.95",
+      "gmv_usd_d7": "318.95"
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "asa",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 21025,
+      "gmv_usd_d3": "44459.86512",
+      "gmv_usd_d7": "48404.893627"
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "google",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 8737,
+      "gmv_usd_d3": "12031.462126",
+      "gmv_usd_d7": "13983.536288"
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "kwai",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 6,
+      "gmv_usd_d3": "0",
+      "gmv_usd_d7": "0"
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "meta",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 111345,
+      "gmv_usd_d3": "140236.900655",
+      "gmv_usd_d7": "152837.218172"
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "mtg",
+      "first_cohort_date": "20261011",
+      "last_cohort_date": "20261011",
+      "cohort_user_cnt": 1,
+      "gmv_usd_d3": "0",
+      "gmv_usd_d7": "0"
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "snapchat",
+      "first_cohort_date": "20261022",
+      "last_cohort_date": "20261022",
+      "cohort_user_cnt": 1,
+      "gmv_usd_d3": "0",
+      "gmv_usd_d7": "0"
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "tiktok",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 10735,
+      "gmv_usd_d3": "13539.455892",
+      "gmv_usd_d7": "14824.147634"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "asa",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261024",
+      "cohort_user_cnt": 17,
+      "gmv_usd_d3": "140.673708",
+      "gmv_usd_d7": "169.673708"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "bing",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 34356,
+      "gmv_usd_d3": "29538.920915",
+      "gmv_usd_d7": "33000.016372"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "google",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 449606,
+      "gmv_usd_d3": "231989.685722",
+      "gmv_usd_d7": "262535.014605"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "meta",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 89,
+      "gmv_usd_d3": "257.436192",
+      "gmv_usd_d7": "257.436192"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "naver",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 2028,
+      "gmv_usd_d3": "6179.314516",
+      "gmv_usd_d7": "6380.483081"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "reddit",
+      "first_cohort_date": "20261022",
+      "last_cohort_date": "20261027",
+      "cohort_user_cnt": 2,
+      "gmv_usd_d3": "0",
+      "gmv_usd_d7": "0"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "x",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 553,
+      "gmv_usd_d3": "2132.560835",
+      "gmv_usd_d7": "2420.357856"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "yahoo",
+      "first_cohort_date": "20261001",
+      "last_cohort_date": "20261031",
+      "cohort_user_cnt": 4554,
+      "gmv_usd_d3": "15178.648552",
+      "gmv_usd_d7": "16922.401709"
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "yandex",
+      "first_cohort_date": "20261003",
+      "last_cohort_date": "20261030",
+      "cohort_user_cnt": 8,
+      "gmv_usd_d3": "0",
+      "gmv_usd_d7": "0"
+    }
+  ],
+  "limitations": [
+    "仅2026-10月度聚合样本，不代表全历史/分日/广告计划级验收",
+    "业务定义与全域pilot批准分开；LTV/ROI待Section10",
+    "投放成本沿广告账户时区；人数及GMV沿北京时间",
+    "D3/D7从注册日起算，不是投放日起算",
+    "全平台GMV覆盖不代表这些平台都可计算CAC/回本",
+    "全部10月cohort已满D7；尚未覆盖临界日期和无数据边界题"
+  ]
+}

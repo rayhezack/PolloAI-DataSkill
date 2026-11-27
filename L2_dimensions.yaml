@@ -140,12 +140,12 @@ dimensions:
   - id: D-010
     name: 广告匹配层级
     synonyms: [match_level, 匹配层级, 归因层级]
-    notes: 只存在于错误表 T-008，广告域改用 T-010 后作废，不得使用。
+    notes: 仅 T-008；Section09 已确认注册日 cohort 表适用范围。总量不筛层级，不能套到 T-010。
     expr: "match_level"
-    values: {"1": "消耗与归因用户都匹配到（AI 推测）", "3": "有归因用户/GMV，无消耗（AI 推测）", "4": "有消耗，无归因用户（AI 推测）", "5": "只有安装（AI 推测）"}
+    values: {"1": "消耗与归因用户都匹配到（生产 SQL 说明）", "3": "有归因用户/GMV，无消耗（生产 SQL 说明）", "4": "有消耗，无归因用户（生产 SQL 说明）", "5": "只有安装（生产 SQL 说明）"}
     applies_to: [T-008]
     traps: [P-34]
-    status: deprecated
+    status: pending_review
     owner: 数据组
     evidence: ["2026-11-25 核查：2026-10 各层级的消耗/用户/GMV 分布"]
 
@@ -154,7 +154,7 @@ dimensions:
     synonyms: [source_end, 投放平台端]
     expr: "source_end"
     values: {WEB: Web 投放, APP: App 投放}
-    applies_to: [T-010]
+    applies_to: [T-008, T-010]
     status: pending_review
     owner: 数据组
     evidence: ["2026-11-25 核查 T-010：仅 WEB/APP"]
@@ -164,7 +164,7 @@ dimensions:
     synonyms: [渠道, 媒体, ad_platform, 投放渠道]
     expr: "LOWER(ad_platform)"
     values: {google: Google, meta: Meta, bing: Bing, tiktok: TikTok, asa: Apple Search Ads, naver: Naver, yahoo: Yahoo, kwai: Kwai}
-    applies_to: [T-010]
+    applies_to: [T-008, T-010]
     notes: 与 v1 G-12 渠道归并（付费投放/自然/未知/其他）是两套维度，不要混用。
     status: pending_review
     owner: 数据组

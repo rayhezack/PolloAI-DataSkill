@@ -71,7 +71,7 @@
 
 原始回复与落地记录见 [Section 01](Section01_口径维护与冲突裁决.md)，本地差异见 [存量知识对照](../governance/legacy_alignment.md)。
 
-**Section 02~08 业务口径已评审。当前待评：** [Section 09：广告域——表分工与 CAC 默认分母](Section09_广告域_表分工与CAC.md)。用户域技术核验与创作域历史回刷对账由 Codex 继续完成，不重复提交既定口径。
+**Section 02~09 业务口径已评审。当前待评：** [Section 10：广告域——LTV 与 ROI 的衔接](Section10_广告域_LTV与ROI衔接.md)。广告两表分工及分端 CAC 已落地，广告全域 pilot 尚未批准。用户域技术核验与创作域历史回刷对账由 Codex 继续完成，不重复提交既定口径。
 
 ## 5. Codex 后续自行处理的检查项
 

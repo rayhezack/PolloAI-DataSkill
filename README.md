@@ -6,7 +6,7 @@
 
 - 新成员先读 [接续与评审路线](review/00_Codex接续与评审路线.md)，了解当前进度和待评审内容。
 - 逐节评审从 [Section 01：口径维护与冲突裁决](review/Section01_口径维护与冲突裁决.md) 开始，每节说明现状、需要的决定和评审内容。
-- Section 02~08 业务口径已评审；当前待评：[Section 09：广告域——表分工与 CAC 默认分母](review/Section09_广告域_表分工与CAC.md)。
+- Section 02~09 业务口径已评审；广告域全域 pilot 尚未批准。当前待评：[Section 10：广告域——LTV 与 ROI 的衔接](review/Section10_广告域_LTV与ROI衔接.md)。
 - 环境安装、分支和 Pull Request 流程见 [协作指南](CONTRIBUTING.md)。
 - 安装校验依赖：`python3 -m pip install -r requirements.txt`；在仓库根目录执行 `python3 scripts/lint.py`。
 - 提交文件不代表口径已通过评审，使用前必须检查条目状态。
@@ -30,7 +30,7 @@
 | R9 | 「新用户」「付费用户」这类裸词按 L3 术语表映射。映射不到的要回问。 |
 
 ## 检索流程（指标优先，schema 兜底）
-1. 先查 `L3_glossary.yaml`，歧义词先确认，再把已明确的说法映射到 M/D。当前术语索引仅覆盖注册访问及两个访客比率，其他说法继续查指标卡 synonyms，未命中按 R7 处理。
+1. 先查 `L3_glossary.yaml`，歧义词先确认，再把已明确的说法映射到 M/D。当前术语索引覆盖注册访问、两个访客比率及广告 CAC/表路由，其他说法继续查指标卡 synonyms，未命中按 R7 处理。
 2. 命中 `L4_verified_queries/K-*.sql` 的，填参数后原样执行，并标注「核验口径」。
 3. 只命中 M/D 的，读指标卡里的 `expr`/`filters`，再读对应的 `L1_datasets` 表卡，然后组装 SQL。
 4. 都没命中的，读 L1 表卡写 SQL，并按 R7 处理。

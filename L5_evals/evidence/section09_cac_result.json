@@ -1,0 +1,88 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "as_of_date": "20261127",
+  "instance_id": "20261127013405613ge9igxstdjm2",
+  "scope": "T-010；2026-10 投放日；P-41 平台；Web D0 注册/App 安装",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "row_count": 8,
+  "data": [
+    {
+      "source_end": "APP",
+      "ad_platform": "asa",
+      "cost_usd": "31425.4054",
+      "reg_user_cnt_d0": 19817,
+      "install_cnt": 29530,
+      "denominator_basis": "installs",
+      "cac_usd": 1.064185756857433
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "google",
+      "cost_usd": "30805.5975",
+      "reg_user_cnt_d0": 7442,
+      "install_cnt": 13266,
+      "denominator_basis": "installs",
+      "cac_usd": 2.322146653098146
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "meta",
+      "cost_usd": "200766.562",
+      "reg_user_cnt_d0": 103143,
+      "install_cnt": 156449,
+      "denominator_basis": "installs",
+      "cac_usd": 1.2832716220621416
+    },
+    {
+      "source_end": "APP",
+      "ad_platform": "tiktok",
+      "cost_usd": "14683.87",
+      "reg_user_cnt_d0": 9680,
+      "install_cnt": 13564,
+      "denominator_basis": "installs",
+      "cac_usd": 1.082561928634621
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "bing",
+      "cost_usd": "48616.59",
+      "reg_user_cnt_d0": 32442,
+      "install_cnt": null,
+      "denominator_basis": "D0 registrations",
+      "cac_usd": 1.498569447013131
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "google",
+      "cost_usd": "415168.4037",
+      "reg_user_cnt_d0": 432457,
+      "install_cnt": null,
+      "denominator_basis": "D0 registrations",
+      "cac_usd": 0.9600223922840884
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "naver",
+      "cost_usd": "4204.4105",
+      "reg_user_cnt_d0": 1929,
+      "install_cnt": null,
+      "denominator_basis": "D0 registrations",
+      "cac_usd": 2.179580352514256
+    },
+    {
+      "source_end": "WEB",
+      "ad_platform": "yahoo",
+      "cost_usd": "7688.7625",
+      "reg_user_cnt_d0": 4217,
+      "install_cnt": null,
+      "denominator_basis": "D0 registrations",
+      "cac_usd": 1.823277804126156
+    }
+  ],
+  "limitations": [
+    "仅2026-10月度聚合样本，不代表全历史/分日/广告计划级验收",
+    "业务定义与全域pilot批准分开；LTV/ROI待Section10",
+    "投放成本沿广告账户时区；人数及GMV沿北京时间"
+  ]
+}

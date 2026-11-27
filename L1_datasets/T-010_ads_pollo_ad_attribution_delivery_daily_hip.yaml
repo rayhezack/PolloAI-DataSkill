@@ -1,7 +1,7 @@
 id: T-010
 table: mc_prd.ads_pollo_ad_attribution_delivery_daily_hip
 domain: AD
-purpose: 广告投放归因日表，广告域口径的唯一来源（R1 广告域 DS 指定，取代 T-008）。按投放日记录消耗、展示、点击、安装，以及该日广告带来的注册用户和他们自注册日起的累计 GMV、订单、首购。
+purpose: 默认广告投放日主表（Section09 DS 确认）。按投放日记录消耗、展示、点击、安装，以及从投放日起算的注册用户、累计 GMV、订单、首购；注册日 cohort、D3/D7、campaign/adgroup 问题另路由 T-008。
 grain: 一行 = stat_date × source_end × channel × ad_platform × country × language × device_type（2026-10 实测每日唯一，42,823 行）
 primary_key: [stat_date, source_end, channel, ad_platform, country, language, device_type]
 partition:
@@ -23,7 +23,7 @@ key_fields:
   gmv_usd_dN / order_cnt_dN: 付款日 − 投放日 ∈ [0, N] 的累计 GMV / 订单（窗口从投放日起算，生产 SQL）。毛额：不扣退款，剔除风控单和 0 元单，含 App 商店付款。没有 d3、d7 列（d3/d7 只在注册日 cohort 表 T-008）
   first_purchase_*_dN: 首购 = 全史第一笔订阅新购 + 全史第一笔 API credits，一人最多 2 单；首购 GMV / 订单只有 d0、d14、all，首购用户数有 D0~D360；first_sub_* 为首订，first_api_* 为 API 首购
 traps: [P-35, P-37, P-38, P-39, P-41]
-producer: CNB bigdata_etl main@d8753d1 pollo/02_数仓/广告域-广告投放归因/Sq_ads_pollo_ad_attribution_delivery_daily_hip.sql（v1.2，04:15 全量 + 07:15~22:15 每小时）；口径文档 ai_workspace/knowledge/legacy-caliber/ad-delivery.md（verified 2026-11-21，冲突以代码为准）
+producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 pollo/02_数仓/广告域-广告投放归因/Sq_ads_pollo_ad_attribution_delivery_daily_hip.sql（v1.2，04:15 全量 + 07:15~22:15 每小时）；口径文档 ai_workspace/knowledge/legacy-caliber/ad-delivery.md（verified 2026-11-21，冲突以代码为准）
 status: pending_review
 owner: 数据组
 evidence:
@@ -32,3 +32,8 @@ evidence:
   - "2026-11-25 核查（2026-10）：注册 d0 611,189 / d14 630,736 / d30 635,005 / all 636,316；GMV d0 $353,883.09 / d14 $574,840.05 / d30 $656,987.32 / all $731,318.42"
   - "2026-11-25 核查：country、language、ad_platform、source_end、device_type 均无 '汇总'/'ALL' 取值；按 7 个维度加 stat_date 每行唯一"
   - "2026-11-25 核查（2026-10）：419 行没有消耗但带 6,625 个 d0 注册；没有注册的行上有 $16,020.55 消耗（消耗和归因在细粒度上错位，P-38）"
+reviewed_by: DS
+reviewed_at: "2026-11-27"
+not_for:
+  - 投放日起算 D3/D7 或 campaign/adgroup 下钻，本表无对应字段。
+  - 跨端统一 CAC；Web 使用 D0 注册，App 使用安装，不能混合分母。
