@@ -1,6 +1,6 @@
 # Section 10：广告域——Web CAC、ROAS 与 ROI 删除
 
-日期：2026-11-27。状态：业务裁决已确认并落地，广告全域 pilot 尚未批准。本次范围仅 Web，App 暂不包含。
+日期：2026-11-27。状态：DS评审完成，业务裁决已确认并落地，广告全域 pilot 尚未批准。本次范围仅 Web，App 暂不包含。
 
 **最终结论：删除内部 ROI；Web 大盘 CAC = 当天 Web 全部广告成本 ÷ 当天 Web 总注册用户数。**
 
@@ -12,7 +12,7 @@
 | 时间与汇总 | 广告成本按成本日、注册按注册日对齐；先各自聚合再关联。期间CAC=期间成本合计/期间注册合计，不平均每日CAC；默认截到T-2。 |
 | ROAS（M-AD-013） | 保留 `SUM(GMV_N)/SUM(cost_usd)`，本轮只记录Web；成本与GMV取同批成熟投放日期及可比平台，窗口从投放日算。 |
 | ROI | 内部指标删除。原M-AD-008编号退休，不复用，不再计算LTV/CAC，也不把ROI自动映射到ROAS。 |
-| LTV（M-AD-006） | 保留DS已确认的固定cohort分母原则；本轮只记录Web。投放日表含晚注册用户收入，与严格注册cohort的技术适配仍需核验，不能通过数学约分认定同批用户。 |
+| LTV（M-AD-006） | DS最新原文明确定义为 `SUM(GMV_N)/SUM(D0注册数)`；本轮仅Web，投放日表分母固定 `reg_user_cnt_d0`，不随N变化。已按该公式更新指标卡与K-109，不再将严格注册cohort适配作为这项已确认公式的前置。 |
 | App | 不纳入本轮CAC、ROAS/LTV实施与验收；不自动套用Web定义。 |
 
 DS 后续原始指令：
@@ -37,7 +37,9 @@ DS 后续原始指令：
 
 本次只证明两个样本日算法与生产字段可执行，尚不代表全历史、分端或全域pilot验收。旧Section09样本保留为历史证据，不能用于当前CAC。
 
-下一步由Codex继续完成Web ROAS成熟窗口及严格LTV cohort的技术核验，随后提交广告域试用范围，不再要求DS重新确认本页已定算法。
+本次补充：[K-109](../L4_verified_queries/K-109.sql)已按LTV=GMV_N/D0注册及ROAS=GMV_N/成本编写；[本地边界检查](../L5_evals/evidence/section11_web_ltv_roas_logic_check.py)通过。生产查询及单独重试均连接超时，尚无本轮LTV/ROAS结果；[核验记录](../L5_evals/evidence/section11_web_ltv_roas_check.json)明确标记未完成。
+
+**下一节：** [Section11：Web广告域有限试用范围](Section11_广告域_Web试用范围.md)。只评已具生产证据的Web成本与CAC是否进入pilot；LTV/ROAS待远程核验，不重新评审公式。
 
 相关文件：[广告指标卡](../L2_metrics/ads.yaml)、[官方口径调研](GoogleAds_CAC与ROAS_官方口径调研.md)、[待拍板事项](../governance/open_questions.md)。
 
@@ -74,7 +76,7 @@ Web 也有类似问题：D14 注册数可能大于 D0 注册数，因此旧 LTV_
 
 **建议选 A：** 便于沿用 ROI=LTV/CAC，但结果中必须写端、分母和单位，不能将 App 的每安装回收称为每注册用户价值。若业务需要严格的“某批注册用户后续价值”，使用注册 cohort 表另建对应指标，不从投放日表直接推断。
 
-**你的结论：A，LTV的核心概念是用户首次安装/注册后的生命周期内的累积GMV，因此即使看GMV_N（比如GMV_30），分母注册用户数是不变的，因为我们看的就是某一批
+**你的结论：A，LTV的分子和分母是「GMV_N」和「D0 注册数」。
 
 ### 2. ROI 与 ROAS 的关系
 
@@ -84,7 +86,7 @@ Web 也有类似问题：D14 注册数可能大于 D0 注册数，因此旧 LTV_
 - 选 B 时，建议 ROI 也明确映射到上述毛额回收率，并取消原 ROI=LTV/CAC 的定义；若希望 ROI 保留其他含义，请写出公式和名称。
 - 1.0（100%）仅表示归因毛额与广告花费相等；未扣退款、拒付、渠道佣金等，不表示净利润回本。
 
-**你的结论：**ROAS = SUM(GMV_N) / SUM(cost_usd)；ROI = LTV / CAC。
+**你的结论：**ROAS = SUM(GMV_N) / SUM(cost_usd)；删除ROI。
 
 ## 已有边界，无需重评
 

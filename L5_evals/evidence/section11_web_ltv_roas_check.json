@@ -1,0 +1,43 @@
+{
+  "checked_on": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "source_commit": "29f97589bc61d7537844958bb646ea4e9fd4b052",
+  "template": "L4_verified_queries/K-109.sql",
+  "business_review": "Section10 DS：LTV=GMV_N/D0注册；ROAS=GMV_N/成本；仅Web；删除ROI",
+  "remote_validation": {
+    "status": "incomplete_connection_error",
+    "start_date": "20261001",
+    "end_date": "20261031",
+    "as_of_date": "20261127",
+    "attempted_windows": [
+      "0",
+      "14",
+      "30"
+    ],
+    "retry_windows": [
+      "14"
+    ],
+    "observed_errors": [
+      "Connection reset by peer",
+      "execute_sql等待超时",
+      "端点HTTPS连通性检查SSL connection timeout"
+    ],
+    "results_received": false
+  },
+  "local_validation": {
+    "status": "passed",
+    "method": "SQLite内存数据库执行同一SQL模板；用Python日期函数替代TO_DATE/TO_CHAR/DATEADD；只验证本地逻辑，未验证MaxCompute方言和生产结果",
+    "script": "L5_evals/evidence/section11_web_ltv_roas_logic_check.py",
+    "checks": [
+      "仅Web、剔除App",
+      "平台白名单",
+      "T-2截止",
+      "D14成熟边界包含11-12、剔除11-13（as_of=11-27）",
+      "同批日期的D0/D14固定D0注册分母",
+      "零注册/零花费返回NULL",
+      "all仍截到T-2",
+      "D3/D7无投放日列，不支持窗口不静默换注册日起算"
+    ]
+  },
+  "release_scope": "LTV/ROAS保持pending_review，不能据本地检查进入pilot；Section11仅提议已有生产证据的Web成本/CAC有限试用"
+}

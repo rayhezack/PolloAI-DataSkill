@@ -1,5 +1,5 @@
 schema_version: 1
-coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09/10 广告CAC、ROAS和选表路由；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
+coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09/10 广告CAC、LTV、ROAS和选表路由；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
 usage: 先匹配 unsupported_terms，再匹配 ambiguous_terms、terms 和 table_routes；命中后仍须检查指标卡的状态、适用范围和过滤条件，不因术语可检索就视为 verified。
 terms:
   - term: 访客注册转化率
@@ -26,6 +26,11 @@ terms:
     metric: M-AD-013
     aliases: [ROAS, 广告回收率, 广告回本率]
     meaning: 本轮仅Web；同批成熟投放日期的广告归因GMV_N/广告成本，毛额回收，不表示利润。
+    reviewed_source: review/Section10_广告域_LTV与ROI衔接.md
+  - term: Web广告LTV
+    metric: M-AD-006
+    aliases: [LTV, 广告LTV, Web LTV]
+    meaning: 本库定义为Web投放日起算的GMV_N/D0广告归因注册数；分母不随N变化，不用大盘CAC分母，不计算ROI。
     reviewed_source: review/Section10_广告域_LTV与ROI衔接.md
 ambiguous_terms:
   - term: 访问注册率

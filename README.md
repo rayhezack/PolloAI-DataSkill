@@ -6,7 +6,7 @@
 
 - 新成员先读 [接续与评审路线](review/00_Codex接续与评审路线.md)，了解当前进度和待评审内容。
 - 逐节评审从 [Section 01：口径维护与冲突裁决](review/Section01_口径维护与冲突裁决.md) 开始，每节说明现状、需要的决定和评审内容。
-- Section 02~10 业务口径已评审；最新结论见 [Section10：仅Web大盘CAC、保留ROAS、删除ROI](review/Section10_广告域_LTV与ROI衔接.md)。广告全域pilot尚未批准；下一步由Codex完成Web收益窗口技术核验与试用范围收口。
+- Section 02~10 业务口径已评审；最新结论见 [Section10：仅Web大盘CAC、保留ROAS、删除ROI](review/Section10_广告域_LTV与ROI衔接.md)。当前待评：[Section11：Web广告成本与CAC有限试用范围](review/Section11_广告域_Web试用范围.md)。LTV/ROAS公式已确认，远程核验因连接超时待补，广告全域pilot尚未批准。
 - 环境安装、分支和 Pull Request 流程见 [协作指南](CONTRIBUTING.md)。
 - 安装校验依赖：`python3 -m pip install -r requirements.txt`；在仓库根目录执行 `python3 scripts/lint.py`。
 - 提交文件不代表口径已通过评审，使用前必须检查条目状态。

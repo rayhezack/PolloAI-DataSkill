@@ -80,7 +80,7 @@ metrics:
   - id: M-AD-006
     name: Web广告LTV（Dn）
     synonyms: [LTV, 用户价值, 人均回收]
-    definition: Section10 选择固定获客分母：本次只记录 Web GMV_N / D0广告归因注册数，分母不随价值观察窗口N变化。此为投放日表中的每D0注册回收比率；该表GMV含投放后晚注册用户，尚不能代表严格固定注册cohort的生命周期收入。与大盘CAC采用不同人群，不通过两者相除派生ROI。
+    definition: Section10 DS已明确：Web LTV_N = SUM(GMV_N)/SUM(D0注册数)。分母固定为T-010的reg_user_cnt_d0，不随N变化。GMV从投放日起算；该表GMV含晚注册用户，结果按本库已确认的每D0归因注册回收解释。与Web大盘CAC采用不同分母，不计算ROI。
     table: T-010
     type: ratio
     expr: SUM(gmv_usd_d{N}) / NULLIF(SUM(reg_user_cnt_d0),0)
@@ -91,12 +91,12 @@ metrics:
     aggregation: rate
     dimensions: [D-012]
     traps: [P-35, P-38, P-41]
-    disclaimer: 固定分母原则已确认；严格注册cohort收入与投放日窗口的技术适配尚未完成，本指标保持pending_review，不能作为严格用户生命周期LTV输出。App本轮不实施。
+    disclaimer: 本库LTV按投放日GMV_N/D0归因注册定义，不改成注册日起算或改用大盘注册分母。App本轮不实施；试用范围见Section11；本项等待生产核验后另行收口。
     status: pending_review
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
-    evidence: ["Section10 DS 选择固定cohort分母；后续仅Web、删除ROI及CAC新裁决见Section10最新结论", "T-010窗口起点为投放日，严格注册cohort适配待核验；不把语义原则的确认等同于源表完全匹配"]
+    evidence: ["Section10最新原文：LTV的分子和分母是GMV_N和D0注册数；仅Web、删除ROI", "K-109.sql按已确认公式编写；section11_web_ltv_roas_check.json记录本地检查通过、远程连接超时"]
 
   - id: M-AD-007
     name: Web大盘注册获客成本 CAC
@@ -201,4 +201,4 @@ metrics:
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
-    evidence: ["Section10 DS：ROAS=SUM(GMV_N)/SUM(cost_usd)；最新指令删除ROI，本轮仅Web", "原M-AD-008已删除且编号不复用；新增独立ROAS编号，成熟样本核验待完成"]
+    evidence: ["Section10 DS：ROAS=SUM(GMV_N)/SUM(cost_usd)；最新指令删除ROI，本轮仅Web", "原M-AD-008已删除且编号不复用；K-109本地边界检查通过，成熟样本远程核验连接超时待补"]
