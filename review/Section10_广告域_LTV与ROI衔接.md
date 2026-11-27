@@ -39,7 +39,7 @@ DS 后续原始指令：
 
 本次补充：[K-109](../L4_verified_queries/K-109.sql)已按LTV=GMV_N/D0注册及ROAS=GMV_N/成本编写；[本地边界检查](../L5_evals/evidence/section11_web_ltv_roas_logic_check.py)通过。生产查询及单独重试均连接超时，尚无本轮LTV/ROAS结果；[核验记录](../L5_evals/evidence/section11_web_ltv_roas_check.json)明确标记未完成。
 
-**下一节：** [Section11：Web广告域有限试用范围](Section11_广告域_Web试用范围.md)。只评已具生产证据的Web成本与CAC是否进入pilot；LTV/ROAS待远程核验，不重新评审公式。
+**最新补充：** [Section11：范围说明与渠道CAC分母](Section11_广告域_Web试用范围.md)。大盘总CAC保留本页定义；渠道CAC另用该渠道注册人数，不能用大盘注册作分母。原有限试用审批建议已撤回，LTV/ROAS技术核验由Codex继续完成。
 
 相关文件：[广告指标卡](../L2_metrics/ads.yaml)、[官方口径调研](GoogleAds_CAC与ROAS_官方口径调研.md)、[待拍板事项](../governance/open_questions.md)。
 

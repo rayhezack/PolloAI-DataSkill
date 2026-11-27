@@ -9,6 +9,7 @@ partition:
   suffix: _hip
   read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')。统计截到 T-2：p_date <= TO_CHAR(DATEADD(GETDATE(),-2,'dd'),'yyyymmdd')（今天只到当前小时，昨天 App 花费未结清，P-39）
 default_filters:
+  - source_end = 'WEB'（本轮DS已评审的端范围，App不包含）
   - 无汇总行，所有行都是明细，直接 SUM（P-37）
 time_axis: stat_date = 投放日：花费按花费日（各账户时区）；注册、订单、GMV 按用户的投放日（App = Adjust 首次安装日，Web = 首访日，回连不上首访的用注册日）
 key_fields:
@@ -24,7 +25,7 @@ key_fields:
   first_purchase_*_dN: 首购 = 全史第一笔订阅新购 + 全史第一笔 API credits，一人最多 2 单；首购 GMV / 订单只有 d0、d14、all，首购用户数有 D0~D360；first_sub_* 为首订，first_api_* 为 API 首购
 traps: [P-35, P-37, P-38, P-39, P-41]
 producer: CNB bigdata_etl main@29f97589bc61d7537844958bb646ea4e9fd4b052 pollo/02_数仓/广告域-广告投放归因/Sq_ads_pollo_ad_attribution_delivery_daily_hip.sql（v1.2，04:15 全量 + 07:15~22:15 每小时）；口径文档 ai_workspace/knowledge/legacy-caliber/ad-delivery.md（verified 2026-11-21，冲突以代码为准）
-status: pending_review
+status: pilot
 owner: 数据组
 evidence:
   - "生产历史说明：先SUM再相除、截到T-2、DN只用成熟日期。其CAC平台白名单已被DS后续大盘CAC定义覆盖；当前仅归因ROAS/LTV沿用P-41可比平台"
@@ -35,5 +36,6 @@ evidence:
 reviewed_by: DS
 reviewed_at: "2026-11-27"
 not_for:
+  - App用途及未单独确认的安装、首购拆分字段，本轮不包含。
   - 投放日起算 D3/D7 或 campaign/adgroup 下钻，本表无对应字段。
   - 单独计算当前Web大盘CAC；本表只提供source_end=WEB的全部广告成本，分母须取T-009当天Web总注册，不能用本表reg_user_cnt_d0或install_cnt。

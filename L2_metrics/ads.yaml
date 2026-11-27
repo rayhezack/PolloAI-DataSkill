@@ -8,13 +8,15 @@ metrics:
     table: T-010
     type: atomic
     expr: SUM(cost_usd)
-    filters: ["p_date 与 stat_date 双约束", "p_date = TO_CHAR(stat_date,'yyyymmdd')；统计截到 T-2（P-39）"]
+    filters: ["source_end='WEB'（本轮仅Web，App不包含）", "p_date 与 stat_date 双约束", "p_date = TO_CHAR(stat_date,'yyyymmdd')；统计截到 T-2（P-39）"]
     unit: USD
     aggregation: total
     dimensions: [D-011, D-012, D-013, D-014]
     traps: [P-39]
-    status: pending_review
+    status: pilot
     owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
     evidence: ["2026-10：$753,408.02（APP $277,681.43、WEB $475,726.59），与旧表各层级消耗合计一致"]
 
   - id: M-AD-002
@@ -68,13 +70,15 @@ metrics:
     table: T-010
     type: atomic
     expr: SUM(gmv_usd_d{N})
-    filters: ["p_date 与 stat_date 双约束", "统计截到 T-2；有限 N 还须 stat_date + N ≤ 昨日；all 为截至观测日累计，不称成熟终值"]
+    filters: ["source_end='WEB'（本轮仅Web，App不包含）", "p_date 与 stat_date 双约束", "统计截到 T-2；有限 N 还须 stat_date + N ≤ 昨日；all 为截至观测日累计，不称成熟终值"]
     unit: USD
     aggregation: total
     dimensions: [D-011, D-012, D-013]
     traps: [P-35, P-41]
-    status: pending_review
+    status: pilot
     owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
     evidence: ["2026-10：d0 $353,883.09 / d14 $574,840.05 / d30 $656,987.32（2026-11-25 样本含未满 D30 日期，不是成熟 D30 总量）/ all $731,318.42"]
 
   - id: M-AD-006
@@ -91,8 +95,8 @@ metrics:
     aggregation: rate
     dimensions: [D-012]
     traps: [P-35, P-38, P-41]
-    disclaimer: 本库LTV按投放日GMV_N/D0归因注册定义，不改成注册日起算或改用大盘注册分母。App本轮不实施；试用范围见Section11；本项等待生产核验后另行收口。
-    status: pending_review
+    disclaimer: 本库LTV按投放日GMV_N/D0归因注册定义，不改成注册日起算或改用大盘注册分母。App本轮不实施；试用范围见Section11；SQL生产核验待补，业务公式已确认，不再要求重复评审。
+    status: pilot
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
@@ -112,8 +116,8 @@ metrics:
     unit: USD/Web注册用户
     aggregation: rate
     traps: [P-39]
-    disclaimer: 仅Web，包含自然注册的大盘经营比率；不等于逐广告归因获客成本。按广告平台拆分时不能把同一批全Web注册重复充当各平台获客分母；平台级CAC需独立已评审的注册归因规则。
-    status: pending_review
+    disclaimer: 仅Web，包含自然注册的大盘经营比率；不等于逐广告归因获客成本。渠道CAC另见M-AD-014：分母必须用该渠道注册，不能将全Web注册重复用作各平台获客分母。
+    status: pilot
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
@@ -197,8 +201,29 @@ metrics:
     aggregation: rate
     dimensions: [D-012]
     traps: [P-35, P-38, P-39, P-41]
-    status: pending_review
+    status: pilot
     owner: 数据组
     reviewed_by: DS
     reviewed_at: "2026-11-27"
     evidence: ["Section10 DS：ROAS=SUM(GMV_N)/SUM(cost_usd)；最新指令删除ROI，本轮仅Web", "原M-AD-008已删除且编号不复用；K-109本地边界检查通过，成熟样本远程核验连接超时待补"]
+
+  - id: M-AD-014
+    name: Web广告渠道注册获客成本 CAC
+    synonyms: [渠道CAC, 广告渠道CAC, Google渠道CAC, 按渠道注册获客成本]
+    definition: 同一Web广告渠道在统计日/期间的广告成本 / 该渠道同日/期间的注册用户数。分子分母必须对应同一渠道或同一组广告渠道，不包含其他渠道与自然注册。单渠道按ad_platform汇总；广告渠道合计先合计对应渠道成本和注册再相除，不平均渠道CAC。大盘总CAC仍为M-AD-007，不能混用。
+    table: T-008
+    type: ratio
+    expr: SUM(cost_usd) / NULLIF(SUM(cohort_user_cnt),0)
+    denominator: 该渠道当天/同期广告归因注册人数（T-008 cohort_user_cnt）
+    filters: ["source_end='WEB'，同一ad_platform/同一组广告平台", "product_type='ALL' AND is_first_purchase='汇总'，保留所有match_level", "p_date与stat_date双约束，统计截到T-2；成本和注册使用同一日期范围", "先按渠道聚合再相除；不与全Web注册明细关联，不用大盘注册作分母"]
+    time_axis: 成本按花费日、注册按注册日；沿用同日/同期比率，不替换成投放日D0注册。
+    unit: USD/渠道注册用户
+    aggregation: rate
+    dimensions: [D-012]
+    traps: [P-33, P-34, P-38]
+    disclaimer: Section11已确认分母必须是该渠道注册。复用已纳入的注册日表；来源的内部账号处理与成本一致性仍需技术核查。K-110尚未远程核验，不能将模板称为已执行证据；成本缺失不得解释为免费获客。
+    status: pending_review
+    owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
+    evidence: ["Section11 DS原文：广告渠道CAC分母应看广告渠道注册用户数，而不是大盘注册", "CNB main@29f9758 注册日表生产说明：cohort_user_cnt按注册日、cost_usd按花费日，平台总量保留全部match_level", "K-110.sql：待生产核验；已评审的业务公式与技术执行证据分开记录"]

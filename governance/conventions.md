@@ -27,6 +27,7 @@
 
 - AI 新建或修改条目后，状态只能是 `draft` 或 `pending_review`。
 - 晋升到 `pilot`/`verified` 需要 DS 评审，并在条目里写上 `reviewed_by`、`reviewed_at`。
+- DS已明确确认公式、来源与适用范围后，直接落实对应业务评审状态；不为同一结论另设“有限试用”重复审批。SQL实际执行进度单独记录，未取得生产结果不能写成verified或已实跑。
 - `verified` 条目必须有 `evidence`（仓库路径@commit，或核验 SQL 加结果），`lint.py` 会检查。
 
 ## 变更流程

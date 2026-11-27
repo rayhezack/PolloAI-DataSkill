@@ -6,7 +6,7 @@
 
 - 新成员先读 [接续与评审路线](review/00_Codex接续与评审路线.md)，了解当前进度和待评审内容。
 - 逐节评审从 [Section 01：口径维护与冲突裁决](review/Section01_口径维护与冲突裁决.md) 开始，每节说明现状、需要的决定和评审内容。
-- Section 02~10 业务口径已评审；最新结论见 [Section10：仅Web大盘CAC、保留ROAS、删除ROI](review/Section10_广告域_LTV与ROI衔接.md)。当前待评：[Section11：Web广告成本与CAC有限试用范围](review/Section11_广告域_Web试用范围.md)。LTV/ROAS公式已确认，远程核验因连接超时待补，广告全域pilot尚未批准。
+- Section 02~10 业务口径已评审；最新结论见 [Section10：仅Web大盘CAC、保留ROAS、删除ROI](review/Section10_广告域_LTV与ROI衔接.md)。最新补充见[Section11：范围说明与渠道CAC分母](review/Section11_广告域_Web试用范围.md)：大盘总CAC与渠道CAC分别计算；不再增加有限试用审批。SQL执行核验由Codex继续完成。
 - 环境安装、分支和 Pull Request 流程见 [协作指南](CONTRIBUTING.md)。
 - 安装校验依赖：`python3 -m pip install -r requirements.txt`；在仓库根目录执行 `python3 scripts/lint.py`。
 - 提交文件不代表口径已通过评审，使用前必须检查条目状态。
@@ -31,7 +31,7 @@
 
 ## 检索流程（指标优先，schema 兜底）
 1. 先查 `L3_glossary.yaml`，已删除术语按删除说明处理，不自动映射；歧义词先确认，再把已明确的说法映射到 M/D。当前术语索引覆盖注册访问、两个访客比率及Web广告CAC/ROAS/表路由；ROI已删除，其他说法继续查指标卡 synonyms，未命中按 R7 处理。
-2. 命中 `L4_verified_queries/K-*.sql` 的，填参数后原样执行，并标注「核验口径」。
+2. 命中 `L4_verified_queries/K-*.sql` 的，先读SQL状态及对应执行证据，再填参数执行。模板未实跑或执行失败时如实说明，不因目录名就标注「已核验」。
 3. 只命中 M/D 的，读指标卡里的 `expr`/`filters`，再读对应的 `L1_datasets` 表卡，然后组装 SQL。
 4. 都没命中的，读 L1 表卡写 SQL，并按 R7 处理。
 5. 输出时附上 R8 要求的四项。

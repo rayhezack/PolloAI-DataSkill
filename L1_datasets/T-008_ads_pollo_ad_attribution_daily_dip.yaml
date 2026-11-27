@@ -9,7 +9,7 @@ partition:
   read_rule: p_date = TO_CHAR(stat_date,'yyyymmdd')
 default_filters:
   - is_first_purchase = '汇总' AND product_type = 'ALL'   # 主行：带消耗、安装、归因用户、GMV；其它行是首购 GMV 拆分行（P-33）
-time_axis: stat_date 对 cohort_user_cnt 和 GMV 为注册日，对 cost_usd 为花费日，对 install_cnt 为安装日；金额/人数北京时间，消耗沿账户时区；本表成本比值只能按周/月解读。
+time_axis: stat_date 对 cohort_user_cnt 和 GMV 为注册日，对 cost_usd 为花费日，对 install_cnt 为安装日；金额/人数北京时间，消耗沿账户时区；渠道CAC按DS确认采用同日/同期成本与注册比率；生产旧说明建议周/月用于减小日期错位，不能把该建议当成DS未批准的日指标禁用规则。
 key_fields:
   source_end: 投放端 WEB / APP
   ad_platform: google / meta / bing / tiktok / asa / naver / yandex / kwai 等
@@ -33,4 +33,5 @@ reviewed_at: "2026-11-27"
 not_for:
   - 投放日 D3/D7；本表的 D3/D7 从注册日起算，不得静默替换。
   - 默认Web大盘CAC；其分子用T-010的Web成本，分母用T-009的Web总注册，不使用本表归因用户。
-  - 日粒度 CAC/ROAS 或未校准的 campaign 级成本比值；Web Google PMax/DG 等须额外核验归因键。
+  - 把同日渠道CAC解释为同一批广告点击的转化成本；花费日和注册日不同，不承诺逐点击归因。
+  - 未校准的campaign级成本比值；Web Google PMax/DG等须额外核验归因键。

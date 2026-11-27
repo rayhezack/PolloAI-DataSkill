@@ -32,7 +32,16 @@ terms:
     aliases: [LTV, 广告LTV, Web LTV]
     meaning: 本库定义为Web投放日起算的GMV_N/D0广告归因注册数；分母不随N变化，不用大盘CAC分母，不计算ROI。
     reviewed_source: review/Section10_广告域_LTV与ROI衔接.md
+  - term: Web广告渠道CAC
+    metric: M-AD-014
+    aliases: [渠道CAC, 广告渠道CAC, Google渠道CAC]
+    meaning: 该Web广告渠道当天/同期的广告成本/该渠道注册人数，不用整个Web注册作分母；同组渠道合计也须成本与注册范围对应。
+    reviewed_source: review/Section11_广告域_Web试用范围.md
 ambiguous_terms:
+  - term: CAC
+    candidate_metrics: [M-AD-007, M-AD-014]
+    action: resolve_from_context
+    prompt: 明确说大盘总CAC用M-AD-007；明确说某广告渠道CAC用M-AD-014；仅在上下文无法判断范围时确认，不自动把大盘注册用于渠道CAC。
   - term: 访问注册率
     candidate_metrics: [M-USR-003, M-USR-009]
     action: clarify
@@ -55,6 +64,11 @@ table_routes:
     metrics: [M-AD-007, M-USR-001]
     guard: 成本source_end=WEB，注册reg_platform=WEB；各自按日聚合再关联；含自然注册，App不包含，不能仅在T-010找注册分母。
     reviewed_source: review/Section10_广告域_LTV与ROI衔接.md
+  - intent: 某Web广告渠道当天/同期注册CAC
+    table: T-008
+    metrics: [M-AD-014]
+    guard: 使用注册日cohort_user_cnt与同渠道花费日成本，不能用T-009全Web注册替代；不把注册日人数当成投放日D0注册。SQL核验状态见K-110。
+    reviewed_source: review/Section11_广告域_Web试用范围.md
 unsupported_terms:
   - term: ROI
     aliases: [广告ROI, D0 ROI, D14 ROI, D30 ROI]

@@ -165,9 +165,11 @@ dimensions:
     expr: "LOWER(ad_platform)"
     values: {google: Google, meta: Meta, bing: Bing, tiktok: TikTok, asa: Apple Search Ads, naver: Naver, yahoo: Yahoo, kwai: Kwai}
     applies_to: [T-008, T-010]
-    notes: 与 v1 G-12 渠道归并（付费投放/自然/未知/其他）是两套维度，不要混用。
-    status: pending_review
+    notes: 本轮已确认Web广告平台维度。与v1 G-12付费/自然等渠道大类分开；LTV/ROAS的平台范围读指标卡，不把全Web注册重复用作各平台分母。
+    status: pilot
     owner: 数据组
+    reviewed_by: DS
+    reviewed_at: "2026-11-27"
     evidence: ["2026-11-25 核查 T-010：20261031 出现的取值"]
 
   - id: D-013
