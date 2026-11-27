@@ -1,0 +1,363 @@
+# Agent域指标。业务定义来源：飞书「Pollo AI Agent 数据基建」（2026-11-27读取）及本地镜像。
+# 当前数据基建为0：来源表统一TBD，指标只固化业务语义、颗粒度、公式和待办，不伪造可执行SQL。
+metrics:
+  - id: M-AGT-001
+    name: Agent访问用户数
+    synonyms: [Agent访问UV, Agent活跃用户, Agent DAU]
+    definition: 对应端当天发生至少一条有效Agent事件的去重用户数；用户×自然日。默认全量Agent用户，不以is_payer限制。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT user_id) WHERE valid_agent_event = 1
+    filters: ["端别必须明确APP/WEB", "事件有效性与外部用户过滤待基建确认", "按user_id×自然日去重"]
+    unit: 人
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：两棵北极星共用Agent访问用户；本地镜像SQL查询/Agent基建/agent_metrics_definition.md"]
+
+  - id: M-AGT-002
+    name: Agent发消息用户数
+    synonyms: [Agent发消息UV, Agent消息用户]
+    definition: 当天至少发送一条有效Agent消息的去重用户数；用户×自然日。作为访问用户到生成发起的中间漏斗，不作为北极星分母起点。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT user_id) WHERE valid_user_message = 1
+    filters: ["端别、消息角色、有效事件和自然日字段待基建确认", "按user_id×自然日去重"]
+    unit: 人
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：创作北极星拆解含发消息率；创作链路按用户×日"]
+
+  - id: M-AGT-003
+    name: Agent生成发起用户数
+    synonyms: [Agent生成请求用户, 生成工具调用用户]
+    definition: 当天至少成功发起一次生成工具调用的去重用户数；用户×自然日。工具调用尝试和失败另作诊断指标。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT user_id) WHERE generation_tool_call = 1
+    filters: ["生成工具识别、成功发起状态和日期字段待基建确认"]
+    unit: 人
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：生成发起率是创作北极星拆解因子"]
+
+  - id: M-AGT-004
+    name: Agent成功创作用户数
+    synonyms: [成功创作用户, Agent生成成功用户]
+    definition: 当天至少有一个生成任务最终成功完成的去重用户数；用户×自然日。Agent创作北极星，不用生成任务数替代。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT user_id) WHERE generation_task_final_status = 'success'
+    filters: ["生成任务最终成功状态、完成日期、外部用户过滤待基建确认"]
+    unit: 人
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：创作北极星选成功创作用户数；用户先拿到可用视频再可能付费"]
+
+  - id: M-AGT-005
+    name: Agent发消息率
+    synonyms: [Agent消息转化率]
+    definition: Agent发消息用户数 ÷ Agent访问用户数；同端、同日、同一用户范围。
+    table: TBD
+    type: ratio
+    expr: M-AGT-002 / NULLIF(M-AGT-001, 0)
+    numerator: M-AGT-002
+    denominator: M-AGT-001
+    filters: ["同端、同日；分母不能替换为发消息用户"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：成功创作用户数=访问用户数×发消息率×生成发起率×生成成功率"]
+
+  - id: M-AGT-006
+    name: Agent生成发起率
+    synonyms: [Agent生成请求率]
+    definition: Agent生成发起用户数 ÷ Agent发消息用户数；同端、同日、同一用户范围。
+    table: TBD
+    type: ratio
+    expr: M-AGT-003 / NULLIF(M-AGT-002, 0)
+    numerator: M-AGT-003
+    denominator: M-AGT-002
+    filters: ["同端、同日；生成工具调用定义待基建确认"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：生成发起率最直接反映Agent自身能力"]
+
+  - id: M-AGT-007
+    name: Agent生成成功率
+    synonyms: [Agent生成任务成功率]
+    definition: Agent生成成功任务数 ÷ Agent生成请求任务数；任务×自然日，同源任务范围。
+    table: TBD
+    type: ratio
+    expr: M-AGT-009 / NULLIF(M-AGT-008, 0)
+    numerator: M-AGT-009
+    denominator: M-AGT-008
+    filters: ["同源生成任务；最终成功状态和任务归日待基建确认"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：生成成功率是创作北极星拆解因子；失败按原因另诊断"]
+
+  - id: M-AGT-008
+    name: Agent生成工具调用任务数
+    synonyms: [Agent生成请求任务数]
+    definition: 当天成功发起生成工具调用的任务数；tool_call_id颗粒度。不是用户数或会话数。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT tool_call_id) WHERE generation_tool_call = 1
+    filters: ["tool_call_id、工具类型、成功发起状态待基建确认"]
+    unit: 个
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系创作链路：生成请求按tool_call_id统计"]
+
+  - id: M-AGT-009
+    name: Agent生成成功任务数
+    synonyms: [Agent成功生成任务数]
+    definition: 当天最终成功完成的生成任务数；生成任务颗粒度。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT generation_task_id) WHERE final_status = 'success'
+    filters: ["成功状态、任务完成日和任务ID待基建确认"]
+    unit: 个
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：生成成功任务按任务颗粒度统计"]
+
+  - id: M-AGT-010
+    name: Agent归因GMV
+    synonyms: [Agent支付GMV, Agent带来的GMV]
+    definition: 通过同端、同用户、同支付日、支付前最近一次订阅提交，并能回连Agent曝光的有效订单金额；订单颗粒度，单位USD。跨日支付不进入当前核心归因。
+    table: TBD
+    type: atomic
+    expr: SUM(amount_received_usd) WHERE agent_order_attributed = 1
+    filters: ["is_valid_order=1；同端同用户同支付日；提交时间<=支付时间；最近一次提交必须回连Agent曝光", "支付GMV含税款和服务费，不扣退款；App/Web分开"]
+    time_axis: pay_date
+    unit: USD
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系支付链路：订单级最近提交归因；本地镜像已有App/Web SQL，基建表尚未纳入本库"]
+
+  - id: M-AGT-011
+    name: Agent付费墙触达用户数
+    synonyms: [Agent订阅弹窗曝光UV, Agent曝光UV]
+    definition: 当天被识别为Agent订阅弹窗曝光的去重用户数；用户×日期。共同北极星起点使用访问用户，不使用发消息用户。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT user_id) WHERE agent_exposure = 1
+    filters: ["App用sub_start_expose且sub_feature_code=ai_agent；Web用Agent页面识别逻辑；App/Web分开"]
+    unit: 人
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：共同起点为访问用户，付费墙可能早于发消息；App/Web曝光识别不同"]
+
+  - id: M-AGT-012
+    name: Agent付费墙提交用户数
+    synonyms: [Agent订阅提交UV, Agent付费意向用户]
+    definition: 当天发生订阅提交且可通过同用户、同sub_start_id回连Agent曝光的去重用户数；用户×日期。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT user_id) WHERE agent_submit_attributed = 1
+    filters: ["event_id IN (sub_submit, refresh_billing_click)；提交不早于活跃/曝光；同端、同sub_start_id回连"]
+    unit: 人
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系支付链路：提交UV必须回连Agent曝光，非Agent提交仍参与最近提交竞争判断"]
+
+  - id: M-AGT-013
+    name: Agent支付用户数
+    synonyms: [Agent付费UV, Agent支付用户]
+    definition: 当天至少有一笔有效订单被归因给Agent的去重用户数；用户×支付日期。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT user_id) WHERE agent_order_attributed = 1
+    filters: ["有效订单；订单级最近一次支付前提交归因；App/Web分开"]
+    unit: 人
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：Agent支付UV按支付日期、用户颗粒度统计"]
+
+  - id: M-AGT-014
+    name: Agent支付订单数
+    synonyms: [Agent支付订单, Agent归因订单数]
+    definition: 被归因给Agent的有效支付订单数；订单颗粒度，按payment_id去重。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT payment_id) WHERE agent_order_attributed = 1
+    filters: ["is_valid_order=1；订单级归因；App/Web分开"]
+    unit: 个
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：Agent支付订单数按订单颗粒度统计"]
+
+  - id: M-AGT-015
+    name: Agent付费墙触达率
+    synonyms: [Agent曝光率]
+    definition: Agent付费墙触达用户数 ÷ Agent访问用户数；同端、同日。
+    table: TBD
+    type: ratio
+    expr: M-AGT-011 / NULLIF(M-AGT-001, 0)
+    numerator: M-AGT-011
+    denominator: M-AGT-001
+    filters: ["同端同日；访问用户是共同起点，不用发消息用户作分母"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系商业化北极星：归因GMV=访问用户×付费墙触达率×支付转化率×ARPPU"]
+
+  - id: M-AGT-016
+    name: Agent支付用户转化率
+    synonyms: [Agent付费转化率]
+    definition: Agent支付用户数 ÷ Agent付费墙提交用户数；同端、同支付日范围。
+    table: TBD
+    type: ratio
+    expr: M-AGT-013 / NULLIF(M-AGT-012, 0)
+    numerator: M-AGT-013
+    denominator: M-AGT-012
+    filters: ["同端同日；提交和支付使用同一订单归因范围"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：Agent支付用户转化率=支付UV/付费墙提交UV"]
+
+  - id: M-AGT-017
+    name: Agent付费用户ARPPU
+    synonyms: [Agent付费ARPPU, Agent用户客单价]
+    definition: Agent归因GMV ÷ Agent支付用户数；同端同支付日期，单位USD/人。
+    table: TBD
+    type: ratio
+    expr: M-AGT-010 / NULLIF(M-AGT-013, 0)
+    numerator: M-AGT-010
+    denominator: M-AGT-013
+    filters: ["同端同支付日期、同一订单归因范围；金额USD"]
+    unit: USD/人
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：Agent付费用户ARPPU=支付GMV/支付UV"]
+
+  - id: M-AGT-018
+    name: Agent收入占比
+    synonyms: [Agent GMV占比, Agent收入贡献]
+    definition: Agent归因GMV ÷ 全站支付GMV；同端/日期范围和币种一致。属于收入贡献指标，不等同于严格因果增量收入。
+    table: TBD
+    type: ratio
+    expr: M-AGT-010 / NULLIF(M-PAY-001, 0)
+    numerator: M-AGT-010
+    denominator: M-PAY-001
+    filters: ["Agent与全站支付使用同一日期、端和有效订单范围；Agent支付只按订单级归因"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：配套指标包含Agent收入占比；归因GMV不等同于严格因果收入"]
+
+  - id: M-AGT-019
+    name: Agent会话采纳率
+    synonyms: [Session采纳率, Agent产物采纳率]
+    definition: 生成结果被用户拿走使用的session比例；session×生成日。下载埋点完整性待研发确认，当前不可声明正式上线。
+    table: TBD
+    type: ratio
+    expr: COUNT(DISTINCT session_id WHERE session_has_download = 1) / NULLIF(COUNT(DISTINCT session_id), 0)
+    filters: ["session和生成日颗粒度；下载事件完整性待确认；App/Web分开"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：价值验证按session×生成日；下载埋点完整性是待确认问题"]
+
+  - id: M-AGT-020
+    name: Agent生成失败任务数
+    synonyms: [Agent生成失败率诊断, 生成失败任务]
+    definition: 已创建生成任务但最终失败的任务数；失败原因需保留，用于诊断生成成功率下滑。
+    table: TBD
+    type: atomic
+    expr: COUNT(DISTINCT generation_task_id WHERE final_status = 'failed')
+    filters: ["任务最终状态和失败原因待基建确认"]
+    unit: 个
+    aggregation: total
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：生成任务失败率用于诊断，需拆失败原因"]
+
+  - id: M-AGT-021
+    name: Agent积分不足用户占比
+    synonyms: [积分不足率, Agent积分拦截率]
+    definition: 命中积分不足的Agent用户占Agent相关用户的比例；当前文案识别仅作临时候选，结构化事件待研发支持。
+    table: TBD
+    type: ratio
+    expr: COUNT(DISTINCT user_id WHERE insufficient_credit = 1) / NULLIF(COUNT(DISTINCT user_id), 0)
+    filters: ["积分不足识别规则待结构化事件；不以文案长期稳定性作已确认事实"]
+    unit: "%"
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：生成发起率下降时先排除积分拦截；结构化事件仍待研发支持"]
+
+  - id: M-AGT-022
+    name: Agent生成任务时长P90
+    synonyms: [Agent等待时长, 生成等待P90]
+    definition: 生成任务创建到最终完成的时长P90；用于护栏，防止通过多发起生成抬高北极星。
+    table: TBD
+    type: derived
+    expr: PERCENTILE( finished_at - created_at, 0.90 )
+    filters: ["仅纳入可计算开始/结束时间的生成任务；时长单位秒，状态范围待基建确认"]
+    unit: 秒
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：等待时长是护栏，需观察P90"]
+
+  - id: M-AGT-023
+    name: 单成功创作用户积分消耗
+    synonyms: [Agent人均成功创作积分, 成功创作用户积分成本]
+    definition: Agent视频生成积分消耗 ÷ Agent成功创作用户数；用于护栏，单位积分/人。
+    table: TBD
+    type: ratio
+    expr: SUM(agent_video_credit_consume) / NULLIF(M-AGT-004, 0)
+    denominator: M-AGT-004
+    filters: ["同端同日；积分消耗来源和失败任务处理待基建确认"]
+    unit: 积分/人
+    aggregation: rate
+    open_question: OQ-24
+    status: draft
+    owner: 数据组
+    evidence: ["飞书Agent指标体系：单成功创作用户积分消耗为护栏"]

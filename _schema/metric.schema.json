@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["id", "name", "table", "type", "expr", "filters", "unit", "status", "owner"],
   "properties": {
-    "id": {"type": "string", "pattern": "^M-(PAY|CRE|USR|AD)-[0-9]{3}$"},
+    "id": {"type": "string", "pattern": "^M-(PAY|CRE|USR|AD|AGT)-[0-9]{3}$"},
     "name": {"type": "string"},
     "synonyms": {"type": "array", "items": {"type": "string"}},
     "definition": {"type": "string"},

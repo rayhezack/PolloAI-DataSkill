@@ -15,7 +15,7 @@
 |---|---|---|---|
 | `T-nnn` | 表卡 | T-001 | `L1_datasets/T-001_<表名>.yaml` |
 | `D-nnn` | 维度 | D-001 | `L2_dimensions.yaml` |
-| `M-<域>-nnn` | 指标，域 ∈ PAY / CRE / USR / AD | M-PAY-001 | `L2_metrics/<域>.yaml` |
+| `M-<域>-nnn` | 指标，域 ∈ PAY / CRE / USR / AD / AGT | M-PAY-001 | `L2_metrics/<域>.yaml` |
 | `G-nn` / `P-nn` | 基线 / 陷阱，沿用 v1 编号续排 | P-19 | `L3_rules.md` |
 | `K-nnn` | 核验 SQL，沿用 v1 编号 | K-014 | `L4_verified_queries/K-014.sql` |
 

@@ -1,0 +1,24 @@
+{
+  "suite_status": "draft",
+  "cases": 38,
+  "domains": {
+    "USR": 8,
+    "PAY": 8,
+    "CRE": 6,
+    "AD": 8,
+    "AGT": 8
+  },
+  "expected_behaviors": {
+    "answer": 16,
+    "clarify": 6,
+    "plan": 10,
+    "explain_unavailable": 3,
+    "explain_removed": 2,
+    "explain_out_of_scope": 1
+  },
+  "stored_value_checks": 26,
+  "agent_evaluation_run": false,
+  "note": "Only structure, references and stored values checked; no Agent accuracy or R3 result.",
+  "errors": [],
+  "passed": true
+}

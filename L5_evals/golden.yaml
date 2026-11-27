@@ -1,0 +1,713 @@
+schema_version: 1
+status: draft
+created_at: '2026-11-27'
+owner: 数据组
+purpose: R2常见问数与边界题草案；已有业务定义不重复审批，题目与预期行为待DS校对。
+evaluation_boundary: 文件/引用/固定证据校验不等于Agent实测；未调用问数Agent、未生成R3通过结论。
+reference_policy: reference是已保存证据中的历史值，固定其查询日期/快照范围，不声称今天重跑仍相同；不足以还原历史快照时先解释而非伪造。
+cases:
+- id: GQ-001
+  domain: USR
+  status: draft
+  question: 按2026-11-25画像快照，2026-10-31全站注册用户数是多少？
+  expected:
+    behavior: answer
+    metrics:
+    - M-USR-001
+    tables:
+    - T-009
+    checks:
+    - 排除内部用户，is_registered=1，按注册日、user_id去重。
+  reference:
+    file: L5_evals/evidence/section06_user_ratios_result.json
+    match:
+      p_date: '20261031'
+    values:
+      signup_uv: 36769
+    absolute_tolerance: 1.0e-09
+  decision_sources:
+  - review/Section08_用户域_整体锁定.md
+- id: GQ-002
+  domain: USR
+  status: draft
+  question: 2026-10-31全站访客UV是多少？
+  expected:
+    behavior: answer
+    metrics:
+    - M-USR-002
+    tables:
+    - T-005
+    checks:
+    - 三个维度都取汇总，不把账号数当访客UV。
+  reference:
+    file: L5_evals/evidence/section06_user_ratios_result.json
+    match:
+      p_date: '20261031'
+    values:
+      visitor_uv: 143308
+    absolute_tolerance: 1.0e-09
+- id: GQ-003
+  domain: USR
+  status: draft
+  question: 用2026-11-25画像快照，查2026-10-31访客注册转化率。
+  expected:
+    behavior: answer
+    metrics:
+    - M-USR-003
+    tables:
+    - T-009
+    - T-005
+    checks:
+    - 注册/访客，解释为当日账号与访客比率，不声称逐访客漏斗。
+    query: K-105
+    parameters:
+      start_date: '20261031'
+      end_date: '20261031'
+      snapshot_date: '20261125'
+  reference:
+    file: L5_evals/evidence/section06_user_ratios_result.json
+    match:
+      p_date: '20261031'
+    values:
+      visitor_signup_rate: 0.2565732548078265
+    absolute_tolerance: 1.0e-09
+- id: GQ-004
+  domain: USR
+  status: draft
+  question: 2026-10-31访客登录占比是多少？
+  expected:
+    behavior: answer
+    metrics:
+    - M-USR-009
+    tables:
+    - T-005
+    checks:
+    - login_visitor_cnt/dau，含老用户。
+    query: K-105
+  reference:
+    file: L5_evals/evidence/section06_user_ratios_result.json
+    match:
+      p_date: '20261031'
+    values:
+      visitor_login_share: 0.604983671532643
+    absolute_tolerance: 1.0e-09
+- id: GQ-005
+  domain: USR
+  status: draft
+  question: 帮我看2026-10-31的访问注册率。
+  expected:
+    behavior: clarify
+    metrics:
+    - M-USR-003
+    - M-USR-009
+    tables:
+    - T-009
+    - T-005
+    checks:
+    - 先确认指新注册/访客还是登录访客/访客，不能凭名称选择。
+  decision_sources:
+  - review/Section06_用户域_访问注册率命名.md
+- id: GQ-006
+  domain: USR
+  status: draft
+  question: 查2026-10-31全站滚动30日访客活跃数。
+  expected:
+    behavior: answer
+    metrics:
+    - M-USR-005
+    tables:
+    - T-005
+    checks:
+    - 滚动[t-29,t]，不是自然月登录账号MAU。
+    query: K-106
+  reference:
+    file: L5_evals/evidence/section07_user_retention_sample_result.json
+    match:
+      p_date: '20261031'
+    values:
+      rolling_30d_visitor_active: 2991757
+    absolute_tolerance: 1.0e-09
+- id: GQ-007
+  domain: USR
+  status: draft
+  question: 按2026-11-26观察日的历史快照，2026-11-24访客D3/D7留存是多少？
+  expected:
+    behavior: answer
+    metrics:
+    - M-USR-007
+    tables:
+    - T-005
+    checks:
+    - 该历史观察日尚未成熟，D3/D7返回NULL，不填0；不能拿今天回刷后的数当旧快照。
+    avoid:
+    - 未成熟留存填0
+    - 用当前数据冒充指定历史快照
+  reference:
+    file: L5_evals/evidence/section07_user_retention_sample_result.json
+    match:
+      p_date: '20261124'
+    values:
+      visitor_d3_retention: null
+      visitor_d7_retention: null
+    absolute_tolerance: 1.0e-09
+- id: GQ-008
+  domain: USR
+  status: draft
+  question: 分析最近一周的新用户表现。
+  expected:
+    behavior: clarify
+    metrics: []
+    tables:
+    - T-009
+    checks:
+    - 先确认指标、当日新/期间新、日期范围和端；周度新老沿用周日起的业务周。
+  decision_sources:
+  - review/R0_业务节点与口径冲突裁决.md
+  - review/Section08_用户域_整体锁定.md
+- id: GQ-009
+  domain: PAY
+  status: draft
+  question: 支付GMV和实收GMV分别怎么算，是否包含税和服务费？
+  expected:
+    behavior: plan
+    metrics:
+    - M-PAY-001
+    - M-PAY-002
+    tables:
+    - T-001
+    checks:
+    - 有效订单；支付GMV汇总实付、含API/税/服务费、不扣退款；实收只扣退款、不额外扣税费，不等于净利润。
+  decision_sources:
+  - review/Section13_支付域_GMV含税说明.md
+- id: GQ-010
+  domain: PAY
+  status: draft
+  question: 客单价和单均价分别用哪个分母？
+  expected:
+    behavior: plan
+    metrics:
+    - M-PAY-008
+    - M-PAY-007
+    tables:
+    - T-001
+    checks:
+    - 客单价=GMV/支付UV；单均价=GMV/支付订单数，不对调。
+  decision_sources:
+  - review/R1_支付域.md
+- id: GQ-011
+  domain: PAY
+  status: draft
+  question: 查2026-10-30~31到期cohort的当日和7日续费金额。
+  expected:
+    behavior: answer
+    metrics:
+    - M-PAY-022
+    - M-PAY-023
+    tables:
+    - T-003
+    checks:
+    - 返回USD金额，不自行除以应续金额；按到期日归属，7日仅成熟日期。
+    query: K-112
+    parameters:
+      start_date: '20261030'
+      end_date: '20261031'
+      as_of_date: '20261127'
+  reference:
+  - file: L5_evals/evidence/section12_renewal_amount_user_rates_result.json
+    match:
+      window_name: same_day
+    values:
+      renewal_amount_usd: 46011.4119
+    absolute_tolerance: 1.0e-09
+  - file: L5_evals/evidence/section12_renewal_amount_user_rates_result.json
+    match:
+      window_name: 7d
+    values:
+      renewal_amount_usd: 57048.9884
+    absolute_tolerance: 1.0e-09
+  decision_sources:
+  - review/Section12_支付域_财务续费率统计单位.md
+- id: GQ-012
+  domain: PAY
+  status: draft
+  question: 查2026-10-30~31到期用户的当日和7日续订率。
+  expected:
+    behavior: answer
+    metrics:
+    - M-PAY-024
+    - M-PAY-021
+    tables:
+    - T-003
+    checks:
+    - 续订用户/到期用户，跨日合计为用户·天，不按订阅数。
+    query: K-112
+  reference:
+  - file: L5_evals/evidence/section12_renewal_amount_user_rates_result.json
+    match:
+      window_name: same_day
+    values:
+      user_renewal_rate: 0.45688127584170113
+    absolute_tolerance: 1.0e-09
+  - file: L5_evals/evidence/section12_renewal_amount_user_rates_result.json
+    match:
+      window_name: 7d
+    values:
+      user_renewal_rate: 0.5318960425280567
+    absolute_tolerance: 1.0e-09
+  decision_sources:
+  - review/Section12_支付域_财务续费率统计单位.md
+- id: GQ-013
+  domain: PAY
+  status: draft
+  question: 查同一批2026-10-30~31到期用户的7日自动续订率，与全类型续订率对照。
+  expected:
+    behavior: answer
+    metrics:
+    - M-PAY-017
+    - M-PAY-021
+    tables:
+    - T-003
+    checks:
+    - 自动只RENEW，全类型含升级/重置/降级；两者都按用户，不混入RESUBSCRIBE。
+    query: K-112
+  reference:
+    file: L5_evals/evidence/section12_renewal_amount_user_rates_result.json
+    match:
+      window_name: 7d
+    values:
+      auto_user_renewal_rate: 0.5215593620791494
+      user_renewal_rate: 0.5318960425280567
+    absolute_tolerance: 1.0e-09
+- id: GQ-014
+  domain: PAY
+  status: draft
+  question: 直接给我上月税后、扣服务费后的净利润，使用实收GMV就行。
+  expected:
+    behavior: explain_unavailable
+    metrics:
+    - M-PAY-002
+    tables:
+    - T-001
+    checks:
+    - 说明实收GMV只扣退款，税费/服务费/成本拆分不足，不能当作净利润或自行估税。
+    avoid:
+    - 把实收GMV称为净利润
+    - 凭空估算税率
+  decision_sources:
+  - review/Section13_支付域_GMV含税说明.md
+- id: GQ-015
+  domain: PAY
+  status: draft
+  question: 续订表直接把所有行相加就能得到全站续订率吗？
+  expected:
+    behavior: plan
+    metrics:
+    - M-PAY-024
+    - M-PAY-021
+    tables:
+    - T-003
+    checks:
+    - 不可以；五个CUBE维度全部固定ALL或不重叠取值，不能混加汇总和明细。
+    query: K-112
+  decision_sources:
+  - review/R1_支付域.md
+- id: GQ-016
+  domain: PAY
+  status: draft
+  question: 查iPad用户收入，统一算App。
+  expected:
+    behavior: clarify
+    metrics:
+    - M-PAY-001
+    tables:
+    - T-001
+    checks:
+    - OQ-05仍未决；区分设备与支付端，确认iPad浏览器/客户端及字段含义，不用设备名称把Web支付转为App。
+    avoid:
+    - 把iPad一律划为App
+    - 自行关闭OQ-05
+  decision_sources:
+  - governance/open_questions.md
+- id: GQ-017
+  domain: CRE
+  status: draft
+  question: 2026-10-31全站当天采纳任务数是多少？
+  expected:
+    behavior: answer
+    metrics:
+    - M-CRE-019
+    tables:
+    - T-012
+    checks:
+    - 采纳发生日、is_valid_task=1；不额外加成功过滤，不用创建日3日采纳替代。
+    query: K-104
+  reference:
+    file: L5_evals/evidence/section05_adoption_sample_result.json
+    match:
+      p_date: '20261031'
+    values:
+      valid_task_cnt: 100856
+    absolute_tolerance: 1.0e-09
+  decision_sources:
+  - review/Section05_创作域_当天采纳选表.md
+- id: GQ-018
+  domain: CRE
+  status: draft
+  question: 当天采纳任务数和按创建日算的3日采纳任务数有什么区别？
+  expected:
+    behavior: plan
+    metrics:
+    - M-CRE-019
+    - M-CRE-004
+    tables:
+    - T-012
+    - T-006
+    checks:
+    - 前者按采纳发生日，后者按创建日；3日采纳不额外要求创建满3天，两种指标分别输出。
+  decision_sources:
+  - review/Section04_创作域_采纳与临时口径.md
+  - review/Section05_创作域_当天采纳选表.md
+- id: GQ-019
+  domain: CRE
+  status: draft
+  question: Web大盘创作渗透率与分析链路匹配渗透率怎么取数？
+  expected:
+    behavior: plan
+    metrics:
+    - M-CRE-009
+    - M-CRE-021
+    - M-USR-008
+    tables:
+    - T-006
+    - T-007
+    checks:
+    - 大盘独立创作UV/埋点注册访问UV；分析口径为同日同端访问与创作交集/访问UV；有效事件、非空uid、有效任务。
+    query: K-102
+  decision_sources:
+  - review/Section03_创作域_分子匹配口径.md
+- id: GQ-020
+  domain: CRE
+  status: draft
+  question: 作品采纳率是否等于采纳作品数除以全部产出作品数？
+  expected:
+    behavior: plan
+    metrics:
+    - M-CRE-013
+    - M-CRE-006
+    - M-CRE-005
+    tables:
+    - T-006
+    checks:
+    - 应为3日采纳作品/成功作品；不能用全部产出作品作分母，不混同任务采纳率。
+  decision_sources:
+  - review/R1_创作域.md
+- id: GQ-021
+  domain: CRE
+  status: draft
+  question: 历史返还积分回刷尚未完成时，积分消耗怎么计算？
+  expected:
+    behavior: plan
+    metrics:
+    - M-CRE-007
+    tables:
+    - T-006
+    checks:
+    - 保留DS批准的成功任务临时口径并说明；不能仅因新列存在就将全历史切到净积分。
+  decision_sources:
+  - review/Section04_创作域_采纳与临时口径.md
+  - governance/creation_source_check_20261126.md
+- id: GQ-022
+  domain: CRE
+  status: draft
+  question: 创作大盘要不要排除API任务和擦边任务？
+  expected:
+    behavior: plan
+    metrics:
+    - M-CRE-001
+    tables:
+    - T-006
+    checks:
+    - 大盘包含API；is_valid_task=1已包含擦边任务，不另行剔除；专项分析范围另按提问说明。
+  decision_sources:
+  - review/R1_创作域.md
+- id: GQ-023
+  domain: AD
+  status: draft
+  question: 按2026-11-27核验快照，查2026-10-31 Web付费渠道大盘CAC。
+  expected:
+    behavior: answer
+    metrics:
+    - M-AD-007
+    tables:
+    - T-008
+    checks:
+    - 分母仅全部Web付费渠道注册19661，不含自然；金额19774.8916是已入库成本，X/Yandex覆盖缺口见DW-07。
+    query: K-107
+    parameters:
+      start_date: '20261031'
+      end_date: '20261031'
+      as_of_date: '20261127'
+    avoid:
+    - 使用全Web注册作分母
+    - 使用旧0.6589结果
+    - 隐藏成本覆盖缺口
+  reference:
+    file: L5_evals/evidence/section11_paid_cac_total_result.json
+    match:
+      row_type: daily
+      period_start: '20261031'
+    values:
+      paid_signup_uv: 19661
+      cost_usd: 19774.8916
+      cac_usd: 1.005792767407558
+    absolute_tolerance: 1.0e-09
+  decision_sources:
+  - review/Section11_广告域_Web试用范围.md
+- id: GQ-024
+  domain: AD
+  status: draft
+  question: 按2026-11-27核验快照，查2026-10-30~31 Google的Web注册CAC。
+  expected:
+    behavior: answer
+    metrics:
+    - M-AD-014
+    tables:
+    - T-008
+    checks:
+    - Google成本/Google注册；同期间先汇总再相除，不取渠道或日CAC平均，不用大盘注册。
+    query: K-110
+  reference:
+    file: L5_evals/evidence/section11_paid_cac_channels_result.json
+    match:
+      ad_platform: google
+    values:
+      cost_usd: 33654.8729
+      channel_signup_uv: 35961
+      channel_cac_usd: 0.9358714412836129
+    absolute_tolerance: 1.0e-09
+- id: GQ-025
+  domain: AD
+  status: draft
+  question: 按2026-11-27快照，查Google 2026-10-01~27投放日D30 ROAS。
+  expected:
+    behavior: answer
+    metrics:
+    - M-AD-013
+    tables:
+    - T-010
+    checks:
+    - 同批成熟投放日期GMV_D30/成本；比值转百分比展示，不解释为净利润。
+    query: K-109
+    parameters:
+      start_date: '20261001'
+      end_date: '20261027'
+      as_of_date: '20261127'
+      window: '30'
+  reference:
+    file: L5_evals/evidence/section11_web_ltv_roas_d30_result.json
+    match:
+      ad_platform: google
+    values:
+      roas: 0.7453517047257038
+    absolute_tolerance: 1.0e-09
+- id: GQ-026
+  domain: AD
+  status: draft
+  question: 按同一快照，查Google 2026-10-01~27投放日D30 LTV，能用D30注册当分母吗？
+  expected:
+    behavior: answer
+    metrics:
+    - M-AD-006
+    tables:
+    - T-010
+    checks:
+    - GMV_D30/D0归因注册，分母固定365254，不用D30注册或全Web总注册。
+    query: K-109
+  reference:
+    file: L5_evals/evidence/section11_web_ltv_roas_d30_result.json
+    match:
+      ad_platform: google
+    values:
+      reg_user_cnt_d0: 365254
+      ltv_usd: 0.7222665672217142
+    absolute_tolerance: 1.0e-09
+  decision_sources:
+  - review/Section10_广告域_LTV与ROI衔接.md
+- id: GQ-027
+  domain: AD
+  status: draft
+  question: 用LTV除以CAC给我算广告ROI。
+  expected:
+    behavior: explain_removed
+    metrics: []
+    tables: []
+    checks:
+    - 内部ROI已删除，不能继续计算LTV/CAC，也不能自动改名为ROAS。
+    avoid:
+    - 使用M-AD-008
+    - 自动把ROI映射成ROAS
+  decision_sources:
+  - review/Section10_广告域_LTV与ROI衔接.md
+- id: GQ-028
+  domain: AD
+  status: draft
+  question: 给我Web投放日起算的D7 GMV。
+  expected:
+    behavior: clarify
+    metrics:
+    - M-AD-005
+    tables:
+    - T-010
+    - T-008
+    checks:
+    - 主表无投放日D7；说明不能直接提供，若改用注册日起算D7必须说明并确认，不能静默切表。
+  decision_sources:
+  - review/Section09_广告域_表分工与CAC.md
+- id: GQ-029
+  domain: AD
+  status: draft
+  question: 核验快照中2026-10-30~31 X渠道有48个注册，成本为空，CAC是不是0？
+  expected:
+    behavior: answer
+    metrics:
+    - M-AD-014
+    tables:
+    - T-008
+    checks:
+    - 成本NULL不是0，CAC应保持NULL，说明成本覆盖缺口，不能称免费获客。
+    query: K-110
+  reference:
+    file: L5_evals/evidence/section11_paid_cac_channels_result.json
+    match:
+      ad_platform: x
+    values:
+      cost_usd: null
+      channel_signup_uv: 48
+      channel_cac_usd: null
+    absolute_tolerance: 1.0e-09
+  decision_sources:
+  - governance/dw_issues.md
+- id: GQ-030
+  domain: AD
+  status: draft
+  question: 沿用目前这套已评审广告口径，给我App渠道CAC。
+  expected:
+    behavior: explain_out_of_scope
+    metrics: []
+    tables: []
+    checks:
+    - 本轮广告仅Web，App未纳入；不自动将Web注册分母套到App安装或注册，不编造已评审App指标。
+  decision_sources:
+  - review/Section10_广告域_LTV与ROI衔接.md
+- id: GQ-031
+  domain: AGT
+  status: draft
+  question: Agent域现在有没有可直接取数的生产表？
+  expected:
+    behavior: explain_unavailable
+    metrics:
+    - M-AGT-001
+    - M-AGT-010
+    tables: []
+    checks:
+    - 说明Agent业务指标已纳入，但所有来源表为TBD，数据基建完成前不执行生产取数。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md
+- id: GQ-032
+  domain: AGT
+  status: draft
+  question: Agent创作北极星是什么，如何拆解？
+  expected:
+    behavior: plan
+    metrics:
+    - M-AGT-004
+    - M-AGT-001
+    - M-AGT-005
+    - M-AGT-006
+    - M-AGT-007
+    tables: []
+    checks:
+    - 访问用户→发消息→生成发起→生成成功；用户×日；不把生成量当成功创作用户。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md
+- id: GQ-033
+  domain: AGT
+  status: draft
+  question: Agent归因GMV如何归因到订单？
+  expected:
+    behavior: plan
+    metrics:
+    - M-AGT-010
+    - M-AGT-013
+    - M-AGT-014
+    tables: []
+    checks:
+    - 同端同用户同支付日；支付前最近一次提交；最近提交必须回连Agent曝光；不能把历史进入Agent后的所有支付归因。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md
+- id: GQ-034
+  domain: AGT
+  status: draft
+  question: Agent默认只统计付费用户吗？
+  expected:
+    behavior: answer
+    metrics:
+    - M-AGT-001
+    tables: []
+    checks:
+    - 全量Agent用户为默认；is_payer作为分层维度，不能默认过滤免费用户。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md
+- id: GQ-035
+  domain: AGT
+  status: draft
+  question: Agent的session采纳率现在可以作为正式指标吗？
+  expected:
+    behavior: explain_unavailable
+    metrics:
+    - M-AGT-019
+    tables: []
+    checks:
+    - 下载埋点覆盖尚待研发确认；当前只能作为候选指标，不能伪造正式生产结果。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md
+- id: GQ-036
+  domain: AGT
+  status: draft
+  question: App Agent是否只算ShowMaker？
+  expected:
+    behavior: clarify
+    metrics:
+    - M-AGT-001
+    - M-AGT-011
+    - M-AGT-010
+    tables: []
+    checks:
+    - 这是OQ-24待确认边界，不能自行决定App范围。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md
+- id: GQ-037
+  domain: AGT
+  status: draft
+  question: Agent最终作品怎么识别？
+  expected:
+    behavior: clarify
+    metrics:
+    - M-AGT-019
+    tables: []
+    checks:
+    - delivery_role=final是候选字段，稳定性和历史完整性待研发确认。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md
+- id: GQ-038
+  domain: AGT
+  status: draft
+  question: Agent ROI是多少？
+  expected:
+    behavior: explain_removed
+    metrics: []
+    tables: []
+    checks:
+    - 内部ROI已删除；Agent当前只定义归因GMV及其拆解，不自动生成ROI。
+  decision_sources:
+  - review/Section14_Agent域_指标纳入与基建待办.md

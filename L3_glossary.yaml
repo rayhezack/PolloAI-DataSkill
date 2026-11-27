@@ -1,7 +1,22 @@
 schema_version: 1
-coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09~11广告CAC、LTV、ROAS和选表路由、Section12续费金额与用户续订率、Section13支付金额组成；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
+coverage: 当前覆盖 Section02/06 注册访问及两个访客比率、Section09~11广告CAC、LTV、ROAS和选表路由、Section14 Agent指标、Section12续费金额与用户续订率、Section13支付金额组成；其他术语继续查指标卡 synonyms，未命中按 README R7 回问。
 usage: 先匹配 unsupported_terms，再匹配 ambiguous_terms、terms 和 table_routes；命中后仍须检查指标卡的状态、适用范围和过滤条件，不因术语可检索就视为 verified。
 terms:
+  - term: Agent访问用户数
+    metric: M-AGT-001
+    aliases: [Agent访问UV, Agent活跃用户]
+    meaning: Agent有效事件下按用户×自然日去重；当前来源表TBD，指标定义先行。
+    reviewed_source: review/Section14_Agent域_指标纳入与基建待办.md
+  - term: Agent成功创作用户数
+    metric: M-AGT-004
+    aliases: [成功创作用户, Agent生成成功用户]
+    meaning: 当天至少一个生成任务最终成功的去重用户数；Agent创作北极星，来源表TBD。
+    reviewed_source: review/Section14_Agent域_指标纳入与基建待办.md
+  - term: Agent归因GMV
+    metric: M-AGT-010
+    aliases: [Agent支付GMV, Agent收入]
+    meaning: 订单级同日支付前最近一次提交回连Agent曝光的有效订单金额；App/Web分开，来源表TBD。
+    reviewed_source: review/Section14_Agent域_指标纳入与基建待办.md
   - term: 访客注册转化率
     metric: M-USR-003
     aliases: [注册转化率, 访客注册率, 新注册转化率]

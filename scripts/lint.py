@@ -85,10 +85,18 @@ for path, it in tables + dims + metrics:
     if st in ("draft", "pending_review") and not is_table and not it.get("evidence"):
         warnings.append(f"{path} [{iid}]: no evidence yet")
 
+golden_cases = 0
+if (ROOT / "L5_evals/golden.yaml").exists():
+    from check_golden import validate_golden
+
+    golden_errors, golden_report = validate_golden(ROOT)
+    errors.extend(golden_errors)
+    golden_cases = golden_report.get("cases", 0)
+
 for w in warnings:
     print("WARN ", w)
 for e in errors:
     print("ERROR", e)
 print(f"tables={len(tables)} dimensions={len(dims)} metrics={len(metrics)} traps={len(p_ids)} "
-      f"errors={len(errors)} warnings={len(warnings)}")
+      f"golden_cases={golden_cases} errors={len(errors)} warnings={len(warnings)}")
 sys.exit(1 if errors else 0)
