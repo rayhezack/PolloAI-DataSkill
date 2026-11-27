@@ -1,6 +1,6 @@
 # Section 09：广告域——表分工与 CAC 默认分母
 
-> 最新裁决已覆盖本页历史CAC/ROI方案：仅Web，CAC=当天Web全部广告成本/当天Web总注册；删除内部ROI，ROAS单列M-AD-013，App本轮不包含。以[Section10最终结论](Section10_广告域_LTV与ROI衔接.md)为准。
+> 最新裁决已覆盖本页历史CAC/ROI方案：仅Web，CAC=当天Web全部付费渠道广告成本/当天Web全部付费渠道注册（排除自然）；删除内部ROI，ROAS单列M-AD-013，App本轮不包含。以[Section10最终结论](Section10_广告域_LTV与ROI衔接.md)为准。
 
 
 创建：2026-11-26。评审完成：2026-11-27。本节对应 OQ-13、OQ-15，已按 DS 回复落地；广告全域尚未批准 pilot。

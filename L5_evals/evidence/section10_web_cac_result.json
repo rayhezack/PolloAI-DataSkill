@@ -40,5 +40,11 @@
     "注册来源画像20261126快照，历史人数可能受画像后续修订影响",
     "无数据日期不能当0；模板保留单侧缺失，缺失侧或零分母时CAC为NULL；双方均缺失的日期需单独核查分区覆盖",
     "App/UNKNOWN不在本轮范围；ROAS/LTV另有适用人群，不从LTV/CAC输出ROI"
-  ]
+  ],
+  "definition_status": "historical_superseded_wrong_denominator",
+  "valid_for_current_definition": false,
+  "superseded_reason": "旧结果分母包含自然渠道注册；DS最新明确大盘CAC仅用全部Web付费渠道注册。旧数字不能用于当前M-AD-007。",
+  "current_definition": "Web全部付费渠道广告成本合计/全部Web付费渠道注册人数合计",
+  "current_sql": "L4_verified_queries/K-107.sql",
+  "current_definition_remote_result": "pending_recalculation"
 }

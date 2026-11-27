@@ -71,7 +71,7 @@
 
 原始回复与落地记录见 [Section 01](Section01_口径维护与冲突裁决.md)，本地差异见 [存量知识对照](../governance/legacy_alignment.md)。
 
-**Section 02~10 业务口径已评审。最新结论：** [Section10：仅Web大盘CAC、保留ROAS、删除ROI](Section10_广告域_LTV与ROI衔接.md)。原分端CAC已被Web全部广告成本/当天Web总注册覆盖；App本轮不包含。最新补充见[Section11：范围说明与渠道CAC分母](Section11_广告域_Web试用范围.md)。原有限试用审批建议已撤回，渠道CAC使用自身渠道注册分母，技术核验由Codex继续完成。LTV已明确为GMV_N/D0注册；LTV/ROAS远程核验连接超时，公式不重复评审。用户域技术核验与创作域历史回刷对账由 Codex 继续完成，不重复提交既定口径。
+**Section 02~10 业务口径已评审。最新结论：** [Section10：仅Web大盘CAC、保留ROAS、删除ROI](Section10_广告域_LTV与ROI衔接.md)。CAC最新明确为Web全部付费渠道成本/当天全部付费渠道注册，排除自然注册；App本轮不包含。最新补充见[Section11：范围说明与渠道CAC分母](Section11_广告域_Web试用范围.md)。原有限试用审批建议已撤回，渠道CAC使用自身渠道注册分母，技术核验由Codex继续完成。LTV已明确为GMV_N/D0注册；LTV/ROAS远程核验连接超时，公式不重复评审。用户域技术核验与创作域历史回刷对账由 Codex 继续完成，不重复提交既定口径。
 
 ## 5. Codex 后续自行处理的检查项
 

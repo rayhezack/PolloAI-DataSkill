@@ -20,8 +20,8 @@ terms:
   - term: 获客成本 CAC
     metric: M-AD-007
     aliases: [CAC, 获客成本, 大盘总CAC, Web CAC, Web注册获客成本]
-    meaning: 仅Web：当天Web全部广告成本/当天Web总注册，含自然和广告注册、排除内部用户；成本T-010、注册T-009按日各自汇总再关联；不使用安装/归因注册分母。
-    reviewed_source: review/Section10_广告域_LTV与ROI衔接.md
+    meaning: 仅Web：全部付费渠道成本合计/全部付费渠道注册合计，排除自然注册；与渠道CAC使用同一批付费渠道来源，仅汇总层级不同。
+    reviewed_source: review/Section11_广告域_Web试用范围.md
   - term: 广告ROAS
     metric: M-AD-013
     aliases: [ROAS, 广告回收率, 广告回本率]
@@ -41,7 +41,7 @@ ambiguous_terms:
   - term: CAC
     candidate_metrics: [M-AD-007, M-AD-014]
     action: resolve_from_context
-    prompt: 明确说大盘总CAC用M-AD-007；明确说某广告渠道CAC用M-AD-014；仅在上下文无法判断范围时确认，不自动把大盘注册用于渠道CAC。
+    prompt: 大盘总CAC用M-AD-007，汇总全部Web付费渠道；某广告渠道CAC用M-AD-014。两者分母均排除自然注册，不再把大盘CAC解释为全Web注册分母。
   - term: 访问注册率
     candidate_metrics: [M-USR-003, M-USR-009]
     action: clarify
@@ -59,11 +59,11 @@ table_routes:
     guard: 明确问投放日D3/D7时先说明主表不支持，不能静默改注册日起算；成本比率及campaign归因另核验。
     reviewed_source: review/Section09_广告域_表分工与CAC.md
   - intent: Web大盘总CAC、Web注册获客成本
-    table: T-010
-    denominator_table: T-009
-    metrics: [M-AD-007, M-USR-001]
-    guard: 成本source_end=WEB，注册reg_platform=WEB；各自按日聚合再关联；含自然注册，App不包含，不能仅在T-010找注册分母。
-    reviewed_source: review/Section10_广告域_LTV与ROI衔接.md
+    table: T-008
+    denominator_table: T-008
+    metrics: [M-AD-007]
+    guard: 成本与注册均取全部Web付费渠道，按同日/同期合计；不含自然注册，不使用T-009全Web注册。
+    reviewed_source: review/Section11_广告域_Web试用范围.md
   - intent: 某Web广告渠道当天/同期注册CAC
     table: T-008
     metrics: [M-AD-014]

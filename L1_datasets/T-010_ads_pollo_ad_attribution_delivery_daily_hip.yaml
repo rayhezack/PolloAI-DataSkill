@@ -38,4 +38,4 @@ reviewed_at: "2026-11-27"
 not_for:
   - App用途及未单独确认的安装、首购拆分字段，本轮不包含。
   - 投放日起算 D3/D7 或 campaign/adgroup 下钻，本表无对应字段。
-  - 单独计算当前Web大盘CAC；本表只提供source_end=WEB的全部广告成本，分母须取T-009当天Web总注册，不能用本表reg_user_cnt_d0或install_cnt。
+  - 单独计算当前注册日Web付费渠道CAC；该指标成本与注册日人数见T-008/K-107，不使用T-009全Web注册或本表安装/D0注册替代。
